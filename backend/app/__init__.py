@@ -8,8 +8,8 @@ def create_app(test_config=None):
     app = Flask(__name__, instance_relative_config=True)
     app.config.from_mapping(
         SECRET_KEY = 'dev',
-        DATABASE = os.path.join(app.instance_path, "day1.sqlite"),
-        SQLALCHEMY_DATABASE_URI = f'sqlite:///{os.path.join(app.instance_path, "day1.db")}'
+        DATABASE = os.path.join(app.instance_path, "moaplay_dev.sqlite"),
+        SQLALCHEMY_DATABASE_URI = f'sqlite:///{os.path.join(app.instance_path, "moaplay_dev.db")}'
     )
 
     if test_config == None:
