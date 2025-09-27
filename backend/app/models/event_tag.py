@@ -12,7 +12,7 @@ class EventTag(db.Model):
     __tablename__ = 'event_tags'
     
     # 기본 필드
-    id: Mapped[int] = mapped_column(BigInteger, primary_key=True)
+    id: Mapped[int] = mapped_column(primary_key=True)
     
     # 외래키
     event_id: Mapped[int] = mapped_column(ForeignKey('events.id'), nullable=False)

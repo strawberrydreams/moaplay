@@ -16,7 +16,7 @@ class Event(db.Model):
     __tablename__ = 'events'
     
     # 기본 필드 (타입 힌트 포함)
-    id: Mapped[int] = mapped_column(BigInteger, primary_key=True)
+    id: Mapped[int] = mapped_column(primary_key=True)
     title: Mapped[str] = mapped_column(String(255), nullable=False)
     summary: Mapped[str] = mapped_column(Text)
     start_date: Mapped[date] = mapped_column(Date, nullable=False)

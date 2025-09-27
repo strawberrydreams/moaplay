@@ -17,12 +17,12 @@ class User(UserMixin, db.Model):
     __tablename__ = 'users'
     
     # 기본 필드
-    id: Mapped[int] = mapped_column(BigInteger, primary_key=True)
+    id: Mapped[int] = mapped_column(primary_key=True)
     user_id: Mapped[str] = mapped_column(String(50), nullable=False, unique=True)
     nickname: Mapped[str] = mapped_column(String(100), nullable=False, unique=True)
     email: Mapped[str] = mapped_column(String(255), nullable=False, unique=True)
     password_hash: Mapped[str] = mapped_column(String(255), nullable=False)
-    profile_image: Mapped[str] = mapped_column(String(500))
+    profile_image: Mapped[str] = mapped_column(String(500), nullable=True)
     
     # 권한
     role: Mapped[UserRole] = mapped_column(Enum(UserRole), default=UserRole.USER)

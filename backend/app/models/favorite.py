@@ -12,7 +12,7 @@ class Favorite(db.Model):
     __tablename__ = 'favorites'
     
     # 기본 필드
-    id: Mapped[int] = mapped_column(BigInteger, primary_key=True)
+    id: Mapped[int] = mapped_column(primary_key=True)
     
     # 외래키
     user_id: Mapped[int] = mapped_column(ForeignKey('users.id'), nullable=False)

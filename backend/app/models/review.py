@@ -12,7 +12,7 @@ class Review(db.Model):
     __tablename__ = 'reviews'
     
     # 기본 필드
-    id: Mapped[int] = mapped_column(BigInteger, primary_key=True)
+    id: Mapped[int] = mapped_column(primary_key=True)
     title: Mapped[str] = mapped_column(String(255), nullable=False)
     content: Mapped[str] = mapped_column(Text, nullable=False)
     rating: Mapped[int] = mapped_column(Integer, nullable=False)  # 1-5점
