@@ -12,3 +12,11 @@ class Base(DeclarativeBase):
     })
 
 db = SQLAlchemy(model_class=Base)
+
+from app.models.user import User
+from app.models.event import Event
+from app.models.review import Review
+from app.models.schedule import Schedule
+from app.models.favorite import Favorite
+from app.models.tag import Tag
+from app.models.event_tag import EventTag

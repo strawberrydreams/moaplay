@@ -11,7 +11,7 @@ class Tag(db.Model):
     __tablename__ = 'tags'
     
     # 기본 필드
-    id: Mapped[int] = mapped_column(BigInteger, primary_key=True)
+    id: Mapped[int] = mapped_column(primary_key=True)
     name: Mapped[str] = mapped_column(String(50), nullable=False, unique=True)
     
     # 타임스탬프
