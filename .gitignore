@@ -1,5 +1,4 @@
+# python backend gitignore
 .venv
-
 __pycache__/
-
 instance/
