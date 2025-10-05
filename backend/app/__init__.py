@@ -2,6 +2,7 @@ import os
 from flask import Flask
 from .models import db
 from flask_migrate import Migrate
+from flask_cors import CORS
 
 
 def create_app(test_config=None):
@@ -27,6 +28,8 @@ def create_app(test_config=None):
     db.init_app(app)
     #migrate
     migrate = Migrate(app, db)
+    #cors 설정
+    CORS(app)
 
     #청사진 연결
     from .routes import api_bp
