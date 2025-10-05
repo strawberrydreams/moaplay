@@ -76,10 +76,8 @@ export const AuthSection = styled.div`
         gap: 8px;
         border-radius: 5px;
         transition: background-color 0.3s ease;
+        outline: none;
 
-        &:hover {
-            background-color: #f2e6ff; /* 마우스 오버 시 연한 보라색 배경 */
-        }
     }
 
     svg {
@@ -95,6 +93,7 @@ export const GlobalStyle = createGlobalStyle`
         margin: 0;
         padding: 0;
         height: 100%;
+        width: 100%;
     }
 
     body {

@@ -1,5 +1,6 @@
 import React, { useMemo, useState } from 'react';
 import eventDetailJson from '../../data/eventDetailData.json';
+import reviewsJson from '../../data/reviews.json';
 import MapComponent from '../../components/common/MapComponent';
 import ExpandableText from '../../components/common/ExpandableText';
 import {
@@ -43,12 +44,24 @@ export type EventDetailData = {
   info: InfoItem[];
   reviewStats: { rating: number; count?: number };
 };
+export type ReviewItem = {
+  id: number,
+  user: string;
+  date: string;
+  text: string;
+  rating: number;
+  eventId: number;
+};
 
 // JSON 타입 단언 (tsconfig에 resolveJsonModule 켜져 있어야 함)
 const eventDetail = eventDetailJson as EventDetailData;
+const reviews = reviewsJson as unknown as ReviewItem[];
 
 // 이미지 배열 (가드)
 const images: string[] = Array.isArray(eventDetail.images) ? eventDetail.images : [];
+
+// 현재 이벤트 ID 저장
+const CURRENT_EVENT_ID = 101; 
 
 // 행사 정보 리스트를 2열로 나누는 함수
 const splitInfoList = (info: InfoItem[]): { left: InfoItem[]; right: InfoItem[] } => {
@@ -63,6 +76,11 @@ const EventDetail: React.FC = () => {
   const [currentImageIndex, setCurrentImageIndex] = useState<number>(0);
 
   const infoColumns = useMemo(() => splitInfoList(eventDetail.info ?? []), []);
+
+  // 이벤트 ID에 맞는 리뷰만 필터링 (useMemo로 성능 최적화)
+  const filteredReviews = useMemo(() => {
+      return reviews.filter(review => review.eventId === CURRENT_EVENT_ID);
+  }, [reviews]); // reviews 데이터가 바뀌지 않는다면 한 번만 계산합니다.
 
   // 이벤트 주소 찾기
   const eventAddress = useMemo(() => {
@@ -182,15 +200,16 @@ const EventDetail: React.FC = () => {
         <ReviewWriteButton>글쓰기</ReviewWriteButton>
       </ReviewHeader>
 
-      {/* 리뷰 카드가 별도 데이터로 들어오면 여기에 map으로 렌더링 */}
       <ReviewGrid>
-        {/* 예시 placeholder */}
-        <ReviewCard>
-          <ReviewRating>{renderStars(eventDetail.reviewStats?.rating ?? 0)}</ReviewRating>
-          <ReviewUser>예시 사용자</ReviewUser>
-          <ReviewDate>2025-04-25</ReviewDate>
-          <ReviewText>첫 번째 리뷰를 여기에 렌더링하세요.</ReviewText>
-        </ReviewCard>
+          {/* 필터링된 리뷰를 렌더링 */}
+          {filteredReviews.map((review) => (
+              <ReviewCard key={review.id}>
+                  <ReviewRating>{renderStars(review.rating)}</ReviewRating>
+                  <ReviewUser>{review.user}</ReviewUser>
+                  <ReviewDate>{review.date}</ReviewDate>
+                  <ReviewText>{review.text}</ReviewText>
+              </ReviewCard>
+          ))}
       </ReviewGrid>
     </DetailContainer>
   );

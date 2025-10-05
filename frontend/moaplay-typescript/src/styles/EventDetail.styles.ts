@@ -88,11 +88,14 @@ export const CarouselButton = styled.button<{ $direction: 'left' | 'right' }>`
     color: white;
     border: none;
     border-radius: 50%;
-    width: 40px;
-    height: 40px;
+    width: 50px;
+    height: 55px;
     font-size: 1.5rem;
     cursor: pointer;
     z-index: 10;
+    display: flex;
+    align-items: center;
+    justify-content: center;
     
     &:hover {
         background: rgba(0, 0, 0, 0.6);

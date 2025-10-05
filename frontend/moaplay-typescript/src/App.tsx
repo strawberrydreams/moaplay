@@ -1,30 +1,91 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
-import Header from './components/Header.tsx';
-import Footer from './components/Footer.tsx';
-import EventDetail from './pages/events/EventDetail';
+import Header from './components/Header'; // Header 컴포넌트 경로 확인!
+import Modal from './components/common/Modal'; // 👈 Modal 임포트
+import LoginForm from './components/auth/LoginForm'; // 👈 LoginForm 임포트
+import SignupForm from './components/auth/SignupForm'; // 추후 회원가입 폼을 여기에 임포트
+import EventDetail from './pages/events/EventDetail'; 
+// import Footer from './components/layout/Footer'; // Footer도 필요하다면
+
+// 전역 스타일 임포트 (Header.styles.js에서 정의했다면)
 import { GlobalStyle } from './styles/Header.styles';
 
+
 const App: React.FC = () => {
+    // 🚀 모달 상태 관리
+    const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
+    // 🚀 회원가입 모달 상태 추가
+    const [isSignupModalOpen, setIsSignupModalOpen] = useState(false); 
+
+    const handleLoginClick = () => {
+        setIsLoginModalOpen(true);
+    };
+
+    const handleCloseModal = () => {
+        setIsLoginModalOpen(false);
+    };
+
+    const handleCloseSignupModal = () => {
+        setIsSignupModalOpen(false);
+    };
+
+    // 🚀 로그인 -> 회원가입 모달 전환 함수
+    const handleSwitchToSignUp = () => {
+        setIsLoginModalOpen(false); // 로그인 모달 닫기
+        setIsSignupModalOpen(true); // 회원가입 모달 열기
+    };
+    
+    // 🚀 회원가입 -> 로그인 모달 전환 함수 (옵션: 추후 필요 시)
+    const handleSwitchToLogin = () => {
+        setIsSignupModalOpen(false); 
+        setIsLoginModalOpen(true);
+    };
+    
+
     return (
         <Router>
-            <GlobalStyle />
-            <Header />
-            <main style={{ padding: '20px 40px', backgroundColor: '#f8f8f8', minHeight: 'calc(100vh - 100px)' }}>
+            <GlobalStyle /> 
+            
+            {/* Header에 모달 열기 함수를 prop으로 전달 */}
+            <Header onLoginClick={handleLoginClick} />
+
+            <main style={{ padding: '20px 40px', backgroundColor: '#f8f8f8' }}>
                 <Routes>
                     <Route path="/" element={<div>홈 페이지 내용 (이벤트 캘린더 & 목록)</div>} />
+                    <Route path="/events/:eventId" element={<EventDetail />} />
                     <Route path="/region" element={<div>지역별 이벤트</div>} />
                     <Route path="/recommend" element={<div>추천 이벤트</div>} />
                     <Route path="/popular" element={<div>인기 이벤트</div>} />
                     {/* 다른 페이지 라우트들 */}
-                    <Route path="*" element={<div>404 페이지 - 존재하지 않는 페이지입니다.</div>} />
-                    {/* 이벤트 상세 페이지 라우트 추가 */}
-                    <Route path="/events/:id" element={<EventDetail />} />
                 </Routes>
             </main>
-            <Footer />
+
+            {/* <Footer /> */}
+            
+            {/* 1. 로그인 모달 렌더링 */}
+            <Modal
+                isOpen={isLoginModalOpen}
+                onClose={handleCloseModal}
+                title="로그인"
+            >
+                {/* 🚀 LoginForm에 전환 함수 prop 전달 */}
+                <LoginForm onSwitchToSignUp={handleSwitchToSignUp} onCloseModal={function (): void {
+                    throw new Error('Function not implemented.');
+                } } /> 
+            </Modal>
+
+            {/* 2. 회원가입 모달 렌더링 (현재는 Placeholder) */}
+            <Modal
+                isOpen={isSignupModalOpen}
+                onClose={handleCloseSignupModal}
+                title="회원가입"
+            >
+                <SignupForm onSwitchToLogin={handleSwitchToLogin} onCloseModal={function (): void {
+                    throw new Error('Function not implemented.');
+                } } />
+            </Modal>
         </Router>
     );
-};
+}
 
 export default App;
