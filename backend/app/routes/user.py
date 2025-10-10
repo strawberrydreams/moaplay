@@ -5,6 +5,8 @@ import re
 
 user_bp = Blueprint('users', __name__)
 
+# 회원가입 API
+# POST /api/users/
 @user_bp.route('/', methods=['POST'])
 def create_user():
     data = request.get_json()
@@ -74,3 +76,11 @@ def create_user():
         "role": user.role.value,
         "created_at": user.created_at
     }, 201
+
+# 유저 정보 가져오기 api
+# GET /api/users/<id>
+@user_bp.route("/<int:id>", methods=["GET"])
+def get_user(id):
+    user = User.query.get_or_404(id, description="User not found")
+
+    return user.to_dict(), 200
