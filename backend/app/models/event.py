@@ -1,6 +1,6 @@
 from . import db
 from sqlalchemy.orm import Mapped, mapped_column, relationship
-from sqlalchemy import String, Text, ForeignKey, DateTime, Date, Enum, BigInteger
+from sqlalchemy import String, Text, ForeignKey, DateTime, Date, Enum, BigInteger, JSON
 from datetime import datetime, date
 from typing import Optional, List, TYPE_CHECKING
 from .enums import EventStatus
@@ -26,10 +26,10 @@ class Event(db.Model):
     phone: Mapped[str] = mapped_column(String(20), nullable=False)
     
     # JSON 필드 (이미지 URL 배열)
-    # image_urls: Mapped[Optional[List[str]]] = mapped_column(JSON, default=list)
+    image_urls: Mapped[Optional[List[str]]] = mapped_column(JSON, default=list, nullable=True)
     
     # 외래키
-    host_id: Mapped[int] = mapped_column(ForeignKey('users.id'))
+    host_id: Mapped[int] = mapped_column(ForeignKey('users.id'), nullable=False)
     
     # 상태 관리
     status: Mapped[EventStatus] = mapped_column(Enum(EventStatus), default=EventStatus.PENDING)
@@ -45,3 +45,23 @@ class Event(db.Model):
     schedules: Mapped[List["Schedule"]] = relationship("Schedule", back_populates="event", cascade="all, delete-orphan")
     favorites: Mapped[List["Favorite"]] = relationship("Favorite", back_populates="event", cascade="all, delete-orphan")
     tags: Mapped[List["EventTag"]] = relationship("EventTag", back_populates="event", cascade="all, delete-orphan")
+
+    # !hashtag 추가 예정
+    def to_dict(self) -> dict:
+        return {
+            "id": self.id,
+            "title": self.title,
+            "summary": self.summary,
+            "start_date": self.start_date,
+            "end_date": self.end_date,
+            "location": self.location,
+            "description": self.description,
+            "phone": self.phone,
+            "image_urls": self.image_urls,
+            "host": {
+                "id": self.host.id,
+                "name": self.host.name
+            },
+            "status": self.status.value,
+            "created_at": self.created_at,
+        }

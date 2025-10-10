@@ -20,7 +20,9 @@ class User(UserMixin, db.Model):
     id: Mapped[int] = mapped_column(primary_key=True)
     user_id: Mapped[str] = mapped_column(String(50), nullable=False, unique=True)
     nickname: Mapped[str] = mapped_column(String(100), nullable=False, unique=True)
+    name : Mapped[str] = mapped_column(String(50), nullable=False)
     email: Mapped[str] = mapped_column(String(255), nullable=False, unique=True)
+    phone: Mapped[str] = mapped_column(String(20), nullable=True)
     password_hash: Mapped[str] = mapped_column(String(255), nullable=False)
     profile_image: Mapped[str] = mapped_column(String(500), nullable=True)
     
@@ -42,3 +44,19 @@ class User(UserMixin, db.Model):
 
     def check_password(self, password):
         return check_password_hash(self.password_hash, password)
+    
+    def to_dict(self, include_sensitive=False) -> dict:
+        data = {
+            "id": self.id,
+            "user_id": self.user_id,
+            "nickname": self.nickname,
+            "name": self.name,
+            "profile_image": self.profile_image,
+            "role": self.role.value
+        }
+
+        if include_sensitive == True:
+            data["email"] = self.email
+            data["phone"] = self.phone
+
+        
