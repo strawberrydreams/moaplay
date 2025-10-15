@@ -15,15 +15,11 @@ import {
 } from '../../styles/SelectTagsForm.styles'
 
 interface SelectTagsFormProps {
-    onBack: () => void;
-    onSubmit: (selectedTagIds: number[]) => Promise<void> | void;
-    minCount?: number;
+    onCloseModal: () =>  void;
 }
 
 const SelectTagsForm: React.FC<SelectTagsFormProps> = ({
-                                                           onBack,
-                                                           onSubmit,
-                                                           minCount = 3,
+                                                            onCloseModal
                                                        }) => {
     const [tags, setTags] = useState<Tag[]>([]);
     const [selected, setSelected] = useState<number[]>([]);
@@ -38,7 +34,7 @@ const SelectTagsForm: React.FC<SelectTagsFormProps> = ({
                 setTags(data);
             } catch (err) {
                 console.error(err);
-                setError("태그를 불러오지 못했어 😢");
+                setError("태그를 불러오지 못했습니다. 😢");
             } finally {
                 setLoading(false);
             }
@@ -53,16 +49,16 @@ const SelectTagsForm: React.FC<SelectTagsFormProps> = ({
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        if (selected.length < minCount) {
-            setError(`선호 태그는 최소 ${minCount}개 이상 선택해야 해!`);
+        if (selected.length < 3) {
+            setError(`선호 태그는 최소 ${3}개 이상 선택해야 합니다!`);
             return;
         }
         setSubmitting(true);
         try {
-            await onSubmit(selected);
+            await onCloseModal
         } catch (err) {
             console.error(err);
-            setError("저장 중 오류가 발생했어 😢");
+            setError("저장 중 오류가 발생했습니다. 😢");
         } finally {
             setSubmitting(false);
         }
@@ -74,7 +70,7 @@ const SelectTagsForm: React.FC<SelectTagsFormProps> = ({
     return (
         <FormContainer onSubmit={handleSubmit}>
             <Title>선호 태그 선택</Title>
-            <Subtitle>선호하는 태그를 최소 {minCount}개 이상 선택해주세요.</Subtitle>
+            <Subtitle>선호하는 태그를 최소 {3}개 이상 선택해주세요.</Subtitle>
 
             <TagList>
                 {tags.map((tag) => (
@@ -90,8 +86,8 @@ const SelectTagsForm: React.FC<SelectTagsFormProps> = ({
             </TagList>
 
             <ButtonRow>
-                <BackButton type="button" onClick={onBack}>
-                    이전
+                <BackButton type="button" onClick={onCloseModal}>
+                    건너뛰기
                 </BackButton>
                 <SubmitButton type="submit" disabled={submitting}>
                     {submitting ? "저장 중..." : "완료"}

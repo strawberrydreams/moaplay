@@ -5,6 +5,7 @@ import Modal from './components/common/Modal'; // 👈 Modal 임포트
 import LoginForm from './components/auth/LoginForm'; // 👈 LoginForm 임포트
 import SignupForm from './components/auth/SignupForm'; // 추후 회원가입 폼을 여기에 임포트
 import EventDetail from './pages/events/EventDetail'; 
+import SelectTagsForm from './components/auth/SelectTagsForm';
 // import Footer from './components/layout/Footer'; // Footer도 필요하다면
 
 // 전역 스타일 임포트 (Header.styles.js에서 정의했다면)
@@ -16,6 +17,7 @@ const App: React.FC = () => {
     const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
     // 🚀 회원가입 모달 상태 추가
     const [isSignupModalOpen, setIsSignupModalOpen] = useState(false); 
+    const [isSelectTagsModalOpen, setisSelectTagsModalOpen] = useState(false);
 
     const handleLoginClick = () => {
         setIsLoginModalOpen(true);
@@ -25,9 +27,18 @@ const App: React.FC = () => {
         setIsLoginModalOpen(false);
     };
 
+    const handleCloseSelectTagsModal = () => {
+        setisSelectTagsModalOpen(false);
+    };
+
     const handleCloseSignupModal = () => {
         setIsSignupModalOpen(false);
     };
+
+    const handleSwitchToSelectTags = () => {
+        setIsSignupModalOpen(false)
+        setisSelectTagsModalOpen(true);
+    }
 
     // 🚀 로그인 -> 회원가입 모달 전환 함수
     const handleSwitchToSignUp = () => {
@@ -80,9 +91,16 @@ const App: React.FC = () => {
                 onClose={handleCloseSignupModal}
                 title="회원가입"
             >
-                <SignupForm onSwitchToLogin={handleSwitchToLogin} onCloseModal={function (): void {
-                    throw new Error('Function not implemented.');
-                } } />
+                <SignupForm onSwitchToLogin={handleSwitchToLogin} onSwitchToSelectTags={handleSwitchToSelectTags} onCloseModal={handleCloseSignupModal}/>
+            </Modal>
+
+            <Modal 
+                isOpen={isSelectTagsModalOpen}
+                onClose={handleCloseSelectTagsModal}
+                title="선호태그 선택"
+
+            >
+                <SelectTagsForm onCloseModal={handleCloseSelectTagsModal}/>
             </Modal>
         </Router>
     );

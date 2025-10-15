@@ -1,5 +1,5 @@
 import React, { useState} from 'react';
-// import * as AuthApi from '../../service/authApi.ts'; // Auth API 임포트 (중복 확인, 등록)
+import * as AuthApi from '../../service/authApi.ts'; // Auth API 임포트 (중복 확인, 등록)
 
 import {
     FormContainer,
@@ -29,10 +29,11 @@ interface Errors {
 
 interface SignupFormProps {
     onSwitchToLogin: () => void;
-    onCloseModal: () => void;
+    onSwitchToSelectTags: () => void;
+    // onCloseModal: () => void;
 }
 
-const SignupForm: React.FC<SignupFormProps> = ({ onSwitchToLogin, onCloseModal }) => {
+const SignupForm: React.FC<SignupFormProps> = ({ onSwitchToLogin, onSwitchToSelectTags }) => {
     const [formData, setFormData] = useState<FormData>({
         user_id: '',
         password: '',
@@ -48,7 +49,8 @@ const SignupForm: React.FC<SignupFormProps> = ({ onSwitchToLogin, onCloseModal }
         nickname: '',
     });
     // 중복 확인 상태
-    // const [isDuplicate, setIsDuplicate] = useState({ user_id: false, nickname: false, email: false });
+    const [isDuplicate, setIsDuplicate] = useState({ user_id: false, nickname: false, email: false });
+
     // 성공 메시지 상태
     const [successMessage, setSuccessMessage] = useState({ user_id: '', nickname: '', email: '' });
     const [isSubmitting, setIsSubmitting] = useState(false);
@@ -112,19 +114,19 @@ const SignupForm: React.FC<SignupFormProps> = ({ onSwitchToLogin, onCloseModal }
             }
         });
         
-        // // 중복 확인 상태 최종 체크
-        // if (isDuplicate.user_id) {
-        //     newErrors.user_id = '이미 사용 중인 아이디입니다.';
-        //     isValid = false;
-        // }
-        // if (isDuplicate.nickname) {
-        //     newErrors.nickname = '이미 사용 중인 닉네임입니다.';
-        //     isValid = false;
-        // }
-        // if (isDuplicate.email) {
-        //     newErrors.email = '이미 등록된 이메일입니다.';
-        //     isValid = false;
-        // }
+        // 중복 확인 상태 최종 체크
+        if (isDuplicate.user_id) {
+            newErrors.user_id = '이미 사용 중인 아이디입니다.';
+            isValid = false;
+        }
+        if (isDuplicate.nickname) {
+            newErrors.nickname = '이미 사용 중인 닉네임입니다.';
+            isValid = false;
+        }
+        if (isDuplicate.email) {
+            newErrors.email = '이미 등록된 이메일입니다.';
+            isValid = false;
+        }
 
 
         setErrors(newErrors);
@@ -135,47 +137,49 @@ const SignupForm: React.FC<SignupFormProps> = ({ onSwitchToLogin, onCloseModal }
     // 🚀 API 호출 로직: 중복 확인 (onBlur)
     // ----------------------------------------------------
     
-//  const handleBlur = async (e: React.FocusEvent<HTMLInputElement>) => {
-//         const { id, value } = e.target;
-//         // 'signupUserId' -> 'UserId' -> 'userId' 형태로 필드 이름 추출
-//         const name = id.replace('signup', '') as keyof typeof isDuplicate; 
+    const handleBlur = async (e: React.FocusEvent<HTMLInputElement>) => {
+        const { id, value } = e.target;
+        // 'signupUserId' -> 'UserId' -> 'userId' 형태로 필드 이름 추출
+        const name = id.replace('signup', '') as keyof typeof isDuplicate; 
 
-//         if (!value || !(name === 'user_id' || name === 'nickname' || name === 'email')) return;
+        if (!value || !(name === 'user_id' || name === 'nickname' || name === 'email')) return;
         
-//         // // 1. 클라이언트 유효성 먼저 검사
-//         // const clientError = validateField(name, value, formData);
-//         // if (clientError) {
-//         //     setErrors(prev => ({ ...prev, [name]: clientError }));
-//         //     setSuccessMessage(prev => ({ ...prev, [name]: '' }));
-//         //     return;
-//         // }
+        // // 1. 클라이언트 유효성 먼저 검사
+        // const clientError = validateField(name, value, formData);
+        // if (clientError) {
+        //     setErrors(prev => ({ ...prev, [name]: clientError }));
+        //     setSuccessMessage(prev => ({ ...prev, [name]: '' }));
+        //     return;
+        // }
         
-//         // 2. 중복 확인 API 호출
-//         try {
-//             const payload = {
-//                 field: name,
-//                 value: value,
-//             };
-//             // 💡 await를 사용하여 API 응답을 기다립니다.
-//             const response = await AuthApi.checkDuplicate(payload);
+        // 2. 중복 확인 API 호출
+        try {
+            const payload = {
+                type: name,
+                value: value,
+            };
+            // 💡 await를 사용하여 API 응답을 기다립니다.
+            const response = await AuthApi.checkDuplicate(payload);
             
-//             // isAvailable이 false면 중복됨
-//             if (!response.isAvailable) {
-//                 setIsDuplicate(prev => ({ ...prev, [name]: true }));
-//                 setSuccessMessage(prev => ({ ...prev, [name]: '' }));
-//             } else {
-//                 // 중복 없음: 성공 메시지 표시
-//                 setIsDuplicate(prev => ({ ...prev, [name]: false }));
-//                 setSuccessMessage(prev => ({ ...prev, [name]: `${name === 'user_id' ? '사용 가능한 아이디' : name === 'email' ? '사용 가능한 이메일' : '사용 가능한 닉네임'}입니다.` }));
-//             }
+            // isAvailable이 false면 중복됨
+            if (response.available) {
+                // 중복 없음: 성공 메시지 표시
+                setIsDuplicate(prev => ({ ...prev, [name]: false }));
+                setSuccessMessage(prev => ({ ...prev, [name]: `${name === 'user_id' ? '사용 가능한 아이디' : name === 'email' ? '사용 가능한 이메일' : '사용 가능한 닉네임'}입니다.` }));
 
-//         } catch (error) {
-//             // 서버 오류 발생 시 (예: 500 에러)
-//             setErrors(prev => ({ ...prev, [name]: '서버 오류로 중복 확인에 실패했습니다.' }));
-//             setIsDuplicate(prev => ({ ...prev, [name]: false }));
-//             setSuccessMessage(prev => ({ ...prev, [name]: '' }));
-//         }
-//     };
+            } else {
+                setErrors(prev=> ({...prev, [name]: ''}));
+                setIsDuplicate(prev => ({ ...prev, [name]: true }));
+                setSuccessMessage(prev => ({ ...prev, [name]: '' }));
+            }
+
+        } catch (error) {
+            // 서버 오류 발생 시 (예: 500 에러)
+            setErrors(prev => ({ ...prev, [name]: '서버 오류로 중복 확인에 실패했습니다.' }));
+            setIsDuplicate(prev => ({ ...prev, [name]: false }));
+            setSuccessMessage(prev => ({ ...prev, [name]: '' }));
+        }
+    };
 
     // ----------------------------------------------------
     // 입력 변경 핸들러
@@ -190,7 +194,7 @@ const SignupForm: React.FC<SignupFormProps> = ({ onSwitchToLogin, onCloseModal }
         // // 입력 직후에는 에러 메시지와 성공 메시지 모두 초기화
         setErrors(prev => ({ ...prev, [name]: '' }));
         setSuccessMessage(prev => ({ ...prev, [name]: '' }));
-        // setIsDuplicate(prev => ({ ...prev, [name]: false }));
+        setIsDuplicate(prev => ({ ...prev, [name]: false }));
     };
 
     // ----------------------------------------------------
@@ -206,30 +210,29 @@ const SignupForm: React.FC<SignupFormProps> = ({ onSwitchToLogin, onCloseModal }
             return;
         }
 
-        // // 2. 최종 회원가입 API 호출
-        // try {
-        //     const payload = {
-        //         user_id: formData.user_id,
-        //         password: formData.password,
-        //         email: formData.email,
-        //         nickname: formData.nickname,
-        //         // 관심사, 지역 등 추가 정보 필요 시 여기에 포함
-        //     };
+        // 2. 최종 회원가입 API 호출
+        try {
+            const payload = {
+                user_id: formData.user_id,
+                password: formData.password,
+                email: formData.email,
+                nickname: formData.nickname,
+                // 관심사, 지역 등 추가 정보 필요 시 여기에 포함
+            };
             
-        //     const response = await AuthApi.registerUser(payload);
+            const response = await AuthApi.registerUser(payload);
             
-        //     if (response.success) {
-        //         alert("회원가입에 성공했습니다! 로그인 페이지로 이동합니다.");
-        //         onCloseModal(); // 모달 닫기
-        //         onSwitchToLogin(); // 로그인 모달로 전환
-        //     } else {
-        //         alert("회원가입에 실패했습니다. 다시 시도해 주세요.");
-        //     }
-        // } catch (error) {
-        //     alert("서버와의 통신 중 오류가 발생했습니다.");
-        // } finally {
-        //     setIsSubmitting(false);
-        // }
+            if (response.success) {
+                alert("회원가입에 성공했습니다! 선호태그 선택 페이지로 이동합니다.");
+                onSwitchToSelectTags();
+            } else {
+                alert("회원가입에 실패했습니다. 다시 시도해 주세요.");
+            }
+        } catch (error) {
+            alert("서버와의 통신 중 오류가 발생했습니다.");
+        } finally {
+            setIsSubmitting(false);
+        }
     };
     
 
@@ -243,7 +246,7 @@ const SignupForm: React.FC<SignupFormProps> = ({ onSwitchToLogin, onCloseModal }
                     type="text"
                     value={formData.user_id}
                     onChange={handleChange}
-                    // onBlur={handleBlur} // 포커스 잃을 때 중복 검사
+                    onBlur={handleBlur} // 포커스 잃을 때 중복 검사
                     disabled={isSubmitting}
                 />
                 {errors.user_id && <ErrorMessage>{errors.user_id}</ErrorMessage>}
@@ -284,7 +287,7 @@ const SignupForm: React.FC<SignupFormProps> = ({ onSwitchToLogin, onCloseModal }
                     type="email"
                     value={formData.email}
                     onChange={handleChange}
-                    // onBlur={handleBlur} // 포커스 잃을 때 중복 검사
+                    onBlur={handleBlur} // 포커스 잃을 때 중복 검사
                     disabled={isSubmitting}
                 />
                 {errors.email && <ErrorMessage>{errors.email}</ErrorMessage>}
@@ -299,7 +302,7 @@ const SignupForm: React.FC<SignupFormProps> = ({ onSwitchToLogin, onCloseModal }
                     type="text"
                     value={formData.nickname}
                     onChange={handleChange}
-                    // onBlur={handleBlur} // 포커스 잃을 때 중복 검사
+                    onBlur={handleBlur} // 포커스 잃을 때 중복 검사
                     disabled={isSubmitting}
                 />
                 {errors.nickname && <ErrorMessage>{errors.nickname}</ErrorMessage>}

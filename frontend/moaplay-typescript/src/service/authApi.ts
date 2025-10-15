@@ -28,13 +28,8 @@ export type RegisterPayload = {
 
 // 중복 확인 요청 시 서버에 보내는 타입
 export type DuplicateCheckPayload = {
-    field: 'user_id' | 'email' | 'nickname';
+    type: 'user_id' | 'email' | 'nickname';
     value: string;
-};
-
-// 이메일 인증 요청에 대한 응답 타입
-export type VerificationResponse = {
-    message: string;
 };
 
 // ----------------------------------------------------
@@ -45,36 +40,16 @@ export type VerificationResponse = {
 // 성공 시 True (사용 가능), 실패 시 False 또는 오류 응답
 export const checkDuplicate = async (
     payload: DuplicateCheckPayload
-): Promise<{ isAvailable: boolean }> => {
-    // /user/check?field=user_id&value=testuser 형태로 요청
-    const { data } = await axiosInstance.get<{ isAvailable: boolean }>('/user', {
+): Promise<{ available: boolean }> => {
+    // //auth/check-availability?type=user_id&value=testuser 형태로 요청
+    const { data } = await axiosInstance.get<{ available: boolean }>('/auth/check-availability', {
         params: payload,
     });
     return data;
 };
 
-// // (POST) 이메일 인증 코드 전송 요청
-// export const sendVerificationEmail = async (email: string): Promise<VerificationResponse> => {
-//     const { data } = await axiosInstance.post<VerificationResponse>('/user/send-verification', {
-//         email,
-//     });
-//     return data;
-// };
-
-// // (POST) 이메일 인증 코드 확인
-// export const verifyEmailCode = async (
-//     email: string,
-//     code: string
-// ): Promise<VerificationResponse> => {
-//     const { data } = await axiosInstance.post<VerificationResponse>('/user/verify-code', {
-//         email,
-//         code,
-//     });
-//     return data;
-// };
-
 // (POST) 최종 회원가입 요청
 export const registerUser = async (payload: RegisterPayload): Promise<{ success: boolean }> => {
-    const { data } = await axiosInstance.post<{ success: boolean }>('/user', payload);
+    const { data } = await axiosInstance.post<{ success: boolean }>('/users/', payload);
     return data;
 };
