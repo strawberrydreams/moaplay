@@ -28,8 +28,8 @@ def login_test():
         return {"id": session["id"]}
     
 # 회원가입 중복 확인 API (user_id, nickname, email)
-# GET /api/auth/check-availability
-@auth_bp.route("/check-availability", methods=["GET"])
+# GET /api/users/check
+@auth_bp.route("/check", methods=["GET"])
 def check_availability():
     field_type = request.args.get("type")
     value = request.args.get("value")
