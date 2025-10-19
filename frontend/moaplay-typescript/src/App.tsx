@@ -10,6 +10,8 @@ import SelectTagsForm from './components/auth/SelectTagsForm';
 
 // 전역 스타일 임포트 (Header.styles.js에서 정의했다면)
 import { GlobalStyle } from './styles/Header.styles';
+import Footer from './components/Footer';
+import MainPage from './pages/MainPage';
 
 
 const App: React.FC = () => {
@@ -62,7 +64,7 @@ const App: React.FC = () => {
 
             <main style={{ padding: '20px 40px', backgroundColor: '#f8f8f8' }}>
                 <Routes>
-                    <Route path="/" element={<div>홈 페이지 내용 (이벤트 캘린더 & 목록)</div>} />
+                    <Route path="/" element={<MainPage />} />
                     <Route path="/events/:eventId" element={<EventDetail />} />
                     <Route path="/region" element={<div>지역별 이벤트</div>} />
                     <Route path="/recommend" element={<div>추천 이벤트</div>} />
@@ -91,7 +93,7 @@ const App: React.FC = () => {
                 onClose={handleCloseSignupModal}
                 title="회원가입"
             >
-                <SignupForm onSwitchToLogin={handleSwitchToLogin} onSwitchToSelectTags={handleSwitchToSelectTags} onCloseModal={handleCloseSignupModal}/>
+                <SignupForm onSwitchToLogin={handleSwitchToLogin} onSwitchToSelectTags={handleSwitchToSelectTags} />
             </Modal>
 
             <Modal 
@@ -102,6 +104,8 @@ const App: React.FC = () => {
             >
                 <SelectTagsForm onCloseModal={handleCloseSelectTagsModal}/>
             </Modal>
+
+            <Footer />
         </Router>
     );
 }
