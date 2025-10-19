@@ -1,9 +1,10 @@
 from . import db
 from sqlalchemy.orm import Mapped, mapped_column, relationship
-from sqlalchemy import String, Text, ForeignKey, DateTime, Date, Enum, BigInteger, JSON
+from sqlalchemy import String, Text, ForeignKey, DateTime, Date, Enum, Integer, JSON, Numeric
 from datetime import datetime, date
 from typing import Optional, List, TYPE_CHECKING
 from .enums import EventStatus
+from decimal import Decimal
 
 if TYPE_CHECKING:
     from .user import User
@@ -17,13 +18,16 @@ class Event(db.Model):
     
     # 기본 필드 (타입 힌트 포함)
     id: Mapped[int] = mapped_column(primary_key=True)
-    title: Mapped[str] = mapped_column(String(255), nullable=False)
-    summary: Mapped[str] = mapped_column(Text)
+    title: Mapped[str] = mapped_column(String(200), nullable=False)
+    summary: Mapped[str] = mapped_column(String(200), nullable=True)
     start_date: Mapped[date] = mapped_column(Date, nullable=False)
     end_date: Mapped[date] = mapped_column(Date, nullable=False)
     location: Mapped[str] = mapped_column(String(255), nullable=False)
+    view_count: Mapped[int] = mapped_column(Integer, default=0)
     description: Mapped[str] = mapped_column(Text, nullable=False)
     phone: Mapped[str] = mapped_column(String(20), nullable=False)
+    organizer: Mapped[Optional[str]] = mapped_column(String(255), nullable=True)
+    hosted_by: Mapped[Optional[str]] = mapped_column(String(255), nullable=True)
     
     # JSON 필드 (이미지 URL 배열)
     image_urls: Mapped[Optional[List[str]]] = mapped_column(JSON, default=list, nullable=True)
@@ -34,6 +38,8 @@ class Event(db.Model):
     # 상태 관리
     status: Mapped[EventStatus] = mapped_column(Enum(EventStatus), default=EventStatus.PENDING)
     rejection_reason: Mapped[Optional[str]] = mapped_column(Text)
+    # 평균 평점
+    average_rating: Mapped[float] = mapped_column(Numeric(2,1), default=0.0)
     
     # 타임스탬프
     created_at: Mapped[datetime] = mapped_column(DateTime, default=lambda: datetime.now())
@@ -46,22 +52,32 @@ class Event(db.Model):
     favorites: Mapped[List["Favorite"]] = relationship("Favorite", back_populates="event", cascade="all, delete-orphan")
     tags: Mapped[List["EventTag"]] = relationship("EventTag", back_populates="event", cascade="all, delete-orphan")
 
-    # !hashtag 추가 예정
     def to_dict(self) -> dict:
         return {
             "id": self.id,
             "title": self.title,
             "summary": self.summary,
-            "start_date": self.start_date,
-            "end_date": self.end_date,
+            "start_date": self.start_date.isoformat(),
+            "end_date": self.end_date.isoformat(),
             "location": self.location,
             "description": self.description,
             "phone": self.phone,
-            "image_urls": self.image_urls,
+            "organizer": self.organizer,
+            "hosted_by": self.hosted_by,
+            "image_urls": self.image_urls or [],
             "host": {
                 "id": self.host.id,
-                "name": self.host.name
+                "nickname": self.host.nickname
             },
             "status": self.status.value,
-            "created_at": self.created_at,
+            "tags": [tag.tag.name for tag in self.tags] if self.tags else [],
+            "stats": {
+                "average_rating": float(self.average_rating),
+                "total_reviews": len(self.reviews),
+                "view_count": self.view_count,
+                "favorites_count": len(self.favorites),
+                "schedules_count": len(self.schedules)
+            },
+            "created_at": self.created_at.isoformat(),
+            "updated_at": self.updated_at.isoformat()
         }
