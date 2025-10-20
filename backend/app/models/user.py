@@ -44,17 +44,32 @@ class User(UserMixin, db.Model):
     def check_password(self, password):
         return check_password_hash(self.password_hash, password)
     
-    def to_dict(self, include_sensitive=False) -> dict:
+    def to_dict(self, me=False) -> dict:
         data = {
             "id": self.id,
             "user_id": self.user_id,
             "nickname": self.nickname,
             "profile_image": self.profile_image,
-            "role": self.role.value
+            "created_at": self.created_at,
+            "statistics": {
+                "events_count": len(self.hosted_events),
+                "reviews": len(self.reviews)
+            }
         }
 
-        if include_sensitive == True:
+        if me == True:
             data["email"] = self.email
             data["phone"] = self.phone
+            data["role"] = self.role.value
+            data["updated_at"] = self.updated_at
+            data["statistics"]["favorites"] = len(self.favorites)
 
-        
+        return data
+
+# 미안증 유저 에러 처리
+def return_user_401():
+    return {
+
+            "error_code": "AUTHENTICATION_REQUIRED",
+            "message": "인증이 필요합니다."
+        }, 401
