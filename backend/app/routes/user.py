@@ -1,12 +1,12 @@
-from flask import Blueprint, request
+from flask import Blueprint, request, session
 from ..models import db
-from ..models.user import User
+from ..models.user import User, return_user_401
 import re
 
 user_bp = Blueprint('users', __name__)
 
-# 회원가입 API
-# POST /api/users/
+### 회원가입 API
+### POST /api/users/
 @user_bp.route('/', methods=['POST'])
 def create_user():
     data = request.get_json()
@@ -77,17 +77,81 @@ def create_user():
         "created_at": user.created_at
     }, 201
 
-# 유저 정보 가져오기 api
-# GET /api/users/<id>
+### 내 정보 가져오기 api
+### GET /api/users/me
+# @loginRequired
+@user_bp.route("/me", methods=["GET"])
+def get_me():
+    if not "id" in session:
+        return return_user_401()
+    
+    id = session.get("id")
+    me: User = User.query.get(id)
+
+    return me.to_dict(me=True), 200
+
+### 유저 정보 가져오기 api
+### GET /api/users/<id>
 @user_bp.route("/<int:id>", methods=["GET"])
 def get_user(id):
-    user = User.query.get_or_404(id, description="User not found")
+    user = User.query.get(id)
+    if user is None:
+        return {
+            "error_code": "USER_NOT_FOUND",
+            "message": "사용자를 찾을 수 없습니다."
+        }, 404
 
     return user.to_dict(), 200
 
+### 내 정보 수정 api
+### PUT /api/users/me
+# @loginRequired
+@user_bp.route("/me", methods=["PUT"])
+def edit_me():
+    if not "id" in session:
+        return return_user_401()
+    
 
-# 회원가입 중복 확인 API (user_id, nickname, email)
-# GET /api/users/check
+### 비밀번호 변경 api
+### PUT /api/users/me/password
+# @loginRequired
+@user_bp.route("/me/password", methods=["PUT"])
+def change_password():
+    if not "id" in session:
+        return return_user_401()
+
+    password = request.get_json().get("password")
+    new_password = request.get_json().get("new_password")
+
+    user: User = User.query.get(session["id"])
+
+    if not user.check_password(password):
+        return {
+            "error_code": "INVALID_CURRENT_PASSWORD",
+            "message": "현재 비밀번호가 일치하지 않습니다."
+        }, 400
+    if len(new_password) < 8:
+        return {
+            "error_code": "INVALID_PASSWORD_FORMAT",
+            "message": "새 비밀번호는 8자 이상이어야 합니다."
+        }, 422
+    
+    user.set_password(new_password)
+    db.session.commit()
+
+    return {"message": "비밀번호가 변경되었습니다."}, 200
+
+
+### 회원 탈퇴 api
+### DELETE /api/users/me
+# @loginRequired
+@user_bp.route("/me", methods=["DELETE"])
+def delete_user():
+    if not "id" in session:
+        return return_user_401()
+
+### 회원가입 중복 확인 API (user_id, nickname, email)
+### GET /api/users/check
 @user_bp.route("/check", methods=["GET"])
 def check_availability():
     field_type = request.args.get("type")
