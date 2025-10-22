@@ -6,6 +6,7 @@ import * as S from '../styles/EventCard.styles';
 
 // --- Props 타입 정의 ---
 interface IEventCardProps {
+  events: IEvent[];
   event: IEvent;
 }
 
@@ -31,9 +32,9 @@ const EventCard: React.FC<IEventCardProps> = ({ event }) => {
       </S.CardImage>
       <S.CardContent>
         <h3>{event.title}</h3>
-        <p>날짜: {event.date}</p>
+        <p>날짜: {event.start_date} ~ {event.end_date}</p>
         <p>주소: {event.location}</p>
-        <span className="card-tag">태그: {event.tag}</span>
+        <span className="card-tag">태그: {event.tag.join(', ')}</span>
       </S.CardContent>
       <S.CardFooter>
         <S.AddScheduleButton>일정 추가</S.AddScheduleButton>
