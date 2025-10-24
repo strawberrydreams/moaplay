@@ -25,6 +25,9 @@ def create_user():
     email = data['email'].strip()
     password = data['password']
 
+    phone = data.get("phone")
+    profile_image = data.get("profile_image")
+
     #유효성 검사, 중복검사
     # user_id 형식 검증 (4-50자, 영문+숫자+언더스코어)
     if not re.match(r'^[a-zA-Z0-9_]{4,50}$', user_id):
@@ -62,13 +65,13 @@ def create_user():
         }, 409
         
     
-    user = User(user_id=user_id, nickname=nickname, email=email)
+    user = User(user_id=user_id, nickname=nickname, email=email, phone=phone, profile_image=profile_image)
     user.set_password(password)
 
     db.session.add(user)
     db.session.commit()
 
-    return user.to_dict(), 201
+    return user.to_dict(me=True), 201
 
 ### 내 정보 가져오기 api
 ### GET /api/users/me
@@ -184,6 +187,28 @@ def change_password():
 def delete_user():
     if not "id" in session:
         return return_user_401()
+    user: User = User.query.get_or_404(session["id"])
+
+    data = request.get_json()
+
+    if not data.get("confirm"):
+        return {
+            "error_code": "CONFIRMATION_REQUIRED",
+            "message": "회원 탈퇴 확인이 필요합니다."
+        }, 400
+
+    password = data.get("password")
+    if not user.check_password(password=password):
+        return {
+            "error_code": "INVALID_PASSWORD",
+            "message": "비밀번호가 일치하지 않습니다."
+        }, 400
+    
+    db.session.delete(user)
+    db.session.commit()
+
+    session.pop("id", None)
+    return {"message": "회원 탈퇴가 완료되었습니다."}, 200
 
 ### 회원가입 중복 확인 API (user_id, nickname, email)
 ### GET /api/users/check
