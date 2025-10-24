@@ -68,14 +68,7 @@ def create_user():
     db.session.add(user)
     db.session.commit()
 
-    return {
-        "id": user.id,
-        "user_id": user.user_id,
-        "nickname": user.nickname,
-        "email": user.email,
-        "role": user.role.value,
-        "created_at": user.created_at
-    }, 201
+    return user.to_dict(), 201
 
 ### 내 정보 가져오기 api
 ### GET /api/users/me
@@ -111,6 +104,48 @@ def edit_me():
     if not "id" in session:
         return return_user_401()
     
+    user: User = User.query.get_or_404(session["id"])
+    data = request.get_json()
+
+    if "nickname" in data:
+        nickname = data.get("nickname")
+        if User.query.filter_by(nickname=nickname).first():
+            return {
+                "error_code": "DUPLICATE_NICKNAME",
+                "message": "이미 사용 중인 닉네임입니다."
+            }, 409
+        if len(nickname) < 2 or len(nickname) > 100:
+            return {
+                "error_code": "VALIDATION_ERROR",
+                "message": "입력값이 유효하지 않습니다.",
+                'field': 'nickname'
+        }, 422
+
+        user.nickname = nickname
+    elif "email" in data:
+        email = data.get("email")
+        if User.query.filter_by(email=email).first():
+            return {
+                "error_code": "DUPLICATE_EMAIL",
+                "message": "이미 사용 중인 이메일입니다."
+            }, 409
+        email_pattern = r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$'
+        if not re.match(email_pattern, email):
+            return {
+                "error_code": "VALIDATION_ERROR",
+                "message": "입력값이 유효하지 않습니다.",
+                'field': 'email'
+            }, 422
+        
+        user.email = data.get("email")
+    elif "phone" in data:
+        user.phone = data.get("phone")
+    elif "profile_image" in data:
+        user.profile_image = data.get("profile_image")
+
+    db.session.commit()
+
+    return user.to_dict(me=True)
 
 ### 비밀번호 변경 api
 ### PUT /api/users/me/password
