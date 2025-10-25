@@ -29,3 +29,23 @@ class Review(db.Model):
     # 관계 설정
     user: Mapped["User"] = relationship("User", back_populates="reviews")
     event: Mapped["Event"] = relationship("Event", back_populates="reviews")
+
+    def to_dict(self) -> dict:
+        return {
+            "id": self.id,
+            "title": self.title,
+            "content": self.content,
+            "rating": self.rating,
+            "image_urls": self.image_urls or [],
+            "user": {
+                "id": self.user.id,
+                "nickname": self.user.nickname,
+                "profile_image": self.user.profile_image
+            },
+            "event": {
+                "id": self.event.id,
+                "title": self.event.title
+            },
+            "created_at": self.created_at.isoformat(),
+            "updated_at": self.updated_at.isoformat()
+        }

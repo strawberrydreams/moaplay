@@ -24,3 +24,24 @@ class Schedule(db.Model):
     # 관계 설정
     user: Mapped["User"] = relationship("User", back_populates="schedules")
     event: Mapped["Event"] = relationship("Event", back_populates="schedules")
+
+    def to_dict(self) -> dict:
+        return {
+            "id": self.id,
+            "user": {
+                "id": self.user.id,
+                "nickname": self.user.nickname,
+                "profile_image": self.user.profile_image
+            },
+            "event": {
+                "id": self.event.id,
+                "title": self.event.title,
+                "summary": self.event.summary,
+                "start_date": self.event.start_date.isoformat(),
+                "end_date": self.event.end_date.isoformat(),
+                "location": self.event.location,
+                "image_urls": self.event.image_urls or [],
+                "status": self.event.status.value
+            },
+            "created_at": self.created_at.isoformat()
+        }
