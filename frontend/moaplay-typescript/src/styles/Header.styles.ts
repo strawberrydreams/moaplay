@@ -68,7 +68,7 @@ export const AuthSection = styled.div`
     button {
         background: none;
         border: none;
-        color: #6a0dad; /* 보라색 계열 */
+        color: #131313; /* 보라색 계열 */
         font-weight: 600;
         font-size: 0.9rem;
         cursor: pointer;
@@ -85,6 +85,20 @@ export const AuthSection = styled.div`
         font-size: 1.2rem;
     }
 `;
+
+export const LoginButton = styled.div`
+    background: none;
+    border: none;
+    color: #6a0dad;
+    font-weight: 600;
+    font-size: 0.9rem;
+    cursor: pointer;
+    padding: 8px 15px;
+    gap: 8px;
+    border-radius: 5px;
+    transition: background-color 0.3s ease;
+    outline: none;
+`
 
 // 전역 스타일 (옵션: 기본 폰트 설정 등을 위해)
 export const GlobalStyle = createGlobalStyle`
