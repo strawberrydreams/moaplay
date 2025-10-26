@@ -1,5 +1,5 @@
 // src/pages/EventSearchPage.tsx
-import React, { useState, type KeyboardEvent } from 'react';
+import React, { useState, type KeyboardEvent, type MouseEvent } from 'react';
 import type { IEvent } from '../types';
 import EventCard from '../components/EventCard';
 import { FaFilter } from 'react-icons/fa';
@@ -49,7 +49,7 @@ const EventSearchPage: React.FC = () => {
   };
 
   // 태그 삭제 핸들러 추가
-  const handleDeleteTag = (e: MouseEvent, tagToDelete: string) => {
+  const handleDeleteTag = (e: MouseEvent<HTMLSpanElement>, tagToDelete: string) => {
     e.stopPropagation(); // 👈 중요: 부모(TagButton)의 onClick이 실행되지 않도록 막기
     setTags(prevTags => prevTags.filter(tag => tag !== tagToDelete));
 
@@ -92,7 +92,7 @@ const EventSearchPage: React.FC = () => {
               {tags.map(tag => (
                 <S.TagButton
                   key={tag}
-                  active={activeTag === tag}
+                  $active={activeTag === tag}
                   onClick={() => setActiveTag(tag)}
                 >
                   {tag}

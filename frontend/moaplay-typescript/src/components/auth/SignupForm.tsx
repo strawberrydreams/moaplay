@@ -1,5 +1,7 @@
-import React, { useState} from 'react';
-import * as AuthApi from '../../service/authApi.ts'; // Auth API 임포트 (중복 확인, 등록)
+import React, { useState, useCallback, type FocusEvent } from 'react'; // 1. FocusEvent 임포트
+import { useForm } from '../../hooks/useForm'; // 👈 제네릭 훅 임포트
+import * as UserApi from '../../service/userApi'; // 회원가입 API
+import type { RegisterPayload } from '../../service/userApi';
 
 import {
     FormContainer,
@@ -11,311 +13,257 @@ import {
     SuccessMessage
 } from '../../styles/SignupForm.styles';
 
-interface FormData {
+// --- 회원가입 폼 전용 타입 정의 ---
+interface SignupFormData extends Omit<RegisterPayload, 'password'> { // Omit password if RegisterPayload has it
     user_id: string;
     password: string;
-    confirmPassword: string;
+    confirmPassword?: string;
     email: string;
     nickname: string;
+    // phone?: string;
 }
 
-interface Errors {
-    user_id: string;
-    password: string;
-    confirmPassword: string;
-    email: string;
-    nickname: string;
-}
+// --- 초기 폼 값 설정 ---
+const initialSignupValues: SignupFormData = {
+    user_id: '',
+    password: '',
+    confirmPassword: '',
+    email: '',
+    nickname: '',
+    // phone: '',
+};
 
+// --- 컴포넌트 Props 타입 ---
 interface SignupFormProps {
     onSwitchToLogin: () => void;
-    onSwitchToSelectTags: () => void;
-    // onCloseModal: () => void;
+    onGoTags: (data: RegisterPayload) => void; // 다음 단계로 데이터 전달 함수
 }
 
-const SignupForm: React.FC<SignupFormProps> = ({ onSwitchToLogin, onSwitchToSelectTags }) => {
-    const [formData, setFormData] = useState<FormData>({
-        user_id: '',
-        password: '',
-        confirmPassword: '',
-        email: '',
-        nickname: '',
-    });
-    const [errors, setErrors] = useState<Errors>({
-        user_id: '',
-        password: '',
-        confirmPassword: '',
-        email: '',
-        nickname: '',
-    });
-    // 중복 확인 상태
+// --- 유효성 검사 함수 ---
+const validateSignup = (values: SignupFormData): Partial<SignupFormData> => {
+    const errors: Partial<SignupFormData> = {};
+
+    // 아이디 검사
+    if (!values.user_id) {
+        errors.user_id = '아이디를 입력해주세요.';
+    } else if (values.user_id.length < 6 || values.user_id.length > 20) {
+        errors.user_id = '아이디는 6~20자 사이여야 합니다.';
+    } else if (!/^[a-z0-9]+$/.test(values.user_id)) {
+        errors.user_id = '아이디는 영문 소문자와 숫자만 가능합니다.';
+    }
+    // (여기서 API 중복 확인 결과를 errors 객체에 반영할 수도 있습니다)
+
+    // 비밀번호 검사
+    if (!values.password) {
+        errors.password = '비밀번호를 입력해주세요.';
+    } else if (values.password.length < 8) {
+        errors.password = '비밀번호는 최소 8자 이상이어야 합니다.';
+    } else {
+        const complexity = [/[a-z]/, /[A-Z]/, /[0-9]/, /[^A-Za-z0-9\s]/]
+                           .filter(regex => values.password && regex.test(values.password)).length;
+        if (complexity < 3) {
+            errors.password = '문자, 숫자, 특수문자 중 3가지 이상을 포함해야 합니다.';
+        }
+    }
+
+
+    // 비밀번호 확인 검사
+    if (values.password !== values.confirmPassword) {
+        errors.confirmPassword = '비밀번호가 일치하지 않습니다.';
+    }
+
+    // 이메일 검사
+    if (!values.email) {
+        errors.email = '이메일을 입력해주세요.';
+    } else if (!/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/.test(values.email)) {
+        errors.email = '유효한 이메일 형식이 아닙니다.';
+    }
+
+    // 닉네임 검사
+    if (!values.nickname) {
+        errors.nickname = '닉네임을 입력해주세요.';
+    } else if (values.nickname.length < 2 || values.nickname.length > 10) {
+        errors.nickname = '닉네임은 2~10자여야 합니다.';
+    } else if (!/^[ㄱ-ㅎ|가-힣|a-z|A-Z|0-9]+$/.test(values.nickname)) {
+        errors.nickname = '닉네임은 한글, 영문, 숫자만 사용 가능합니다.';
+    }
+
+    return errors;
+};
+
+// --- SignupForm 컴포넌트 ---
+const SignupForm: React.FC<SignupFormProps> = ({ onSwitchToLogin, onGoTags }) => {
+
+    // 2. 중복 확인/성공 메시지 상태 추가 (useForm과 별개로 관리)
     const [isDuplicate, setIsDuplicate] = useState({ user_id: false, nickname: false, email: false });
+    const [successMessage, setSuccessMessage] = useState({ user_id: '', nickname: '', email: '' , password: '', confirmPassword: '', phone: ''});
 
-    // 성공 메시지 상태
-    const [successMessage, setSuccessMessage] = useState({ user_id: '', nickname: '', email: '' });
-    const [isSubmitting, setIsSubmitting] = useState(false);
-
-    // ----------------------------------------------------
-    // 유효성 검사 로직 (Validation)
-    // ----------------------------------------------------
-
-    const validateField = (name: keyof FormData, value: string, currentData: FormData): string => {
-        let error = '';
-        
-        switch (name) {
-            case 'user_id':
-                if (value.length < 6 || value.length > 20) {
-                    error = '아이디는 6~20자 사이의 영문 소문자와 숫자만 사용 가능합니다.';
-                } else if (!/^[a-z0-9]+$/.test(value)) {
-                    error = '아이디는 영문 소문자와 숫자만 가능합니다.';
-                }
-                break;
-            case 'password':
-                if (value.length < 8) {
-                    error = '비밀번호는 최소 8자 이상이어야 합니다.';
-                } else {
-                    // 복잡성: 문자, 숫자, 특수문자 중 3가지 이상 포함
-                    const complexity = [/[a-z]/, /[A-Z]/, /[0-9]/, /[^A-Za-z0-9\s]/].filter(regex => regex.test(value)).length;
-                    if (complexity < 3) {
-                        error = '문자, 숫자, 특수문자 중 3가지 이상을 포함해야 합니다.';
-                    }
-                }
-                break;
-            case 'confirmPassword':
-                if (value !== currentData.password) {
-                    error = '비밀번호가 일치하지 않습니다.';
-                }
-                break;
-            case 'email':
-                if (!/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/.test(value)) {
-                    error = '유효한 이메일 형식이 아닙니다.';
-                }
-                break;
-            case 'nickname':
-                if (value.length < 2 || value.length > 10) {
-                    error = '닉네임은 2~10자여야 합니다.';
-                } else if (!/^[ㄱ-ㅎ|가-힣|a-z|A-Z|0-9]+$/.test(value)) {
-                    error = '닉네임은 한글, 영문, 숫자만 사용 가능합니다.';
-                }
-                break;
+    // 4. useForm 훅 호출 (validate 함수에 isDuplicate를 반영한 새 함수 전달)
+    const { values, errors, isSubmitting, handleChange: handleFormChange, handleSubmit } = useForm<SignupFormData>({
+        initialValues: initialSignupValues,
+        validate: validateSignup, // 👈 isDuplicate 상태가 반영된 유효성 함수 사용
+        onSubmit: UserApi.registerUser,
+        onSuccess: (response) => {
+            onGoTags(response as RegisterPayload);
+        },
+        onError: (error) => { 
+            console.error('Signup error:', error);
+            alert(error.response?.data?.error || '회원가입에 실패했습니다.');
         }
-        return error;
-    };
+    });
 
-    const validateForm = (data: FormData): boolean => {
-        let isValid = true;
-        let newErrors: Errors = { user_id: '', password: '', confirmPassword: '', email: '', nickname: '' };
+    // 5. handleBlur (중복 확인) 함수 정의
+    const handleBlur = useCallback(async (e: FocusEvent<HTMLInputElement>) => {
+        const { name, value } = e.target as { name: keyof typeof isDuplicate; value: string };
 
-        (Object.keys(data) as (keyof FormData)[]).forEach(key => {
-            const error = validateField(key, data[key], data);
-            if (error) {
-                newErrors[key] = error;
-                isValid = false;
-            }
-        });
-        
-        // 중복 확인 상태 최종 체크
-        if (isDuplicate.user_id) {
-            newErrors.user_id = '이미 사용 중인 아이디입니다.';
-            isValid = false;
-        }
-        if (isDuplicate.nickname) {
-            newErrors.nickname = '이미 사용 중인 닉네임입니다.';
-            isValid = false;
-        }
-        if (isDuplicate.email) {
-            newErrors.email = '이미 등록된 이메일입니다.';
-            isValid = false;
-        }
-
-
-        setErrors(newErrors);
-        return isValid;
-    };
-    
-    // ----------------------------------------------------
-    // 🚀 API 호출 로직: 중복 확인 (onBlur)
-    // ----------------------------------------------------
-    
-    const handleBlur = async (e: React.FocusEvent<HTMLInputElement>) => {
-        const { id, value } = e.target;
-        // 'signupUserId' -> 'UserId' -> 'userId' 형태로 필드 이름 추출
-        const name = id.replace('signup', '') as keyof typeof isDuplicate; 
-
+        // 빈 값이거나 중복 확인 대상 필드가 아니면 종료
         if (!value || !(name === 'user_id' || name === 'nickname' || name === 'email')) return;
-        
-        // // 1. 클라이언트 유효성 먼저 검사
-        // const clientError = validateField(name, value, formData);
-        // if (clientError) {
-        //     setErrors(prev => ({ ...prev, [name]: clientError }));
-        //     setSuccessMessage(prev => ({ ...prev, [name]: '' }));
-        //     return;
-        // }
-        
-        // 2. 중복 확인 API 호출
+
+        // 기존 에러/성공 메시지 초기화
+        setSuccessMessage(prev => ({ ...prev, [name]: '' }));
+        // errors 상태는 useForm이 관리하므로 직접 건드리지 않음
+        // setErrors(prev => ({ ...prev, [name]: undefined }));
+
         try {
-            const payload = {
-                type: name,
-                value: value,
-            };
-            // 💡 await를 사용하여 API 응답을 기다립니다.
-            const response = await AuthApi.checkDuplicate(payload);
-            
-            // isAvailable이 false면 중복됨
+            const payload = { type: name, value: value };
+            const response = await UserApi.checkDuplicate(payload); // API 이름 확인!
+
             if (response.available) {
-                // 중복 없음: 성공 메시지 표시
                 setIsDuplicate(prev => ({ ...prev, [name]: false }));
-                setSuccessMessage(prev => ({ ...prev, [name]: `${name === 'user_id' ? '사용 가능한 아이디' : name === 'email' ? '사용 가능한 이메일' : '사용 가능한 닉네임'}입니다.` }));
-
+                setSuccessMessage(prev => ({ ...prev, [name]: `사용 가능한 ${name === 'user_id' ? '아이디' : name}입니다.` }));
             } else {
-                setErrors(prev=> ({...prev, [name]: ''}));
                 setIsDuplicate(prev => ({ ...prev, [name]: true }));
-                setSuccessMessage(prev => ({ ...prev, [name]: '' }));
+                // 에러 상태는 validateSignup 함수가 isDuplicate를 보고 설정하므로 여기서 직접 설정 안 함
             }
-
         } catch (error) {
-            // 서버 오류 발생 시 (예: 500 에러)
-            setErrors(prev => ({ ...prev, [name]: '서버 오류로 중복 확인에 실패했습니다.' }));
+            setIsDuplicate(prev => ({ ...prev, [name]: false }));
+            // 에러 상태는 validateSignup 함수가 처리하도록 유도 (예: 서버 에러 필드 추가)
+            // setErrors(prev => ({ ...prev, [name]: '중복 확인 실패' }));
+            console.error('중복 확인 실패:', error);
+            alert('중복 확인 중 서버 오류가 발생했습니다.');
+        }
+    }, []); // 의존성 없음
+
+    // 커스텀 handleChange
+    const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        handleFormChange(e); // useForm의 기본 handleChange 호출
+
+        // 추가로 중복/성공 상태 초기화
+        const { name } = e.target as { name: keyof typeof isDuplicate };
+        if (name === 'user_id' || name === 'nickname' || name === 'email') {
             setIsDuplicate(prev => ({ ...prev, [name]: false }));
             setSuccessMessage(prev => ({ ...prev, [name]: '' }));
         }
     };
 
-    // ----------------------------------------------------
-    // 입력 변경 핸들러
-    // ----------------------------------------------------
-    const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const { id, value } = e.target;
-        const name = id.replace('signup', '') as keyof FormData;
-        
-        // 폼 데이터 업데이트
-        setFormData(prev => ({ ...prev, [name]: value }));
-        
-        // // 입력 직후에는 에러 메시지와 성공 메시지 모두 초기화
-        setErrors(prev => ({ ...prev, [name]: '' }));
-        setSuccessMessage(prev => ({ ...prev, [name]: '' }));
-        setIsDuplicate(prev => ({ ...prev, [name]: false }));
-    };
-
-    // ----------------------------------------------------
-    // 🚀 최종 제출 로직 (handleSubmit)
-    // ----------------------------------------------------
-    const handleSubmit = async (e: React.FormEvent) => {
-        e.preventDefault();
-        setIsSubmitting(true);
-
-        // 1. 클라이언트 측 최종 유효성 검사
-        if (!validateForm(formData)) {
-            setIsSubmitting(false);
-            return;
-        }
-
-        // 2. 최종 회원가입 API 호출
-        try {
-            const payload = {
-                user_id: formData.user_id,
-                password: formData.password,
-                email: formData.email,
-                nickname: formData.nickname,
-                // 관심사, 지역 등 추가 정보 필요 시 여기에 포함
-            };
-            
-            const response = await AuthApi.registerUser(payload);
-            
-            if (response.success) {
-                alert("회원가입에 성공했습니다! 선호태그 선택 페이지로 이동합니다.");
-                onSwitchToSelectTags();
-            } else {
-                alert("회원가입에 실패했습니다. 다시 시도해 주세요.");
-            }
-        } catch (error) {
-            alert("서버와의 통신 중 오류가 발생했습니다.");
-        } finally {
-            setIsSubmitting(false);
-        }
-    };
-    
-
-    return (
+return (
         <FormContainer onSubmit={handleSubmit}>
-            {/* 1. 아이디 */}
+            {/* 아이디 */}
             <InputGroup>
                 <label htmlFor="signupuser_id">아이디</label>
                 <input
                     id="signupuser_id"
+                    name="user_id"
                     type="text"
-                    value={formData.user_id}
-                    onChange={handleChange}
-                    onBlur={handleBlur} // 포커스 잃을 때 중복 검사
+                    value={values.user_id}
+                    onChange={handleChange} 
+                    onBlur={handleBlur}     
                     disabled={isSubmitting}
                 />
                 {errors.user_id && <ErrorMessage>{errors.user_id}</ErrorMessage>}
-                {successMessage.user_id && <SuccessMessage>{successMessage.user_id}</SuccessMessage>}
+                {successMessage.user_id && !errors.user_id && <SuccessMessage>{successMessage.user_id}</SuccessMessage>}
             </InputGroup>
 
-            {/* 2. 비밀번호 */}
+            {/* 비밀번호 */}
             <InputGroup>
                 <label htmlFor="signuppassword">비밀번호</label>
                 <input
                     id="signuppassword"
+                    name="password"
                     type="password"
-                    value={formData.password}
-                    onChange={handleChange}
+                    value={values.password}
+                    onChange={handleChange} 
+                    onBlur={handleBlur}    
                     disabled={isSubmitting}
                 />
                 {errors.password && <ErrorMessage>{errors.password}</ErrorMessage>}
+                {successMessage.password && !errors.password && <SuccessMessage>{successMessage.password}</SuccessMessage>}
             </InputGroup>
 
-            {/* 3. 비밀번호 확인 */}
+            {/* 비밀번호 확인 */}
             <InputGroup>
                 <label htmlFor="signupconfirmPassword">비밀번호 확인</label>
                 <input
                     id="signupconfirmPassword"
+                    name="confirmPassword"
                     type="password"
-                    value={formData.confirmPassword}
-                    onChange={handleChange}
+                    value={values.confirmPassword}
+                    onChange={handleChange} 
+                    onBlur={handleBlur}     
                     disabled={isSubmitting}
                 />
                 {errors.confirmPassword && <ErrorMessage>{errors.confirmPassword}</ErrorMessage>}
+                {successMessage.confirmPassword && !errors.confirmPassword && <SuccessMessage>{successMessage.confirmPassword}</SuccessMessage>}
             </InputGroup>
-            
-            {/* 4. 이메일 */}
+
+
+            {/* 이메일 */}
             <InputGroup>
                 <label htmlFor="signupemail">이메일</label>
                 <input
                     id="signupemail"
+                    name="email"
                     type="email"
-                    value={formData.email}
-                    onChange={handleChange}
-                    onBlur={handleBlur} // 포커스 잃을 때 중복 검사
+                    value={values.email}
+                    onChange={handleChange} // 👈 수정된 handleChange 사용
+                    onBlur={handleBlur}     // 👈 onBlur 연결
                     disabled={isSubmitting}
                 />
                 {errors.email && <ErrorMessage>{errors.email}</ErrorMessage>}
-                {successMessage.email && <SuccessMessage>{successMessage.email}</SuccessMessage>}
+                {successMessage.email && !errors.email && <SuccessMessage>{successMessage.email}</SuccessMessage>}
             </InputGroup>
-            
-            {/* 5. 닉네임 */}
+
+            {/* 닉네임 */}
             <InputGroup>
                 <label htmlFor="signupnickname">닉네임</label>
                 <input
                     id="signupnickname"
+                    name="nickname"
                     type="text"
-                    value={formData.nickname}
-                    onChange={handleChange}
-                    onBlur={handleBlur} // 포커스 잃을 때 중복 검사
+                    value={values.nickname}
+                    onChange={handleChange} // 👈 수정된 handleChange 사용
+                    onBlur={handleBlur}     // 👈 onBlur 연결
                     disabled={isSubmitting}
                 />
                 {errors.nickname && <ErrorMessage>{errors.nickname}</ErrorMessage>}
-                {successMessage.nickname && <SuccessMessage>{successMessage.nickname}</SuccessMessage>}
+                {successMessage.nickname && !errors.nickname && <SuccessMessage>{successMessage.nickname}</SuccessMessage>}
             </InputGroup>
 
+            {/* 전화번호 */}
+            {/* <InputGroup>
+                <label htmlFor="signupphone">전화번호</label>
+                <input
+                    id="signupphone"
+                    name="phone"
+                    type="tel"
+                    value={values.phone}
+                    onChange={handleChange} // 👈 수정된 handleChange 사용
+                    onBlur={handleBlur}     // 👈 onBlur 연결
+                    disabled={isSubmitting}
+                />
+                {errors.phone && <ErrorMessage>{errors.phone}</ErrorMessage>}
+                {successMessage.phone && !errors.phone && <SuccessMessage>{successMessage.phone}</SuccessMessage>}
+            </InputGroup> */}
+
+
+            
             {/* 버튼 */}
             <ButtonRow>
                 <SubmitButton type="submit" disabled={isSubmitting}>
-                    {isSubmitting ? '등록 중...' : '회원가입'}
+                    {isSubmitting ? '로딩 중...' : '회원가입'}
                 </SubmitButton>
             </ButtonRow>
-            
+
             {/* 로그인으로 돌아가기 */}
             <LinksContainer>
                 계정이 이미 있나요?

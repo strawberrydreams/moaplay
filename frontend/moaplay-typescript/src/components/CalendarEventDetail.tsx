@@ -4,13 +4,14 @@ import type { IEvent } from '../types';
 import * as S from '../styles/CalendarEvendDetail.styles';
 import { FaImage, FaSignInAlt, FaArrowLeft } from 'react-icons/fa'; // 이미지 플레이스홀더 아이콘
 // useAuthModal 훅 임포트
-import { useAuthModal } from '../../AuthModalContext';
+// import { useAuthModal } from '../../AuthModalContext';
+import { useSignupFlow } from '../hooks/useSignupFlow';
 
 // 이벤트를 위한 랜덤 색상 생성 (Image 1의 점)
-const getRandomColor = () => {
-  const colors = ['#4286f4', '#EA4335', '#FBBC05', '#34A853', '#A142F4', '#FF6D00'];
-  return colors[Math.floor(Math.random() * colors.length)];
-};
+// const getRandomColor = () => {
+//   const colors = ['#4286f4', '#EA4335', '#FBBC05', '#34A853', '#A142F4', '#FF6D00'];
+//   return colors[Math.floor(Math.random() * colors.length)];
+// };
 
 interface IDetailProps {
   events: IEvent[];        // 모든 담은 행사 목록
@@ -19,7 +20,7 @@ interface IDetailProps {
 
 const CalendarEventDetail: React.FC<IDetailProps> = ({ events, event }) => {
   // 컨텍스트에서 로그인 모달 여는 함수를 직접 가져옴
-  const { openLoginModal } = useAuthModal();
+  const { openLoginModal } = useSignupFlow();
   // 로그인 상태 대신 토큰 여부로 판단
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   // Image 1의 목록에서 클릭된 행사
@@ -110,7 +111,7 @@ const CalendarEventDetail: React.FC<IDetailProps> = ({ events, event }) => {
           <S.EventListItem 
             key={eventCard.id} 
             // 2. 랜덤 생성 대신 eventCard.color prop 사용 (fallback 색상 지정)
-            dotColor={eventCard.color || '#4285F4'} 
+            $dotColor={eventCard.color || '#4285F4'} 
             onClick={() => setSelectedDetailEvent(eventCard)} 
           >
             <div className="event-dot"></div>

@@ -2,54 +2,57 @@ import axiosInstance from './core';
 
 // ----------------------------------------------------
 // TypeScript Type Definitions (백엔드와 통신을 위해 필요)
-// ----------------------------------------------------
+// ---------------------------------------------------- 
 
-// (GET) 서버가 살아있는지 확인 (Health Check)
-export const getServerStatus = async (): Promise<boolean> => {
-    try {
-        // 서버의 루트 경로 ('/')에 GET 요청을 보냅니다.
-        const response = await axiosInstance.get('/');
-        // 상태 코드가 200번대면 성공으로 간주
-        return response.status >= 200 && response.status < 300;
-    } catch (error) {
-        // 네트워크 오류나 CORS 오류 발생 시
-        return false;
-    }
-};
-
-// 회원가입 시 최종적으로 서버에 전송되는 데이터 타입
-export type RegisterPayload = {
+// (POST) 로그인 요청 시 서버에 보내는 데이터 타입
+export type LoginPayload = {
     user_id: string;
     password: string;
-    email: string;
-    nickname: string;
-    // 선호 지역, 관심사 등 추가 정보가 필요하면 여기에 추가
+};
+// (POST) 로그인 성공 시 서버가 반환하는 데이터 타입
+export type LoginResponse = {
+    id: number;
+    user_id: string;
 };
 
-// 중복 확인 요청 시 서버에 보내는 타입
-export type DuplicateCheckPayload = {
-    type: 'user_id' | 'email' | 'nickname';
-    value: string;
-};
+export interface UserResponse {
+    id: number;
+    user_id: string;
+    nickname?: string;
+    profile_image?: string;
+  // me.to_dict()가 반환하는 다른 필드들도 필요하면 추가
+}
 
 // ----------------------------------------------------
 // API 통신 함수 정의
-// ----------------------------------------------------
+// ---------------------------------------------------- 
 
-// (GET) 아이디/이메일/닉네임 중복 확인
-// 성공 시 True (사용 가능), 실패 시 False 또는 오류 응답
-export const checkDuplicate = async (
-    payload: DuplicateCheckPayload
-): Promise<{ available: boolean }> => {
-    // //auth/check-availability?type=user_id&value=testuser 형태로 요청
-    const { data } = await axiosInstance.get<{ available: boolean }>('/auth/check-availability', {
-        params: payload,
-    });
+// (POST) 로그인 요청
+export const loginUser = async (
+    payload: LoginPayload
+): Promise<LoginResponse> => {
+    const { data } = await axiosInstance.post<LoginResponse>('/auth/login', payload);
     return data;
 };
 
-// (POST) 최종 회원가입 요청
-export const registerUser = async (payload: RegisterPayload): Promise<{ success: boolean }> => {
-    const { data } = await axiosInstance.post<{ success: boolean }>('/users/', payload);
+// (POST) 로그아웃 요청
+export const logoutUser = async (): Promise<{ success: boolean }> => {
+    const { data } = await axiosInstance.post<{ success: boolean }>('/auth/logout');
+    return data;
+};  
+
+// (GET) 현재 로그인한 사용자 정보 요청
+export const checkLoginStatus = async (): Promise<{ 
+    id: number;
+}> => {
+    const { data } = await axiosInstance.get('/auth/login_test');
     return data;
 };
+
+// // (GET) 현재 로그인한 사용자 정보 요청
+
+// export const checkLoginStatus = async (): Promise<UserResponse> => {
+//     const { data } = await axiosInstance.get<UserResponse>('/users/me');
+//     return data;
+// };
+

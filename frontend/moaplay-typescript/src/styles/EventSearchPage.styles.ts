@@ -3,7 +3,7 @@ import styled from 'styled-components';
 
 // --- 타입 정의 ---
 export interface ITagButtonProps {
-  active?: boolean;
+  $active?: boolean;
 }
 
 // --- 스타일 컴포넌트 ---

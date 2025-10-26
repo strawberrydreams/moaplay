@@ -1,6 +1,10 @@
 // src/styles/CalendarEventDetail.styles.ts
 import styled from 'styled-components';
 
+interface IEventListItemProps {
+  $dotColor: string;
+}
+
 export const CalendarDetailWrapper = styled.div`
   max-width: 400px; /* 이미지와 유사한 고정 너비 */
   min-height: 600px;
@@ -72,7 +76,7 @@ export const EventListWrapper = styled.div`
   overflow-y: auto;
 `;
 
-export const EventListItem = styled.div<{ dotColor: string }>`
+export const EventListItem = styled.div<{ $dotColor: string }>`
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -92,7 +96,7 @@ export const EventListItem = styled.div<{ dotColor: string }>`
     width: 8px;
     height: 8px;
     border-radius: 50%;
-    background-color: ${props => props.dotColor};
+    background-color: ${props => props.$dotColor};
     margin-right: 10px;
     flex-shrink: 0;
   }

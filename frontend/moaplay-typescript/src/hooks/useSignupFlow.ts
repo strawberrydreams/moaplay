@@ -1,19 +1,49 @@
 // frontend/hooks/useSignupFlow.ts
 import { useState } from 'react';
-import type { RegisterPayload } from '../service/authApi';
+import type { RegisterPayload } from '../service/userApi';
 
 type Step = 'signup' | 'tags';
 
 export function useSignupFlow() {
-    const [isOpen, setOpen] = useState(false);
-    const [step, setStep] = useState<Step>('signup');
-    const [signupData, setSignupData] = useState<RegisterPayload | null>(null);
+    const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
+    const [isSignupModalOpen, setIsSignupModalOpen] = useState(false); 
+    const [isSelectTagsModalOpen, setisSelectTagsModalOpen] = useState(false);
 
-    const open = () => { setOpen(true); setStep('signup'); setSignupData(null); };
-    const close = () => { setOpen(false); setStep('signup'); setSignupData(null); };
+    // 2. 함수 이름을 컨텍스트와 맞추면 더 좋습니다 (옵션)
+    const openLoginModal = () => setIsLoginModalOpen(true);
+    const openSignupModal = () => setIsSignupModalOpen(true);
+    const openSelectTagsModal = () => setisSelectTagsModalOpen(true);
 
-    const goTags = (data: RegisterPayload) => { setSignupData(data); setStep('tags'); };
-    const backToSignup = () => setStep('signup');
+    const closeAllModals = () => {
+        setIsLoginModalOpen(false);
+        setIsSignupModalOpen(false);
+        setisSelectTagsModalOpen(false);
+    };
+    
+    const loginToSignUp = () => {
+        setIsLoginModalOpen(false);
+        openSignupModal();
+    };
+    
+    const signUpToLogin = () => {
+        setIsSignupModalOpen(false);
+        openLoginModal();
+    };
 
-    return { isOpen, open, close, step, signupData, goTags, backToSignup };
+    const signUpToTags = () => {
+        setIsSignupModalOpen(false);
+        openSelectTagsModal();
+    }
+
+    return { 
+        isLoginModalOpen,
+        isSignupModalOpen,
+        isSelectTagsModalOpen,
+        openLoginModal,
+        openSignupModal,
+        openSelectTagsModal,
+        closeAllModals, 
+        loginToSignUp, 
+        signUpToLogin, 
+        signUpToTags,  };
 }

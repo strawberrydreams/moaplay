@@ -3,7 +3,7 @@ import styled from 'styled-components';
 
 // '좋아요' 버튼 props 타입
 export interface ILikeButtonProps {
-  isLiked: boolean;
+  $isLiked: boolean;
 }
 
 export const Card = styled.div`
@@ -44,7 +44,7 @@ export const LikeButton = styled.button<ILikeButtonProps>`
   border: none;
   font-size: 1.2rem;
   padding: 0;
-  color: ${props => props.isLiked ? '#FF4136' : 'white'};
+  color: ${props => props.$isLiked ? '#FF4136' : 'white'};
   cursor: pointer;
   
   &:focus { outline: none; }

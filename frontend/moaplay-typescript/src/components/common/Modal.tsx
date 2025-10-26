@@ -17,7 +17,6 @@ const Modal: React.FC<ModalProps> = ({ isOpen, onClose, title, children }) => {
 
     return (
         <ModalOverlay onClick={onClose}>
-            {/* ModalContent 클릭 시 버블링을 막아 오버레이 클릭 방지 */}
             <ModalContent onClick={(e) => e.stopPropagation()}>
                 <CloseButton onClick={onClose} aria-label="Close modal">
                     &times;

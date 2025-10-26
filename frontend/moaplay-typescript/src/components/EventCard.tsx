@@ -26,7 +26,7 @@ const EventCard: React.FC<IEventCardProps> = ({ event }) => {
         ) : (
           <FaImage className="placeholder-icon" />
         )}
-        <S.LikeButton isLiked={isLiked} onClick={toggleLike}>
+        <S.LikeButton $isLiked={isLiked} onClick={toggleLike}>
           {isLiked ? <FaHeart /> : <FaRegHeart />}
         </S.LikeButton>
       </S.CardImage>
