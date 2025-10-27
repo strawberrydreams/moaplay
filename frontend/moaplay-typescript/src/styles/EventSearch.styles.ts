@@ -1,4 +1,4 @@
-// src/pages/EventSearchPage.styles.ts
+// src/pages/EventSearch.styles.ts
 import styled from 'styled-components';
 
 // --- 타입 정의 ---
@@ -14,7 +14,7 @@ export const Container = styled.div`
   color: #131313;
 `;
 
-export const SearchContainer = styled.section`
+export const SearchContainer = styled.form`
   background-color: #F9F9F9;
   border-radius: 8px;
   padding: 1.5rem;
@@ -63,18 +63,62 @@ export const InputGroup = styled.div`
     flex-grow: 1;
     input { width: 100%; padding-right: 2rem; }
   }
+
+  input[type="text"] {
+    border: 1px solid #E0E0E0;
+    border-radius: 6px;
+    padding: 0.5rem 65px 0.5rem 0.75rem; /* 👈 오른쪽 패딩 증가 */
+    font-size: 0.9rem;
+    background-color: #fff;
+    font-family: inherit;
+    flex-grow: 1; /* input이 남은 공간 채우도록 */
+    width: 100%;
+  }
 `;
 
-export const ClearButton = styled.button`
+
+export const SearchButton = styled.button`
   position: absolute;
-  right: 0.5rem;
   top: 50%;
   transform: translateY(-50%);
   background: none;
   border: none;
-  font-size: 1.2rem;
-  color: #777;
+  padding: 0 10px; /* 좌우 여백 */
+  margin: 0;
   cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 80%; /* input보다 약간 작게 */
+  color: #777;
+  right: 5px; /* X 버튼 왼쪽에 위치 */
+
+  &:hover {
+    color: #333;
+  }
+`;
+
+
+export const ClearButton = styled.button`
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  padding: 0 10px; /* 좌우 여백 */
+  margin: 0;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 80%; /* input보다 약간 작게 */
+  color: #aaa; /* 약간 흐리게 */
+  right: 35px; /* 가장 오른쪽에 위치 */
+  font-size: 1.2rem;
+
+  &:hover {
+    color: #555;
+  }
 `;
 
 export const DateRangeGroup = styled(InputGroup)`
@@ -194,4 +238,17 @@ export const EventGrid = styled.section`
   @media (max-width: 768px) {
     grid-template-columns: 1fr;
   }
+`;
+
+export const NoResultsMessage = styled.p`
+  grid-column: 1 / -1; /* 그리드의 첫 열부터 마지막 열까지 차지 */
+  width: 100%;
+  
+  /* 텍스트 가운데 정렬 */
+  text-align: center;
+  
+  /* 추가 스타일 (선택 사항) */
+  color: #777;
+  padding: 3rem 0; /* 위아래 여백 */
+  font-size: 1rem;
 `;

@@ -27,6 +27,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       try { // JSON.parse 오류 방지
         const userData = JSON.parse(storedUserData);
         setCurrentUser(userData);
+        console.log('AuthProvider: 초기화 시 setCurrentUser 호출됨, user:', userData);
       } catch (error) {
         console.error("localStorage 사용자 데이터 파싱 오류:", error);
         localStorage.removeItem('user'); // 잘못된 데이터 제거

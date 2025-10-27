@@ -188,8 +188,15 @@ export const DetailTagList = styled.div`
 `;
 
 export const DetailTag = styled.span`
+
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 10px;
   background-color: #f1f1f1ff;
-  padding: 4px 8px;
+  padding: 4px 5px;
+  width: auto;
+  height: 15px;
   font-size: 0.75rem;
   color: #8d8d8dff;
   font-weight: 500;
@@ -294,4 +301,13 @@ export const LoginButton = styled.button`
   &:hover {
     background-color: #f5f5f5; /* 호버 시 약간 어둡게 */
   }
+`;
+
+export const NoEventsMessage = styled.p`
+  padding: 2rem;
+  text-align: center;
+  color: #888;
+  font-style: italic;
+  font-size: 0.95rem;
+  margin: 0;
 `;

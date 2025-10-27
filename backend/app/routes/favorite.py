@@ -140,14 +140,47 @@ def get_favorites():
         }, 500
 
 
-# ==================== 3. DELETE /<id> - 찜 삭제 ====================
+# ==================== GET /event/<event_id> - 특정 이벤트 찜 여부 확인 ====================
+@favorite_bp.route('/event/<int:event_id>', methods=['GET']) 
+@login_required
+def check_favorite_status(event_id):
+    """특정 이벤트가 현재 사용자의 찜 목록에 있는지 확인"""
+    user_id = session['id']
+
+    try:
+        favorite = db.session.query(Favorite).filter_by(
+            user_id=user_id, 
+            event_id=event_id 
+        ).first()
+
+        if favorite:
+            # 찜 목록에 있음 -> is_favorite: True와 찜 ID 반환
+            return {
+                "is_favorite": True, 
+                "favorite_id": favorite.id # 삭제 시 사용할 찜 ID
+            }, 200 # 👈 성공 (200 OK)
+        else:
+            # 찜 목록에 없음 -> is_favorite: False 반환
+            return {
+                "is_favorite": False,
+                "favorite_id": None # 찜 ID 없음
+            }, 200 # 👈 성공 (200 OK)
+
+    except Exception as e:
+        print(f"찜 확인 중 오류 발생: {e}") 
+        return {
+            "error_code": "INTERNAL_SERVER_ERROR",
+            "message": "찜 상태 확인 중 오류가 발생했습니다."
+        }, 500
+
+# ==================== 4. DELETE /<id> - 찜 삭제 ====================
 
 @favorite_bp.route('/<int:favorite_id>', methods=['DELETE'])
 @login_required
 def delete_favorite(favorite_id):
     """찜 삭제 (본인만 가능)"""
     favorite = db.session.get(Favorite, favorite_id)
-    
+
     if not favorite:
         return {
             "error_code": "FAVORITE_NOT_FOUND",

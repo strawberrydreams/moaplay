@@ -35,13 +35,33 @@ export function useForm<T>({
 
   // 입력 변경 핸들러
   const handleChange = useCallback((e: ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
-    const { name, value } = e.target as unknown as { name: keyof T; value: any };
-    setValues(prev => ({ ...prev, [name]: value }));
-    // 입력 시작 시 해당 필드 에러 제거
-    if (errors[name]) {
-      setErrors(prev => ({ ...prev, [name]: undefined }));
-    }
-  }, [errors]);
+      const { name, value } = e.target as unknown as { name: keyof T; value: string }; // value는 항상 string
+
+      // 1. 해당 필드의 초기값 타입을 확인합니다.
+      const initialValueType = typeof initialValues[name];
+
+      // 2. 초기값이 숫자였고, 현재 입력값도 숫자 형태인지 확인합니다.
+      let processedValue: any = value; // 기본값은 문자열
+      if (initialValueType === 'number') {
+          // 빈 문자열이거나 숫자 형태일 때만 숫자로 변환 시도
+          if (value === '' || /^\d*\.?\d*$/.test(value)) { 
+              const num = parseFloat(value);
+              // NaN이 아니면 숫자로, 빈 문자열이면 null이나 0 (선택), 그 외엔 문자열 그대로
+              processedValue = isNaN(num) ? (value === '' ? null : value) : num; 
+              // 또는 빈 문자열일 때 0으로 처리:
+              // processedValue = isNaN(num) ? 0 : num; 
+          }
+          // (숫자 형태가 아닌 입력은 무시하거나, 그대로 둘 수 있음 - 현재는 문자열로 둠)
+      }
+
+      // 3. 변환된 값으로 상태 업데이트
+      setValues(prev => ({ ...prev, [name]: processedValue })); 
+
+      // 4. 에러 처리 (동일)
+      if (errors[name]) {
+        setErrors(prev => ({ ...prev, [name]: undefined }));
+      }
+    }, [errors, initialValues]); // initialValues를 의존성 배열에 추가
 
   // 폼 제출 핸들러
   const handleSubmit = useCallback(async (e: FormEvent) => {
@@ -76,6 +96,7 @@ export function useForm<T>({
   // 훅 반환 값
   return {
     values,       // 현재 폼 값들 (input value에 연결)
+    setValues,    // 폼 값 직접 설정 함수 (필요 시 사용)
     errors,       // 현재 에러 상태 (ErrorMessage에 연결)
     isSubmitting, // 로딩 상태
     handleChange, // input onChange에 연결

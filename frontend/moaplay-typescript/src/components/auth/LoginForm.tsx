@@ -1,7 +1,7 @@
 import React from 'react';
 import { useForm } from '../../hooks/useForm'; // 👈 제네릭 훅 임포트
 import type { LoginPayload } from '../../service/authApi';
-import { useAuth } from '../../Context/AuthContext';
+import { useAuth } from '../../context/AuthContext';
 import * as AuthApi from '../../service/authApi'; // 로그인 API
 import {
     FormContainer,

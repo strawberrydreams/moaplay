@@ -2,7 +2,7 @@ import React, {useMemo} from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import logoImage from '../assets/logo.png';
 import { FaSignInAlt } from 'react-icons/fa';
-import { useAuth } from '../Context/AuthContext';
+import { useAuth } from '../context/AuthContext';
 import { useSignupFlow } from '../hooks/useSignupFlow.ts';
 
 import { StyledHeader, LogoContainer, Nav, AuthSection, LoginButton } from '../styles/Header.styles';

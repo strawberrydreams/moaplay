@@ -1,56 +1,134 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import Calendar from '../components/Calendar';
-import EventSearchPage from './EventSearchPage';
+import EventSearchPage from '../components/EventSearch'; // 경로 확인 필요
 import CalendarEventDetail from '../components/CalendarEventDetail';
-import type { IEvent } from '../types';
+import * as SchedulesApi from '../service/schedulesApi'; // SchedulesApi 사용 확인
+import * as E from '../types/events'; // Event 타입
+import type * as S from '../types/schedules'; // Schedule 타입 임포트
 
 import { MainPageContainer, CalendarSection, CalendarWrapper, CalendarDetailWrapper } from '../styles/MainPage.styles';
 
+// --- localStorage 색상 관리 로직 ---
 const getRandomColor = () => {
   const colors = ['#4286f4', '#EA4335', '#FBBC05', '#34A853', '#A142F4', '#FF6D00'];
   return colors[Math.floor(Math.random() * colors.length)];
 };
 
-// 원본 샘플 데이터 (색상 없음)
-const rawSampleEvents: Omit<IEvent, 'color'>[] = [
-  { id: 1, title: '오케스트라 특별 공연', start_date: '2025-10-07', end_date: '2025-10-07', location: '대전 예술의전당', tag: ['음악', '콘서트'], description: '...', host: '대전예술의전당', contact: '042-2222-3333' , isLiked: false },
-  { id: 2, title: '현대 미술 전시회', start_date: '2025-10-09', end_date: '2025-10-09', location: '서울 시립 미술관', tag: ['미술', '전시'], description: '...', host: '시립미술관', contact: '02-1111-2222', isLiked: false },
-  { id: 3, title: '지역 축제', start_date: '2025-10-11', end_date: '2025-10-11', location: '부산 해운대', tag: ['축제', '야외'], description: '...', host: '부산시청', contact: '051-3333-4444', isLiked: false },
-  { id: 4, title: '축구 경기', start_date: '2025-10-16', end_date: '2025-10-18', location: '상암 월드컵 경기장', tag: ['스포츠', '축구'], description: '...', host: 'K리그', contact: '02-0000-0000', isLiked: false },
-  { id: 5, title: '북 콘서트', start_date: '2025-10-31', end_date: '2025-10-31', location: '강남 교보문고', tag: ['도서', '강연'], description: '...', host: '교보문고', contact: '02-5555-6666', isLiked: false },
-];
+const EVENT_COLORS_KEY = 'moaplay_event_colors_main';
 
-// 원본 데이터에 랜덤 색상을 추가하여 처리
-const processedSampleEvents: IEvent[] = rawSampleEvents.map(event => ({
-  ...event,
-  color: getRandomColor(), // 👈 각 이벤트에 랜덤 색상 1회 할당
-}));
+// getPersistentEventColors 함수는 E.Event[]를 받음 (수정 없음)
+const getPersistentEventColors = (events: E.Event[]): Map<string | number, string> => {
+    const savedColors = localStorage.getItem(EVENT_COLORS_KEY);
+    let colorMap: Map<string | number, string>;
+
+    if (savedColors) {
+      try {
+        colorMap = new Map(JSON.parse(savedColors));
+      } catch (e) {
+        console.error("저장된 색상 파싱 오류:", e);
+        colorMap = new Map();
+        localStorage.removeItem(EVENT_COLORS_KEY);
+      }
+    } else {
+      colorMap = new Map();
+    }
+
+    let updated = false;
+    events.forEach(event => {
+      if (!colorMap.has(event.id)) { 
+        colorMap.set(event.id, getRandomColor());
+        updated = true;
+      }
+    });
+
+    if (updated) {
+      try {
+        localStorage.setItem(EVENT_COLORS_KEY, JSON.stringify(Array.from(colorMap.entries())));
+      } catch (e) { console.error("localStorage 색상 저장 오류:", e); }
+    }
+    
+    return colorMap;
+};
+// --- 색상 관리 로직 끝 ---
+
+
+// --- MainPage 컴포넌트 ---
 function MainPage() {
-  const [calendarEvents, setCalendarEvents] = useState(processedSampleEvents);
-  const [selectedCalendarEvent, setSelectedCalendarEvent] = useState<IEvent | null>(null);
+  // Calendar 컴포넌트에 전달할 이벤트 목록 (색상 포함)
+  const [calendarEvents, setCalendarEvents] = useState<E.Event[]>([]); 
+  // CalendarEventDetail에 전달할 찜 목록 (원본 스케줄 데이터)
+  const [schedules, setSchedules] = useState<S.Schedule[]>([]); 
+  // Calendar에서 클릭된 *이벤트* 정보 (CalendarEventDetail 상세 보기용)
+  const [selectedCalendarEvent, setSelectedCalendarEvent] = useState<E.Event | null>(null); // 👈 타입 S.Schedule -> E.Event 로 수정
+  // 로딩 상태
+  const [isLoading, setIsLoading] = useState(true);
 
-  const handleCalendarEventSelect = (event: IEvent) => {
+  // Calendar 컴포넌트에서 이벤트 클릭 시 호출될 핸들러 (파라미터 타입 E.Event)
+  const handleCalendarEventSelect = useCallback((event: E.Event) => { // 👈 파라미터 타입 S.Schedule -> E.Event 로 수정
     setSelectedCalendarEvent(event);
-  };
+  }, []);
+
+  // API 호출 및 상태 업데이트 함수
+  const fetchAndSetSchedules = useCallback(async () => {
+    setIsLoading(true);
+    try {
+      const response = await SchedulesApi.getSchedules(); 
+      const fetchedSchedules: S.Schedule[] = response.schedules || [];
+      setSchedules(fetchedSchedules);
+      console.log('실제 API 응답:', fetchedSchedules.map((e) => e.event?.host.nickname).filter(Boolean));
+
+      // 3. 찜 목록에서 이벤트 정보만 추출 (schedule.event가 있는지 확인!)
+      const eventsFromSchedules: E.Event[] = fetchedSchedules
+        .map((schedule) => schedule.event) // schedule.event 추출
+        .filter((event): event is E.Event => event !== null && event !== undefined); // null/undefined 제거 및 타입 가드
+
+
+      // 4. 이벤트 목록 기준으로 색상 맵 가져오기/생성
+      const colorMap = getPersistentEventColors(eventsFromSchedules);
+
+      // 5. 이벤트 목록에 색상 정보 추가
+      const eventsWithColors = eventsFromSchedules.map(event => ({
+        ...event,
+        color: colorMap.get(event.id) || getRandomColor(), // fallback
+      }));
+
+      setCalendarEvents(eventsWithColors); // 캘린더용 이벤트 상태 업데이트
+
+    } catch (error) {
+      console.error("일정 목록 로딩 실패:", error); 
+      setCalendarEvents([]); 
+      setSchedules([]); 
+    } finally {
+      setIsLoading(false);
+    }
+  }, []);
+
+  // 컴포넌트 마운트 시 데이터 조회
+  useEffect(() => {
+    fetchAndSetSchedules(); 
+  }, [fetchAndSetSchedules]);
+
+  if (isLoading) {
+    return <div>찜한 일정 목록을 불러오는 중...</div>; // 로딩 메시지 수정
+  }
 
   return (
     <MainPageContainer>
       <CalendarSection>
-        
         <CalendarWrapper>
           <Calendar 
-            events={calendarEvents} 
+            events={calendarEvents} // 👈 Calendar에는 색상이 포함된 이벤트 목록 전달
             onEventClick={handleCalendarEventSelect}
           />
         </CalendarWrapper>
-
         <CalendarDetailWrapper>
           <CalendarEventDetail 
-            events={calendarEvents}
-            event={selectedCalendarEvent} 
+            events={calendarEvents} // 👈 찜한 전체 이벤트 목록 전달
+            event={selectedCalendarEvent} // 👈 Calendar에서 클릭된 *이벤트* 정보 전달
+            schedules={schedules} // 👈 원본 스케줄 데이터 전달
+            onScheduleDeleted={fetchAndSetSchedules}
           />
         </CalendarDetailWrapper>
-
       </CalendarSection>
       <EventSearchPage />
     </MainPageContainer>

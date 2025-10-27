@@ -15,7 +15,7 @@ import Footer from './components/Footer';
 
 // Modal 제어 커스텀 Hook
 import { useSignupFlow } from './hooks/useSignupFlow';
-import { AuthProvider } from './Context/AuthContext';
+import { AuthProvider } from './context/AuthContext';
 
 
 const App: React.FC = () => {
