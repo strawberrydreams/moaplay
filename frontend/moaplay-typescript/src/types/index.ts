@@ -22,7 +22,7 @@ export type PaginatedResponse<T, K extends string> = {
 // 사용자 요약 정보 (리뷰, 목록 등)
 export interface UserSummary {
     id: number;
-    name: string;
+    nickname: string;
     profile_image: string;
 }
 

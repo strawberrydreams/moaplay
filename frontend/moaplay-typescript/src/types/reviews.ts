@@ -31,6 +31,12 @@ export interface ReviewSummary {
     created_at: string;
 }
 
+export interface GetReviewApiResponse {
+    data : {
+        reviews: Review[];
+    }
+}
+
 // ===============================================================
 // == Request (요청) 타입들
 // ===============================================================
@@ -42,7 +48,7 @@ export interface CreateReviewPayload {
     content: string;
     rating: number;
     event_id: number;
-    image_urls: string[];
+    image_urls?: string[];
 }
 
 // 리뷰 수정을 위한 데이터 타입

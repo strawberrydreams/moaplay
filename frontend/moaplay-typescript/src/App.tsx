@@ -14,8 +14,11 @@ import { GlobalStyle } from './styles/Header.styles';
 import Footer from './components/Footer';
 
 // Modal 제어 커스텀 Hook
-import { useSignupFlow } from './hooks/useSignupFlow';
+import { useModal } from './hooks/useModal';
 import { AuthProvider } from './context/AuthContext';
+import PopularEventsPage from './pages/PopularEventsPage';
+import RegionalEventsPage from './pages/RegionPage';
+import RecommendedEventsPage from './pages/RecommendPage';
 
 
 const App: React.FC = () => {
@@ -28,7 +31,7 @@ const App: React.FC = () => {
         loginToSignUp, 
         signUpToLogin, 
         signUpToTags,
-    } = useSignupFlow();
+    } = useModal();
 
     return (
         <AuthProvider>
@@ -38,7 +41,10 @@ const App: React.FC = () => {
             <main style={{ padding: '20px 40px', backgroundColor: '#f8f8f8' }}>
                 <Routes>
                     <Route path="/" element={<MainPage />} /> 
-                    <Route path="/events/:eventId" element={<EventDetail />} />
+                    <Route path="/events/:eventId" element={<EventDetail/>} />
+                    <Route path='/popular' element={<PopularEventsPage/>}/>
+                    <Route path='/region' element={<RegionalEventsPage/>}/>
+                    <Route path='/recommend' element={<RecommendedEventsPage/>}/>
                 </Routes>
             </main>
             

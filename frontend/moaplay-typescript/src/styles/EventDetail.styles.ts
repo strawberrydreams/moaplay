@@ -221,37 +221,158 @@ export const ReviewWriteButton = styled.button`
 
 export const ReviewGrid = styled.div`
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
     gap: 20px;
 `;
 
 export const ReviewCard = styled.div`
-    border: 1px solid #eee;
-    padding: 15px;
-    border-radius: 8px;
-    background-color: #fff;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  padding: 23.1837px; // 제공된 padding
+  gap: 10px; // 제공된 gap
+
+  width: 320px; // 제공된 width
+  min-width: 231.84px; // 제공된 min-width
+  height: 200px; // 제공된 height
+  
+  background: #FFFFFF;
+  border: 0.965986px solid #D9D9D9; // 제공된 border
+  border-radius: 7.79734px; // 제공된 border-radius
+
+  cursor: pointer; // 클릭 가능함을 표시
+  transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out; // 호버 효과
+  
+  &:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  }
+
+  position: relative; // 버튼 절대 위치 기준
+  padding-bottom: 40px; 
 `;
 
-export const ReviewUser = styled.div`
-    font-weight: 600;
-    color: #333;
-    margin-bottom: 5px;
-`;
+// --- ReviewCard 내부 요소 스타일 (필요하다면 추가/수정) ---
 
-export const ReviewDate = styled.p`
-    font-size: 0.75rem;
-    color: #999;
-    margin: 0 0 10px;
+export const ReviewTitle = styled.h4` // 제목 스타일 추가 (이미지 참고)
+  font-size: 1.1rem;
+  font-weight: bold;
+  color: #333;
+  margin: 0;
+  white-space: nowrap; // 한 줄로 표시
+  overflow: hidden; // 넘치면 숨김
+  text-overflow: ellipsis; // 넘치면 ...으로 표시
+  width: 100%; // 부모 너비에 맞춤
 `;
 
 export const ReviewText = styled.p`
-    font-size: 0.9rem;
-    color: #444;
-    line-height: 1.4;
+  font-size: 0.9rem;
+  color: #555;
+  margin: 0;
+  line-height: 1.4;
+  flex-grow: 1; // 남은 공간 차지 (내용이 길 때)
+  overflow: hidden; // 넘치는 텍스트 숨김
+  text-overflow: ellipsis; // ... 처리
+  display: -webkit-box; // 여러 줄 말줄임
+  -webkit-line-clamp: 2; // 표시할 줄 수 (이미지상 2줄 정도)
+  -webkit-box-orient: vertical;
+  width: 100%;
 `;
 
-export const ReviewRating = styled.div`
-    color: gold;
-    font-size: 1.2rem;
+export const ReviewImageGrid = styled.div` // 이미지들을 담을 컨테이너 추가
+  display: flex;
+  gap: 8px;
+  margin-top: auto; // 하단으로 밀어냄 (ReviewCard의 flex-direction: column)
+`;
+
+export const ReviewThumbnail = styled.img` // ReviewCard 내 썸네일 이미지 스타일
+  width: 60px; // 이미지 크기
+  height: 60px;
+  object-fit: cover;
+  border-radius: 4px;
+  background-color: #f0f0f0; // 이미지 없을 때 배경
+`;
+
+export const ReviewImagePlaceholder = styled.div` // 썸네일 플레이스홀더
+  width: 60px;
+  height: 60px;
+  background-color: #f0f0f0;
+  border-radius: 4px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  color: #ccc;
+  font-size: 1.5rem;
+`;
+
+export const ReviewFooter = styled.div` // 하단 사용자 정보와 별점 컨테이너
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  margin-top: 10px; // 상단 요소와의 간격
+`;
+
+export const UserInfoWrapper = styled.div` // 사용자 이미지, 이름, 날짜
+  display: flex;
+  align-items: center;
+  gap: 8px;
+`;
+
+export const UserProfileImage = styled.img`
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  object-fit: cover;
+  background-color: #eee;
+`;
+
+export const UserDetails = styled.div`
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+`;
+
+export const ReviewUser = styled.span`
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #333;
+`;
+
+export const ReviewDate = styled.span`
+  font-size: 0.75rem;
+  color: #888;
+`;
+
+export const ReviewRating = styled.div` // 별점 스타일
+  font-size: 1rem; // 별 크기
+  color: #FFC107; // 별 색상
+  white-space: nowrap;
+`;
+
+
+export const ReviewActions = styled.div`
+  position: absolute;
+  bottom: 15px; // 카드 하단에서의 위치
+  right: 20px; // 카드 오른쪽에서의 위치
+  display: flex;
+  gap: 8px;
+`;
+
+export const ActionButton = styled.button<{ danger?: boolean }>` // 👈 danger prop 추가
+  background: none;
+  border: none;
+  padding: 0;
+  margin: 0;
+  font-size: 0.8rem;
+  /* 👈 danger prop에 따라 색상 변경 */
+  color: ${props => props.danger ? '#ff4d4f' : '#888'}; 
+  cursor: pointer;
+
+  &:hover {
+    /* 👈 danger prop에 따라 호버 색상 변경 */
+    color: ${props => props.danger ? '#d9363e' : '#333'};
+    text-decoration: underline;
+  }
 `;

@@ -1,7 +1,5 @@
 import styled from 'styled-components';
 
-// FullCalendar 컴포넌트를 감싸는 Wrapper입니다.
-// 이 Wrapper 안에서 FullCalendar의 클래스들을 모두 선택합니다.
 export const StyledCalendarWrapper = styled.div`
   
   /* --- 1. CalendarContainer 스타일 (전체 래퍼) --- */
@@ -25,6 +23,7 @@ export const StyledCalendarWrapper = styled.div`
     border-bottom: 1px solid #ddd;
     background-color: #fff;
     margin-bottom: 0 !important;
+    
   }
 
   .fc-toolbar-title {
@@ -58,12 +57,13 @@ export const StyledCalendarWrapper = styled.div`
     }
   }
 
-/* --- 👇 3. 요일 헤더 스타일 (월화수목금토일) --- */
+/* --- 3. 요일 헤더 스타일 (월화수목금토일) --- */
   .fc-col-header-cell {
     background-color: #f8f9fa; /* 헤더 배경색 변경 */
     border-bottom: 1px solid #ddd; /* 헤더 하단 테두리 */
     font-size: 0.9rem;
     font-weight: 600;
+  
   }
 
   /* 요일 헤더 글자 (예: "월") */
@@ -72,7 +72,7 @@ export const StyledCalendarWrapper = styled.div`
     padding: 12px 4px; /* 내부 여백 */
   }
 
-  /* --- 👇 4. (참고) 주말 요일 헤더 색상 변경 --- */
+  /* --- 4. (참고) 주말 요일 헤더 색상 변경 --- */
   .fc-col-header-cell.fc-day-sun .fc-col-header-cell-cushion {
     color: #d9534f; /* 일요일 헤더 글자색 */
   }
@@ -84,6 +84,7 @@ export const StyledCalendarWrapper = styled.div`
   .fc-daygrid-day-frame {
     height: 100px; 
     /* overflow-y: auto; 내용 많으면 스크롤 */
+    
   }
 
   /* 날짜 숫자 스타일 (DayNumber) */
@@ -139,4 +140,5 @@ export const StyledCalendarWrapper = styled.div`
   .fc-scrollgrid, .fc-view {
     border: none;
   }
+
 `;

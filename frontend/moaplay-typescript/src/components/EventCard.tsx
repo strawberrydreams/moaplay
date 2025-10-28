@@ -1,5 +1,6 @@
 // src/components/EventCard.tsx
 import React, { useState } from 'react';
+import { replace, useNavigate } from 'react-router-dom';
 import * as E from '../types/events'; // 행사 타입
 import { FaImage, FaHeart, FaRegHeart } from 'react-icons/fa';
 import * as S from '../styles/EventCard.styles';
@@ -15,6 +16,7 @@ const favorite: FavoriteStatus = {
 
 const EventCard: React.FC<{ event: E.Event }> = ({ event }) => {
   const [isLiked, setIsLiked] = useState(false);
+  let navigate = useNavigate();
   
   const { currentUser } = useAuth();
   const checkFavorite = async () => {
@@ -50,14 +52,16 @@ const EventCard: React.FC<{ event: E.Event }> = ({ event }) => {
   };
 
   const handleAddToSchedule = async () => {
-    // 일정 추가 기능 구현 예정
-    const response = await CalendarApi.addSchedule(event.id);
+    // 일정 추가 기능
+    await CalendarApi.addSchedule(event.id);
     alert(`${event.title} 일정이 추가되었습니다.`);
+    window.location.reload();
   }
+
 
   // 2. 모든 컴포넌트를 S.xxx로 변경
   return (
-    <S.Card>
+    <S.Card onClick={() =>{navigate(`/events/${event.id}`)}}>
       <S.CardImage>
         {event.image_urls ? (
           <img src={event.image_urls[0]} alt={event.title} />

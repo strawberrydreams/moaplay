@@ -3,7 +3,7 @@ import type * as E from '../types/events'; // Event 타입 임포트
 // import type { Schedule } from '../types/schedules'; // Schedule 타입 불필요
 import * as S from '../styles/CalendarEventDetail.styles'; // 스타일 경로 확인!
 import { FaImage, FaSignInAlt, FaArrowLeft } from 'react-icons/fa';
-import { useSignupFlow } from '../hooks/useSignupFlow'; // 1. AuthModalContext 훅 임포트
+import { useModal } from '../hooks/useModal'; // 1. AuthModalContext 훅 임포트
 import * as SchedulesApi from '../service/schedulesApi'; // 일정 삭제 API
 import type { Schedule } from '../types/schedules'; // Schedule 타입 임포트
 
@@ -18,7 +18,7 @@ interface IDetailProps {
 
 const CalendarEventDetail: React.FC<IDetailProps> = ({ events = [], event, schedules, onScheduleDeleted}) => {
   // --- 👇 로그인 관련 로직 유지 ---
-  const { openLoginModal } = useSignupFlow();  // 로그인 모달 열기 함수 가져오기
+  const { openLoginModal } = useModal();  // 로그인 모달 열기 함수 가져오기
   const [isLoggedIn, setIsLoggedIn] = useState(false); // 로그인 상태
   useEffect(() => {
     checkLoginStatus(); // 마운트 시 로그인 상태 확인

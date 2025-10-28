@@ -1,5 +1,5 @@
 // src/pages/EventSearchPage.tsx
-import React, { useState, type KeyboardEvent, type MouseEvent } from 'react';
+import React, { useEffect, useState, type KeyboardEvent, type MouseEvent } from 'react';
 import {useForm} from '../hooks/useForm';
 import * as E from '../types/events'; // 행사 타입
 import EventCard from './EventCard';
@@ -71,7 +71,7 @@ const EventSearchPage: React.FC = () => {
     }
   };
 
-  // 6. Enter 키로 태그를 추가하는 핸들러
+  // Enter 키로 태그를 추가하는 핸들러
   const handleInputKeyDown = (e: KeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'Enter') {
       e.preventDefault(); // 폼 제출 방지
@@ -88,7 +88,7 @@ const EventSearchPage: React.FC = () => {
     e.stopPropagation(); // 👈 중요: 부모(TagButton)의 onClick이 실행되지 않도록 막기
     setTags(prevTags => prevTags.filter(tag => tag !== tagToDelete));
 
-    // 6. 만약 활성화된 태그를 삭제하면 activeTag를 null로 초기화
+    // 만약 활성화된 태그를 삭제하면 activeTag를 null로 초기화
     if (activeTag === tagToDelete) {
       setActiveTag(null);
     }
@@ -116,6 +116,20 @@ const EventSearchPage: React.FC = () => {
           alert(error.response?.data?.error || "검색 중 오류가 발생했습니다.");
       }
   });
+
+  // --- 컴포넌트 마운트 시 초기 데이터 로드 ---
+  useEffect(() => {
+    const fetchInitialEvents = async () => {
+      try {
+        const response = await EventApi.getEvents(initialSearchValues);
+        setEvents(response.events || []);
+      } catch (error) {
+        console.error("초기 행사 목록 로딩 실패:", error);
+        setEvents([]);
+      }
+    };
+    fetchInitialEvents();
+  }, []);
 
   // 2. 모든 컴포넌트를 S.xxx로 변경
   return (

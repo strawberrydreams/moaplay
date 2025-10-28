@@ -37,27 +37,34 @@ export type ExpandableTextProps = {
  * "더보기" 기능을 제공하는 컴포넌트 (TypeScript)
  */
 const ExpandableText: React.FC<ExpandableTextProps> = ({ content }) => {
-  const [isExpanded, setIsExpanded] = useState<boolean>(false);
+  const [isExpanded, setIsExpanded] = useState<boolean>(false); // 훅 1번
 
-  // 내용이 없으면 아무 것도 렌더링하지 않음
-  if (!content) return null;
+  // --- 👇 1. 모든 훅 호출을 위로 옮깁니다 ---
+  
+  // 텍스트 내용이 최대 길이를 초과하는지 확인 (content가 null/undefined일 수 있음)
+  const needsExpansion = content ? content.length > MAX_LENGTH : false;
 
-  // 텍스트 내용이 최대 길이를 초과하는지 확인
-  const needsExpansion = content.length > MAX_LENGTH;
-
-  // 표시할 텍스트: 전체 내용 또는 잘린 내용 (메모이제이션)
+  // 표시할 텍스트 계산 (useMemo)
   const displayedText = useMemo(() => {
+    // content가 없을 경우 빈 문자열 반환
+    if (!content) return ''; 
+    
+    // 이전 로직과 동일
     return needsExpansion && !isExpanded
       ? content.substring(0, MAX_LENGTH) + '...'
       : content;
-  }, [content, isExpanded, needsExpansion]);
+  }, [content, isExpanded, needsExpansion]); // 훅 2번
+  
+  // --- 👆 훅 호출 끝 ---
+
+  // --- 👇 2. 조건부 return은 모든 훅 호출 이후에 ---
+  // 내용이 없으면 아무 것도 렌더링하지 않음
+  if (!content) return null; 
+  // --- 👆 ---
 
   return (
     <ContentWrapper>
-      {/* 텍스트 내용 */}
       {displayedText}
-
-      {/* 더보기/접기 버튼 */}
       {needsExpansion && (
         <MoreButton
           type="button"
