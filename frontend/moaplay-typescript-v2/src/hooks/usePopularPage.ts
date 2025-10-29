@@ -39,21 +39,21 @@ export const usePopularPage = (): UsePopularPageReturn => {
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 20;
 
-  // 캐러셀 이미지 (하드코딩 또는 추후 API 연동)
+  // 캐러셀 이미지 (현재는 Placeholder 이미지 하드코딩, 추후 업로드 기능 만들고 API 연동)
   const featuredImages: CarouselImage[] = [
-    { url: 'https://via.placeholder.com/1200x400?text=Popular+Event+1', alt: '인기 행사 1' },
-    { url: 'https://via.placeholder.com/1200x400?text=Popular+Event+2', alt: '인기 행사 2' },
-    { url: 'https://via.placeholder.com/1200x400?text=Popular+Event+3', alt: '인기 행사 3' },
+    { id: 1, url: 'https://via.placeholder.com/1200x400?text=Popular+Event+1', title: '인기 행사 1' },
+    { id: 2, url: 'https://via.placeholder.com/1200x400?text=Popular+Event+2', title: '인기 행사 2' },
+    { id: 3, url: 'https://via.placeholder.com/1200x400?text=Popular+Event+3', title: '인기 행사 3' },
   ];
 
   /**
    * 기간별 필터링 (현재는 'all'만 지원, 추후 확장 가능)
    */
   const filteredByPeriod = useMemo(() => {
-    // TODO: 기간별 필터링 로직 추가 (created_at 기준)
+    // TODO: 기간별 필터링 로직 추가 (start_date 기준)
     // 현재는 전체 행사 반환
     return allEvents;
-  }, [allEvents, selectedPeriod]);
+  }, [allEvents]);
 
   /**
    * 조회수 기준 정렬된 인기 행사 목록

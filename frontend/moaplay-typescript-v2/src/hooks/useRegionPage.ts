@@ -59,11 +59,11 @@ export const useRegionPage = (): UseRegionPageReturn => {
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 20;
 
-  // 캐러셀 이미지 (하드코딩 또는 추후 API 연동)
+  // 캐러셀 이미지 (현재는 Placeholder 이미지 하드코딩, 추후 업로드 기능 만들고 API 연동)
   const featuredImages: CarouselImage[] = [
-    { url: 'https://via.placeholder.com/1200x400?text=Region+Event+1', alt: '지역 행사 1' },
-    { url: 'https://via.placeholder.com/1200x400?text=Region+Event+2', alt: '지역 행사 2' },
-    { url: 'https://via.placeholder.com/1200x400?text=Region+Event+3', alt: '지역 행사 3' },
+    { id: 1, url: 'https://via.placeholder.com/1200x400?text=Popular+Event+1', title: '인기 행사 1' },
+    { id: 2, url: 'https://via.placeholder.com/1200x400?text=Popular+Event+2', title: '인기 행사 2' },
+    { id: 3, url: 'https://via.placeholder.com/1200x400?text=Popular+Event+3', title: '인기 행사 3' },
   ];
 
   /**

@@ -5,7 +5,7 @@
 export { useAuth } from './useAuth';
 export { useEventDetail } from './useEventDetail';
 export { useEventList } from './useEventList';
-export { useEventCreate, useEventUpdate, EventFormValidators } from './useEventCreate';
+export { useEventCreate, useEventUpdate } from './useEventCreate';
 export { useRegionPage } from './useRegionPage';
 export { useRecommendPage } from './useRecommendPage';
 export { usePopularPage } from './usePopularPage';
