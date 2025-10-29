@@ -58,30 +58,32 @@ export class SearchNormalizer {
     searchResponse: SearchResponse,
     appliedFilters: string[] = []
   ): SearchResultViewModel {
-    const { items, pagination, search_info } = searchResponse;
+    const { events, pagination } = searchResponse;
 
     return {
-      items: items.map(event => EventNormalizer.toCardViewModel(event)),
+      items: events.map(event => EventNormalizer.toCardViewModel(event)),
       pagination: {
-        currentPage: pagination.current_page,
-        totalPages: pagination.total_pages,
-        totalItems: pagination.total_items,
-        limit: pagination.limit,
-        hasNext: pagination.current_page < pagination.total_pages,
-        hasPrev: pagination.current_page > 1,
+        currentPage: pagination.page,
+        totalPages: pagination.pages,
+        totalItems: pagination.total,
+        limit: pagination.per_page,
+        hasNext: pagination.page < pagination.pages,
+        hasPrev: pagination.page > 1,
       },
       searchInfo: {
-        query: search_info.query,
-        parsedQuery: search_info.parsed_query,
-        totalResults: search_info.total_results,
-        searchTime: search_info.search_time,
-        isEmpty: search_info.total_results === 0,
+        query: '',
+        parsedQuery: {
+          type: 'text',
+        },
+        totalResults: pagination.total,
+        searchTime: 0,
+        isEmpty: pagination.total === 0,
       },
       filters: {
         appliedFilters,
         availableFilters: {
-          regions: this.extractRegionsFromResults(items),
-          tags: this.extractTagsFromResults(items),
+          regions: this.extractRegionsFromResults(events),
+          tags: this.extractTagsFromResults(events),
           dateRanges: this.generateDateRangeOptions(),
         },
       },

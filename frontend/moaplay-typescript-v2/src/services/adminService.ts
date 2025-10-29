@@ -19,11 +19,19 @@ export class AdminService {
    * 대시보드 통계 조회
    */
   static async getDashboardStats(): Promise<DashboardStatsResponse> {
-    const response = await apiClient.get<{ data: DashboardStatsResponse }>(
-      '/api/admin/dashboard'
-    );
-    // 백엔드 응답 구조: { data: { approved_events, ... }, message, requestId }
-    return response.data.data;
+    const response = await apiClient.get<{
+      statistics: any;
+      popular_events: any[];
+      recent_pending: any[];
+    }>('/api/admin/dashboard');
+    // 백엔드 응답 구조: { statistics: { users, events, reviews, engagement }, popular_events, recent_pending }
+    return {
+      approved_events: response.data.statistics.events.approved,
+      pending_events: response.data.statistics.events.pending,
+      total_users: response.data.statistics.users.total,
+      pending_organizers: 0, // 백엔드에서 제공하지 않음
+      recent_activities: [],
+    };
   }
 
   /**
@@ -34,7 +42,7 @@ export class AdminService {
     limit: number = 20
   ): Promise<PendingListResponse> {
     const response = await apiClient.get<{ data: PendingListResponse }>(
-      '/api/admin/events/pending',
+      '/api/admin/pending-list',
       {
         params: { page, limit },
       }
@@ -51,7 +59,7 @@ export class AdminService {
     limit: number = 20
   ): Promise<ApprovedListResponse> {
     const response = await apiClient.get<{ data: ApprovedListResponse }>(
-      '/api/admin/events/approved',
+      '/api/admin/approved-list',
       {
         params: { page, limit },
       }
@@ -81,10 +89,10 @@ export class AdminService {
   }
 
   /**
-   * 행사 삭제
+   * 행사 삭제 (event.py의 DELETE /api/events/{id} 사용)
    */
   static async deleteEvent(eventId: number): Promise<void> {
-    await apiClient.delete(`/api/admin/events/${eventId}`);
+    await apiClient.delete(`/api/events/${eventId}`);
   }
 
   /**
@@ -95,9 +103,12 @@ export class AdminService {
     limit: number = 20,
     role?: string
   ): Promise<UserListResponse> {
-    const response = await apiClient.get<{ data: UserListResponse }>('/api/admin/users', {
-      params: { page, limit, role },
-    });
+    const response = await apiClient.get<{ data: UserListResponse }>(
+      '/api/admin/users',
+      {
+        params: { page, limit, role },
+      }
+    );
     // 백엔드 응답 구조: { data: { items, pagination }, message, requestId }
     return response.data.data;
   }
@@ -131,12 +142,11 @@ export class AdminService {
     page: number = 1,
     limit: number = 20
   ): Promise<OrganizerApplicationListResponse> {
-    const response = await apiClient.get<{ data: OrganizerApplicationListResponse }>(
-      '/api/admin/organizer-applications',
-      {
-        params: { page, limit },
-      }
-    );
+    const response = await apiClient.get<{
+      data: OrganizerApplicationListResponse;
+    }>('/api/admin/organizer-applications', {
+      params: { page, limit },
+    });
     // 백엔드 응답 구조: { data: { items, pagination }, message, requestId }
     return response.data.data;
   }
@@ -205,10 +215,17 @@ export class AdminService {
   }
 
   /**
-   * 사용자 삭제
+   * 사용자 삭제 (user.py의 DELETE /api/users/me 사용)
+   * 관리자가 사용자를 삭제하는 경우, 해당 사용자의 세션으로 요청해야 함
+   * 실제로는 관리자 권한으로 직접 삭제하는 API가 필요할 수 있음
    */
-  static async deleteUser(userId: number): Promise<void> {
-    await apiClient.delete(`/api/admin/users/${userId}`);
+  static async deleteUser(_userId: number, password: string): Promise<void> {
+    await apiClient.delete(`/api/users/me`, {
+      data: {
+        confirm: true,
+        password: password,
+      },
+    });
   }
 }
 

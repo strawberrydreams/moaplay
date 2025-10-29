@@ -11,25 +11,15 @@ import { EventListItem } from '../types/events';
 
 /**
  * 검색 결과 응답 타입
+ * 백엔드 API 명세에 맞춤: GET /api/events/search
  */
 export interface SearchResponse {
-  items: EventListItem[];
+  events: EventListItem[];
   pagination: {
-    current_page: number;
-    total_pages: number;
-    total_items: number;
-    limit: number;
-  };
-  search_info: {
-    query: string;
-    parsed_query: {
-      type: 'text' | 'hashtag' | 'location' | 'mixed';
-      text?: string[];
-      tags?: string[];
-      location?: string;
-    };
-    total_results: number;
-    search_time: number;
+    page: number;
+    per_page: number;
+    total: number;
+    pages: number;
   };
 }
 
@@ -70,9 +60,9 @@ export class SearchService {
     params: SearchParams = {}
   ): Promise<SearchResponse> {
     try {
-      const response = await apiClient.get('/api/search', {
+      const response = await apiClient.get('/api/events/search', {
         params: {
-          query: query.trim(),
+          q: query.trim(),
           ...params,
         },
       });
@@ -102,7 +92,7 @@ export class SearchService {
 
       const response = await apiClient.get('/api/search/suggestions', {
         params: {
-          query: query.trim(),
+          q: query.trim(),
           limit,
         },
       });
@@ -147,7 +137,7 @@ export class SearchService {
   ): Promise<void> {
     try {
       await apiClient.post('/api/search/history', {
-        query: query.trim(),
+        q: query.trim(),
         result_count: resultCount,
       });
     } catch (error) {

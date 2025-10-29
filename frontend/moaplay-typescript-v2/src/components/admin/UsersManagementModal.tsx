@@ -110,24 +110,9 @@ export const UsersManagementModal: React.FC<UsersManagementModalProps> = ({
   /**
    * 사용자 삭제
    */
-  const handleDeleteUser = async (userId: number, nickname: string) => {
-    if (!confirm(`${nickname}님을 삭제하시겠습니까? 이 작업은 되돌릴 수 없습니다.`)) {
-      return;
-    }
-
-    const confirmText = prompt('삭제하려면 "삭제"를 입력하세요:');
-    if (confirmText !== '삭제') {
-      return;
-    }
-
-    try {
-      await AdminService.deleteUser(userId);
-      alert('사용자가 삭제되었습니다.');
-      await loadUsers(currentPage, roleFilter);
-    } catch (err) {
-      console.error('사용자 삭제 실패:', err);
-      alert('사용자 삭제에 실패했습니다.');
-    }
+  const handleDeleteUser = async () => {
+    alert('사용자 삭제 기능은 현재 제한되어 있습니다.\n대신 "비활성화" 기능을 사용해주세요.');
+    return;
   };
 
   /**
@@ -232,7 +217,7 @@ export const UsersManagementModal: React.FC<UsersManagementModalProps> = ({
                         </ActionButton>
                         <ActionButton
                           variant="danger"
-                          onClick={() => handleDeleteUser(user.id, user.nickname || user.username || '사용자')}
+                          onClick={() => handleDeleteUser()}
                         >
                           삭제
                         </ActionButton>

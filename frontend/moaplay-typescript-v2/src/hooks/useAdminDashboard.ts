@@ -82,28 +82,15 @@ export const useAdminDashboard = (): UseAdminDashboardReturn => {
    * 백엔드 snake_case → 프론트엔드 camelCase 변환
    */
   const toAdminDashboardStats = (resp: unknown): AdminDashboardStats => {
-    // 응답 구조: { data: { approved_events, pending_events, ... } }
-    const data: Record<string, any> = (resp && typeof resp === 'object' && 'data' in resp) ? (resp as any).data : (resp as any);
+    // 응답 구조가 이미 정규화되어 있음 (adminService에서 처리)
+    const data = resp as any;
     
     return {
       approvedEvents: data?.approved_events ?? 0,
       pendingEvents: data?.pending_events ?? 0,
       totalUsers: data?.total_users ?? 0,
       pendingOrganizers: data?.pending_organizers ?? 0,
-      recentActivities: data?.recent_activities ? [
-        {
-          id: 1,
-          type: 'new_events',
-          description: `이번 주 신규 행사: ${data.recent_activities.new_events_this_week}개`,
-          created_at: new Date().toISOString()
-        },
-        {
-          id: 2,
-          type: 'new_users',
-          description: `이번 주 신규 회원: ${data.recent_activities.new_users_this_week}명`,
-          created_at: new Date().toISOString()
-        }
-      ] : []
+      recentActivities: data?.recent_activities ?? []
     };
   };
 

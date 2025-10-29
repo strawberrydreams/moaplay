@@ -146,6 +146,8 @@ const Input = styled.input<{ $hasError: boolean }>`
 
   &::placeholder {
     color: ${({ theme }) => theme.colors.textSecondary};
+    font-family: 'Malgun Gothic', '맑은 고딕', system-ui, sans-serif;
+    font-style: normal;
   }
 
   &:focus {

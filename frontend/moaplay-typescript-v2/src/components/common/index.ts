@@ -23,7 +23,6 @@ export { VerifiedBadge } from './VerifiedBadge';
 
 // 파일 업로드 컴포넌트들
 export { ImageUploader } from './ImageUploader';
-export { DocumentUploader } from './DocumentUploader';
 
 // 이미지 모달
 export { ImageModal } from './ImageModal';

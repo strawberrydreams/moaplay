@@ -136,7 +136,7 @@ export const useSearch = (
 
       // 검색 히스토리에 저장 (로그인한 사용자만)
       if (isAuthenticated) {
-        await SearchService.saveToHistory(trimmedQuery, response.search_info.total_results);
+        await SearchService.saveToHistory(trimmedQuery, response.pagination.total);
         // 히스토리 다시 로드
         await loadHistory();
       }
