@@ -50,7 +50,6 @@ export const StyledCalendarWrapper = styled.div`
     /* DayCell의 테두리 스타일 적용 */
     border-right: 1px solid #eee;
     border-bottom: 1px solid #eee;
-    
     /* 7번째 셀(토요일)마다 오른쪽 테두리 제거 */
     &:nth-child(7n) {
       border-right: none;
@@ -95,10 +94,6 @@ export const StyledCalendarWrapper = styled.div`
     color: #131313; /* DayCell의 color */
   }
 
-  .fc-daygrid-day {
-    color: #000;
-  }
-
   /* --- 4. 주말 색상 적용 --- */
   .fc-day-sun .fc-daygrid-day-number {
     color: #d9534f !important; /* FullCalendar 기본 스타일 덮어쓰기 */
@@ -109,11 +104,6 @@ export const StyledCalendarWrapper = styled.div`
 
   /* --- 5. EventTag 스타일 --- */
   .fc-event {
-    /* background-color: #e6f7ff !important;
-    border: 1px solid #b3e0ff !important; */
-    /* color: #0056b3 !important; */
-
-    /* 2. !important가 없는 기본 스타일만 남김 */
     background-color: #e6f7ff; /* (기본값) */
     border: 1px solid #b3e0ff; /* (기본값) */
     color: #0056b3; /* (기본값) */
@@ -123,6 +113,7 @@ export const StyledCalendarWrapper = styled.div`
     font-size: 0.75rem;
     font-weight: 500;
     cursor: pointer;
+    transition: transform 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease;
     
     /* EventTag의 텍스트 스타일 */
     .fc-event-title {

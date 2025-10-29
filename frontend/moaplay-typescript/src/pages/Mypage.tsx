@@ -1,0 +1,196 @@
+import React, { useEffect, useState, useRef, useCallback } from 'react'; // useRef 추가
+import * as UserApi from '../service/userApi';     // 사용자 정보 API
+import * as ReviewApi from '../service/reviewsApi';  // 리뷰 API
+import * as FavoriteApi from '../service/favoritesApi';// 찜 API
+import { useAuth } from '../context/AuthContext';
+import type * as U from '../types/user';        // User 타입
+import type * as R from '../types/reviews';       // Review 타입
+import type * as F from '../types/favorites';     // Favorite 타입 (찜 목록용)
+import type * as E from '../types/events';        // Event 타입 (찜 목록 내부용)
+import EventCard from '../components/EventCard';   // EventCard 재사용
+import ReviewCard from '../components/ReviewCard'
+import * as S from '../styles/Mypage.styles';    // 스타일 임포트
+import { FaPencilAlt, FaChevronLeft, FaChevronRight } from 'react-icons/fa'; // 아이콘
+
+const MyPage: React.FC = () => {
+  const [userData, setUserData] = useState<U.User | null>(null);
+  const [myReviews, setMyReviews] = useState<R.Review[]>([]);
+  const [myFavorites, setMyFavorites] = useState<F.Favorite[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const favoriteListRef = useRef<HTMLDivElement>(null); // 찜 목록 스크롤용
+  const { currentUser } = useAuth()
+
+  // 데이터 로딩
+  const loadMyPageData = useCallback(async () => {
+    setIsLoading(true);
+    try {
+        // API 호출 로직 (이전과 동일)
+        const [userRes, favoritesRes] = await Promise.all([
+            UserApi.getMe(), // 내 정보 가져오기
+            //reviewsRes,
+        //   ReviewApi.getMyReviews({ page: 1, per_page: 3 }), // 내 리뷰 3개
+            FavoriteApi.getFavorites(), // 내 찜 8개
+            console.log("데이터로드 실패")
+        ]);
+        
+        // 가상 데이터 사용 (이전과 동일)
+        await new Promise(resolve => setTimeout(resolve, 500)); 
+        setUserData(userRes);
+        // setMyReviews(reviewsRes.reviews || []);
+        setMyFavorites(favoritesRes.favorites || []);
+
+    } catch (error) {
+        console.error("마이페이지 데이터 로딩 실패:", error);
+      // 필요 시 에러 상태 설정
+    } finally {
+        setIsLoading(false);
+    }
+  }, []); // 의존성 배열 비움 (처음 한 번만 생성)
+  // --- 👆 ---
+
+    // --- 2. useEffect는 loadMyPageData 호출만 하도록 변경 ---
+    useEffect(() => {
+        loadMyPageData(); // 마운트 시 데이터 로딩 함수 호출
+    }, [loadMyPageData]);
+
+  // 찜 목록 스크롤 함수
+  const scrollFavorites = (direction: 'left' | 'right') => {
+      if (favoriteListRef.current) {
+          const scrollAmount = favoriteListRef.current.offsetWidth * 0.8; // 화면 너비의 80% 스크롤
+          favoriteListRef.current.scrollBy({
+              left: direction === 'left' ? -scrollAmount : scrollAmount,
+              behavior: 'smooth'
+          });
+      }
+  };
+
+  const handleEditReview = (reviewId: number) => {
+      console.log(`MyPage에서 리뷰 수정: ${reviewId}`);
+      // TODO: 리뷰 수정 로직 (예: 수정 폼 모달 열기)
+  };
+  const handleDeleteReview = (reviewId: number) => {
+      console.log(`MyPage에서 리뷰 삭제: ${reviewId}`);
+      // TODO: 리뷰 삭제 API 호출 및 목록 새로고침 로직
+      if (window.confirm("정말로 리뷰를 삭제하시겠습니까?")) {
+        ReviewApi.deleteReview(reviewId).then(() => loadMyPageData()); // 예시
+      }
+  };
+
+  if (isLoading) {
+    return <S.PageContainer>로딩 중...</S.PageContainer>;
+  }
+  if (!userData) {
+    return <S.PageContainer>사용자 정보를 불러올 수 없습니다.</S.PageContainer>; // 로그인 안 된 경우 등
+  }
+
+  return (
+    <S.PageContainer>
+      {/* --- 1. 프로필 섹션 --- */}
+      <S.ProfileSection>
+        <S.ProfileAvatar src={userData.profile_image || '/default-profile.png'} alt="프로필 사진" />
+        <S.ProfileInfo>
+          <S.ProfileName>{userData.nickname}</S.ProfileName>
+          <S.ProfileUserId>{userData.user_id}</S.ProfileUserId>
+        </S.ProfileInfo>
+        <S.EditProfileButton aria-label="프로필 수정">
+          <FaPencilAlt />
+        </S.EditProfileButton>
+      </S.ProfileSection>
+
+      {/* --- 2. 기본 정보 --- */}
+      <S.InfoSection>
+        <S.SectionTitle>기본 정보</S.SectionTitle>
+        <S.InfoRow>
+          <S.InfoLabel>닉네임</S.InfoLabel>
+          <S.InfoValue>{userData.nickname}</S.InfoValue>
+          <S.ChangeButton>변경</S.ChangeButton>
+        </S.InfoRow>
+        <S.InfoRow>
+          <S.InfoLabel>아이디</S.InfoLabel>
+          <S.InfoValue>{userData.user_id}</S.InfoValue>
+          {/* 아이디는 변경 불가하므로 버튼 없음 */}
+        </S.InfoRow>
+        <S.InfoRow>
+          <S.InfoLabel>비밀번호</S.InfoLabel>
+          <S.InfoValue>************</S.InfoValue>
+          <S.ChangeButton>변경</S.ChangeButton>
+        </S.InfoRow>
+        <S.InfoRow>
+          <S.InfoLabel>이메일</S.InfoLabel>
+          <S.InfoValue>{userData.email}</S.InfoValue>
+          <S.ChangeButton>변경</S.ChangeButton>
+        </S.InfoRow>
+        <S.InfoRow>
+          <S.InfoLabel>전화번호</S.InfoLabel>
+          <S.InfoValue>{userData.phone || '-'}</S.InfoValue>
+          <S.ChangeButton>변경</S.ChangeButton>
+        </S.InfoRow>
+        {/* <S.InfoRow>
+          <S.InfoLabel>선호 태그</S.InfoLabel>
+          <S.InfoValue>{(userData.tags || []).join(', ') || '-'}</S.InfoValue>
+          <S.ChangeButton>변경</S.ChangeButton>
+        </S.InfoRow> */}
+      </S.InfoSection>
+
+      {/* --- 3. 내 리뷰 --- */}
+      <section>
+        <S.ListHeader>
+          <S.SectionTitle style={{ borderBottom: 'none', marginBottom: 0 }}>리뷰</S.SectionTitle>
+          <S.ViewMoreButton>더보기</S.ViewMoreButton>
+        </S.ListHeader>
+        <S.ReviewGrid>
+          {myReviews.length === 0 ? (
+            <p>작성한 리뷰가 없습니다.</p> 
+          ) : (
+            // 👇 ReviewCard 컴포넌트 사용
+            myReviews.map(review => (
+              <ReviewCard 
+                key={review.id} 
+                review={review} 
+                // onClick={() => openReviewDetailModal(review)} // 상세 모달 열기 함수 전달 (필요 시)
+                onEdit={handleEditReview} // 수정 함수 전달
+                onDelete={handleDeleteReview} // 삭제 함수 전달
+              />
+            ))
+            // 👆 ReviewCard 컴포넌트 사용
+          )}
+        </S.ReviewGrid>
+      </section>
+
+      {/* --- 4. 찜한 행사 --- */}
+      <section>
+        <S.ListHeader>
+          <S.SectionTitle style={{ borderBottom: 'none', marginBottom: 0 }}>찜한 행사</S.SectionTitle>
+          <S.ViewMoreButton>더보기</S.ViewMoreButton>
+        </S.ListHeader>
+        <S.FavoriteListContainer>
+          <S.ArrowButton direction="left" onClick={() => scrollFavorites('left')} aria-label="왼쪽으로 스크롤">
+            <FaChevronLeft />
+          </S.ArrowButton>
+          <S.FavoriteGrid ref={favoriteListRef}>
+            {myFavorites.length === 0 ? (
+              <p>찜한 행사가 없습니다.</p> // NoResultsMessage 재사용 가능
+            ) : (
+              myFavorites.map(favorite => (
+                // 찜 목록의 favorite 객체 안에 event 객체가 포함되어야 함
+                favorite.event && <EventCard key={favorite.id} event={favorite.event as E.Event} /> 
+              ))
+            )}
+          </S.FavoriteGrid>
+           <S.ArrowButton direction="right" onClick={() => scrollFavorites('right')} aria-label="오른쪽으로 스크롤">
+            <FaChevronRight />
+          </S.ArrowButton>
+        </S.FavoriteListContainer>
+      </section>
+
+      {/* --- 5. 하단 링크 --- */}
+      <S.ActionLinks>
+        <S.ActionLink href="/host-apply">행사 주최자 신청하기</S.ActionLink>
+        <S.ActionLink onClick={() => alert('회원 탈퇴 처리')}>회원탈퇴</S.ActionLink>
+      </S.ActionLinks>
+
+    </S.PageContainer>
+  );
+};
+
+export default MyPage;

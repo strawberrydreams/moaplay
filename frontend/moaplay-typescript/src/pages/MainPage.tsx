@@ -64,8 +64,17 @@ function MainPage() {
   const [isLoading, setIsLoading] = useState(true);
 
   // Calendar 컴포넌트에서 이벤트 클릭 시 호출될 핸들러 (파라미터 타입 E.Event)
-  const handleCalendarEventSelect = useCallback((event: E.Event) => { // 👈 파라미터 타입 S.Schedule -> E.Event 로 수정
-    setSelectedCalendarEvent(event);
+  const handleCalendarEventSelect = useCallback((on: boolean, event?: E.Event) => { // 👈 파라미터 타입 S.Schedule -> E.Event 로 수정
+    if (on && event) {
+      setSelectedCalendarEvent(event);
+    } else if (!on) {
+      setSelectedCalendarEvent(null);
+    }
+  }, []);
+
+  // 선택 해제 함수
+  const handleDeselectEvent = useCallback(() => {
+    setSelectedCalendarEvent(null);
   }, []);
 
   // API 호출 및 상태 업데이트 함수
@@ -113,12 +122,13 @@ function MainPage() {
   }
 
   return (
-    <MainPageContainer>
+    <MainPageContainer style={{padding: '50px'}}>
       <CalendarSection>
         <CalendarWrapper>
           <Calendar 
             events={calendarEvents} // 👈 Calendar에는 색상이 포함된 이벤트 목록 전달
             onEventClick={handleCalendarEventSelect}
+            CalendarEvent={selectedCalendarEvent ?? undefined}
           />
         </CalendarWrapper>
         <CalendarDetailWrapper>

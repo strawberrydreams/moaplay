@@ -19,6 +19,7 @@ import { AuthProvider } from './context/AuthContext';
 import PopularEventsPage from './pages/PopularEventsPage';
 import RegionalEventsPage from './pages/RegionPage';
 import RecommendedEventsPage from './pages/RecommendPage';
+import MyPage from './pages/Mypage';
 
 
 const App: React.FC = () => {
@@ -38,13 +39,14 @@ const App: React.FC = () => {
         <Router>
             <GlobalStyle /> 
             <Header onLoginClick={openLoginModal} />
-            <main style={{ padding: '20px 40px', backgroundColor: '#f8f8f8' }}>
+            <main style={{backgroundColor: '#f8f8f8' }}>
                 <Routes>
                     <Route path="/" element={<MainPage />} /> 
                     <Route path="/events/:eventId" element={<EventDetail/>} />
                     <Route path='/popular' element={<PopularEventsPage/>}/>
                     <Route path='/region' element={<RegionalEventsPage/>}/>
                     <Route path='/recommend' element={<RecommendedEventsPage/>}/>
+                    <Route path='/mypage' element={<MyPage/>}/>
                 </Routes>
             </main>
             

@@ -162,6 +162,7 @@ const EventSearchPage: React.FC = () => {
               // value={values.region || ''}
               value={values.location || ''}
               onChange={handleChange}
+              onClick={handleSubmit}
             >
               <option value="">전체</option>
               <option value="서울">서울</option>
@@ -191,6 +192,7 @@ const EventSearchPage: React.FC = () => {
                 // name='date_from'
                 // value={values.date_from}
                 // onChange={handleChange}
+                // onClick={handleSubmit}
             />
             <span>~</span>
             <label htmlFor="end-date">종료일</label>
@@ -200,6 +202,7 @@ const EventSearchPage: React.FC = () => {
                 // name='date_to'
                 // value={values.date_to}
                 // onChange={handleChange}
+                // onClick={handleSubmit}
             />
           </S.DateRangeGroup>
         </S.FormRow>
@@ -230,6 +233,7 @@ const EventSearchPage: React.FC = () => {
                   onBlur={handleAddTag} // 포커스가T(DOM)에서 벗어날 때도 추가
                   placeholder="태그 입력..."
                   autoFocus // 입력창이 나타날 때 자동으로 포커스
+                  onClick={handleSubmit}
                 />
               ) : (
                 <S.TagButton
@@ -249,7 +253,7 @@ const EventSearchPage: React.FC = () => {
               name='sort' 
               value={values.sort || 'start_date'}
               onChange={handleChange}
-              onSubmit={handleSubmit}
+              onClick={handleSubmit}
             >
               <option value="start_date">최신순</option>
               <option value="view_count">인기순</option>

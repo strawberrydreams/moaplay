@@ -1,30 +1,7 @@
 import axiosInstance from './core';
-
+import type {LoginPayload, LoginResponse} from '../types/auth';
 // ----------------------------------------------------
 // TypeScript Type Definitions (백엔드와 통신을 위해 필요)
-// ---------------------------------------------------- 
-
-// (POST) 로그인 요청 시 서버에 보내는 데이터 타입
-export type LoginPayload = {
-    user_id: string;
-    password: string;
-};
-// (POST) 로그인 성공 시 서버가 반환하는 데이터 타입
-export type LoginResponse = {
-    id: number;
-    user_id: string;
-};
-
-export interface UserResponse {
-    id: number;
-    user_id: string;
-    nickname?: string;
-    profile_image?: string;
-  // me.to_dict()가 반환하는 다른 필드들도 필요하면 추가
-}
-
-// ----------------------------------------------------
-// API 통신 함수 정의
 // ---------------------------------------------------- 
 
 // (POST) 로그인 요청

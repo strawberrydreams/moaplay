@@ -1,4 +1,12 @@
 import axiosInstance from './core';
+import type { 
+    User, 
+    DuplicateCheckPayload, 
+    RegisterPayload, 
+    DeleteUserPayload, 
+    ChangePasswordPayload,
+    ChangeUserPayload
+} from '../types/user';
 
 // ----------------------------------------------------
 // TypeScript Type Definitions (백엔드와 통신을 위해 필요)
@@ -17,21 +25,6 @@ export const getServerStatus = async (): Promise<boolean> => {
     }
 };
 
-// 회원가입 시 최종적으로 서버에 전송되는 데이터 타입
-export type RegisterPayload = {
-    user_id: string;
-    password: string;
-    email: string;
-    nickname: string;
-    // 선호 지역, 관심사 등 추가 정보가 필요하면 여기에 추가
-};
-
-// 중복 확인 요청 시 서버에 보내는 타입
-export type DuplicateCheckPayload = {
-    type: 'user_id' | 'email' | 'nickname';
-    value: string;
-};
-
 // ----------------------------------------------------
 // API 통신 함수 정의
 // ----------------------------------------------------
@@ -40,9 +33,9 @@ export type DuplicateCheckPayload = {
 // 성공 시 True (사용 가능), 실패 시 False 또는 오류 응답
 export const checkDuplicate = async (
     payload: DuplicateCheckPayload
-): Promise<{ available: boolean }> => {
+): Promise<User> => {
     // //users/check?type=user_id&value=testuser 형태로 요청
-    const { data } = await axiosInstance.get<{ available: boolean }>('/users/check', {
+    const { data } = await axiosInstance.get<User>('/users/check', {
         params: payload,
     });
     return data;
@@ -53,3 +46,34 @@ export const registerUser = async (payload: RegisterPayload): Promise<{ success:
     const { data } = await axiosInstance.post<{ success: boolean }>('/users/', payload);
     return data;
 };
+
+// (PUT) 비밀번호 변경
+export const changePassword = async (payload: ChangePasswordPayload): Promise<{ success: boolean }> => {
+    const { data } = await axiosInstance.put<{ success: boolean }>('/users/me/password/', payload);
+    return data;
+};
+
+
+// (PUT) 비밀번호 변경
+export const changeUser = async (payload: ChangeUserPayload): Promise<User> => {
+    const { data } = await axiosInstance.put<User>('/users/me/', payload);
+    return data;
+};
+
+// (PUT) 내 정보 가져오기
+export const getMe = async (): Promise<User> => {
+    const { data } = await axiosInstance.get<User>('/users/me/');
+    return data;
+};
+
+// (PUT) 유저 정보 가져오기
+export const getUser = async (id : number): Promise<User> => {
+    const { data } = await axiosInstance.put<User>(`/users/me/${id}`);
+    return data;
+};
+
+// (DELETE) 회원 탈퇴
+export const DeleteUser = async (payload: DeleteUserPayload): Promise<{success: boolean}> => {
+    const {data} = await axiosInstance.delete<{success: boolean}>('/users/me/', { data: payload });
+    return data;
+}

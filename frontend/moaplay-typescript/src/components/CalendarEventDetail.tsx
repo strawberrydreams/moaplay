@@ -44,7 +44,7 @@ const CalendarEventDetail: React.FC<IDetailProps> = ({ events = [], event, sched
       setSelectedDetailEvent(event);
     } else {
       // event prop이 null일 때 목록 보기로 돌아가도록 설정 (선택 사항)
-      // setSelectedDetailEvent(null); 
+      setSelectedDetailEvent(null); 
     }
   }, [event]); 
 

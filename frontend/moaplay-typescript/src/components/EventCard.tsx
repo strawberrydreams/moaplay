@@ -61,7 +61,7 @@ const EventCard: React.FC<{ event: E.Event }> = ({ event }) => {
 
   // 2. 모든 컴포넌트를 S.xxx로 변경
   return (
-    <S.Card onClick={() =>{navigate(`/events/${event.id}`)}}>
+    <S.Card >
       <S.CardImage>
         {event.image_urls ? (
           <img src={event.image_urls[0]} alt={event.title} />
@@ -72,7 +72,7 @@ const EventCard: React.FC<{ event: E.Event }> = ({ event }) => {
           {isLiked ? <FaHeart /> : <FaRegHeart />}
         </S.LikeButton>
       </S.CardImage>
-      <S.CardContent>
+      <S.CardContent onClick={() =>{navigate(`/events/${event.id}`)}}>
         <h3>{event.title}</h3>
         <p>날짜: {event.start_date} ~ {event.end_date}</p>
         <p>주소: {event.location}</p>

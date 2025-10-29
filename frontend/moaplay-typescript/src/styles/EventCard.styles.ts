@@ -1,10 +1,22 @@
 // src/components/EventCard.styles.ts
-import styled from 'styled-components';
+import styled, {keyframes} from 'styled-components';
 
 // '좋아요' 버튼 props 타입
 export interface ILikeButtonProps {
   $isLiked: boolean;
 }
+
+const pop = keyframes`
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.2); /* 중간에 1.2배로 커짐 */
+  }
+  100% {
+    transform: scale(1); /* 다시 원래 크기로 */
+  }
+`;
 
 export const Card = styled.div`
   border: 1px solid #E0E0E0;
@@ -14,6 +26,13 @@ export const Card = styled.div`
   box-shadow: 0 2px 4px rgba(0,0,0,0.05);
   display: flex;
   flex-direction: column;
+
+  transition: transform 0.2s ease-in-out;
+
+  &:hover {
+    /* 마우스를 올리면 1.1배 커지도록 설정 */
+    transform: scale(1.01); 
+  }
 `;
 
 export const CardImage = styled.div`
@@ -46,13 +65,24 @@ export const LikeButton = styled.button<ILikeButtonProps>`
   padding: 0;
   color: ${props => props.$isLiked ? '#FF4136' : 'white'};
   cursor: pointer;
-  
-  &:focus { outline: none; }
+  filter: drop-shadow(0 2px 4px rgba(0,0,0,0.25));
+
+  transition: transform 0.2s ease-in-out;
+
+  &:focus { 
+    outline: none; 
+  }
+
+  &:hover {
+    /* 마우스를 올리면 1.1배 커지도록 설정 */
+    transform: scale(1.2); 
+  }
 `;
 
 export const CardContent = styled.div`
   padding: 1rem;
   flex-grow: 1;
+  cursor: pointer;
 
   h3 {
     margin-top: 0;

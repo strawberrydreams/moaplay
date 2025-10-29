@@ -3,9 +3,10 @@ import { useAuth } from '../context/AuthContext' // Auth 컨텍스트
 import * as S from '../styles/ProfileDropdown.styles'; // 스타일 임포트
 import { FaChevronDown } from 'react-icons/fa';
 import defaultProfile from '../assets/default-profile.png';
-// import { useNavigate } from 'react-router-dom'; // 마이페이지 이동 시 필요
+import { useNavigate } from 'react-router-dom'; // 마이페이지 이동 시 필요
 
 const ProfileDropdown: React.FC = () => {
+  const navigate = useNavigate();
   const { currentUser, logout } = useAuth(); // 컨텍스트에서 user, logout 가져오기
   // const navigate = useNavigate(); // 마이페이지 이동 시 필요
 
@@ -33,7 +34,7 @@ const ProfileDropdown: React.FC = () => {
   }
 
   const handleMyPageClick = () => {
-    // navigate('/mypage'); // 마이페이지 경로로 이동
+    navigate('/mypage'); // 마이페이지 경로로 이동
     setIsDropdownOpen(false); // 메뉴 닫기
   };
 

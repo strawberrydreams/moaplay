@@ -1,8 +1,8 @@
 import { createContext, useContext, useState, useEffect, type ReactNode, type SetStateAction,  } from "react";
-
+import type {LoginResponse} from "../types/auth";
 
 interface AuthContextType {
-  currentUser: any; // 실제 사용자 타입으로 바꾸는 것이 좋습니다 (예: User | null)
+  currentUser: LoginResponse | null;
   login: (userData: any) => void; // userData 타입도 구체화
   logout: () => void;
 }
@@ -19,7 +19,7 @@ export function useAuth() {
 }
 
 export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
-  const [currentUser, setCurrentUser] = useState<any | null>(null); // currentUser 타입 구체화 권장
+  const [currentUser, setCurrentUser] = useState<LoginResponse | null>(null); // currentUser 타입 구체화 권장
 
   useEffect(() => {
     const storedUserData = localStorage.getItem('user');

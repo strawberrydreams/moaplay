@@ -1,19 +1,22 @@
 // src/components/Calendar.tsx
-import React from 'react';
+import React, {useState} from 'react';
 import FullCalendar from '@fullcalendar/react';
 import dayGridPlugin from '@fullcalendar/daygrid';
+import interactionPlugin from '@fullcalendar/interaction';
 import type { DayCellContentArg, EventClickArg, EventMountArg } from '@fullcalendar/core';
+import type { DateClickArg } from '@fullcalendar/interaction';
 import { StyledCalendarWrapper } from '../styles/Calendar.styles';
 import type * as E from '../types/events'; // Event 타입 임포트
 
 interface ICalendarProps {
   events?: E.Event[]; 
-  onEventClick: (event: E.Event) => void;
+  onEventClick: (on:boolean, event?: E.Event) => void;
+  CalendarEvent?: E.Event;
 }
 
-const Calendar: React.FC<ICalendarProps> = ({ events = [], onEventClick }) => {
-
+const Calendar: React.FC<ICalendarProps> = ({ events = [], onEventClick, CalendarEvent }) => {
   console.log('CalendarEventDetail 렌더링, event prop:', events);
+  const [clickedEventId, setClickedEventId] = useState<string | null>(null);
 
   const handleDayCellContent = (arg: DayCellContentArg) => {
     return arg.dayNumberText.replace("일", "");
@@ -40,40 +43,63 @@ const Calendar: React.FC<ICalendarProps> = ({ events = [], onEventClick }) => {
   });
 
   const handleCalendarClick = (clickInfo: EventClickArg) => {
-    const clickedEventId = clickInfo.event.id;
+    setClickedEventId(clickInfo.event.id);
     
     // 원본 'events' 배열에서 id로 원본 데이터를 찾습니다.
     const originalEvent = events.find(e => String(e.id) === clickedEventId); 
 
-    if (originalEvent) {
+    if (!CalendarEvent) {
+      if (originalEvent) {
       // 부모에게 E.Event 타입 객체 전달
-      onEventClick(originalEvent); 
+        onEventClick(true, originalEvent); 
+      } 
+    } else {
+      onEventClick(false, originalEvent);
     }
+
   };
 
   const handleEventMount = (mountInfo: EventMountArg) => {
-    // extendedProps에서 color 가져오기 (이전과 동일)
-    const color = mountInfo.event.extendedProps.color; 
+    const color = mountInfo.event.extendedProps.color;
+    // ... (기존 색상 적용 로직)
     if (color) {
+      // 2. 배경/테두리 색상 적용 (투명도 추가)
       mountInfo.el.style.backgroundColor = color + '33'; 
       mountInfo.el.style.borderColor = color + '33'; 
-      mountInfo.el.style.color = color;
+      
+      // 3. 텍스트 색상 적용
+      mountInfo.el.style.color = color; 
       const titleEl = mountInfo.el.querySelector('.fc-event-title');
       if (titleEl) {
         (titleEl as HTMLElement).style.color = color;
       }
     }
+    console.log(`Mounting event ${mountInfo.event.id}, Clicked ID: ${clickedEventId}`); // 로그 추가
+    if (mountInfo.event.id === clickedEventId) {
+      console.log(`Adding event-clicked to ${mountInfo.event.id}`); // 로그 추가
+      mountInfo.el.classList.add('event-clicked');
+    } else {
+      mountInfo.el.classList.remove('event-clicked'); // 다른 이벤트 클래스 제거
+    }
+  };
+
+  const handleDateClick = (arg: DateClickArg) => {
+    console.log('빈 날짜 클릭됨:', arg.dateStr);
+    const originalEvent = events.find(e => String(e.id) === clickedEventId); 
+
+    onEventClick(false, originalEvent);
   };
 
   return (
     <StyledCalendarWrapper> 
       <FullCalendar
-        plugins={[dayGridPlugin]}
+        plugins={[dayGridPlugin, interactionPlugin]}
         initialView="dayGridMonth"
         events={formattedEvents}
         eventClick={handleCalendarClick} 
         eventDidMount={handleEventMount} 
         dayCellContent={handleDayCellContent}
+        dateClick={handleDateClick}
         headerToolbar={{
           left: 'title',
           right: 'prev next'
