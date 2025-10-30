@@ -10,6 +10,7 @@ const API_BASE_URL = '/api';
 
 const axiosInstance: AxiosInstance = axios.create({
     baseURL: API_BASE_URL,
+    withCredentials: true,
     headers: {
         'Content-Type': 'application/json',
     },

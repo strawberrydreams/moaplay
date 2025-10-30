@@ -5,11 +5,15 @@
 // Image Upload 응답 데이터
 // API: POST /api/upload/image
 export interface ImageUploadResponse {
-    image_url: string;
-    file_id: string;
-    file_size: number;
-    file_type: string;
+    url: string;
 }
+
+// 다중 업로드 응답 타입(서버 스키마에 맞춰 필요시 수정)
+// API: 단일 이미지와 API 엔드포인트는 동일함 (POST /api/upload/image)
+export type ImagesUploadResponse = {
+    urls: string[];
+    count?: number;
+};
 
 // ===============================================================
 // == Request (요청) 타입들

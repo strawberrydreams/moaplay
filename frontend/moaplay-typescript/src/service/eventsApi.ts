@@ -16,13 +16,13 @@ export const getEventById = async (id: number): Promise<E.Event> => {
 };
 
 // (POST) 새로운 행사 등록 & 신청
-export const createEvent = async (payload: E.CreateEventPayload): Promise<Event> => {
+export const createEvent = async (payload: Partial<E.CreateEventPayload>): Promise<Event> => {
     const { data } = await axiosInstance.post<Event>('/events', payload);
     return data;
 };
 
 // (PUT) 특정 ID의 행사 정보 수정
-export const updateEvent = async (id: number, payload: E.UpdateEventPayload): Promise<Event> => {
+export const updateEvent = async (id: number, payload: Partial<E.CreateEventPayload>): Promise<Event> => {
     const { data } = await axiosInstance.put<Event>(`/events/${id}`, payload);
     return data;
 };

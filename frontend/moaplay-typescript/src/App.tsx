@@ -21,7 +21,7 @@ import RegionalEventsPage from './pages/RegionPage';
 import RecommendedEventsPage from './pages/RecommendPage';
 import MyPage from './pages/Mypage';
 import { AdminDashboardPage } from "./pages/admin/AdminDashboardPage";
-
+import EventCreatePage from "./pages/events/EventCreatePage";
 
 const App: React.FC = () => {
     const { 
@@ -48,6 +48,7 @@ const App: React.FC = () => {
                     <Route path='/region' element={<RegionalEventsPage/>}/>
                     <Route path='/recommend' element={<RecommendedEventsPage/>}/>
                     <Route path='/mypage' element={<MyPage/>}/>
+                    <Route path='/events/new' element={<EventCreatePage/>}/>
                     <Route path='/admin/dashboard' element={<AdminDashboardPage/>}/>
                 </Routes>
             </main>

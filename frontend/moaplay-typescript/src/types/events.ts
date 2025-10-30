@@ -40,18 +40,17 @@ export interface Event {
 // 행사 생성을 위한 데이터 타입 (Payload)
 // API: POST /api/events (생성 요청 Body)
 export interface CreateEventPayload {
-    id?: number;
     title: string;
-    summary: string;
-    start_date: string;
-    end_date: string;
+    summary?: string;
+    organizer?: string;
+    hosted_by?: string;
+    start_date: string;      // 'YYYY-MM-DD'
+    end_date: string;        // 'YYYY-MM-DD'
     location: string;
     description: string;
     phone: string;
-    organizer: string;
-    hosted_by: Host;
-    image_urls: string[];
-    tag_names: string[];
+    image_urls?: string[];   // 서버는 선택으로 받음
+    tag_names?: string[];    // 서버는 선택으로 받음 (태그 없음 가능)
 }
 
 // 행사 목록 조회를 위한 데이터 타입 (Payload)
@@ -99,10 +98,8 @@ export interface EventStatusUpdateResponse {
 // ==Rsponse 타입들: 서버로부터 받는 데이터의 형태를 정의 ==
 // ===============================================================
 
-
-
 // 행사 리스트 조회 응답 타입 (Response)
-// API: GET /api?evnets
+// API: GET /api/events
 interface EventReadListResponse {
     events: Event[];
     pagination: {
