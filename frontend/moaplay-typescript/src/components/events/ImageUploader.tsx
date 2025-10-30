@@ -292,7 +292,7 @@ const DropZone = styled.div.withConfig({
                     props.isDragOver ? '#007bff' : '#dee2e6'
     };
     border-radius: 12px;
-    padding: 40px 20px;
+    padding: 100px 20px;
     text-align: center;
     cursor: pointer;
     transition: all 0.2s ease;

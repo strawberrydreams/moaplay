@@ -22,6 +22,7 @@ import RecommendedEventsPage from './pages/RecommendPage';
 import MyPage from './pages/Mypage';
 import { AdminDashboardPage } from "./pages/admin/AdminDashboardPage";
 import EventCreatePage from "./pages/events/EventCreatePage";
+import {EventUpdatePage} from "./pages/events/EventUpdatePage";
 
 const App: React.FC = () => {
     const { 
@@ -42,13 +43,14 @@ const App: React.FC = () => {
             <Header onLoginClick={openLoginModal} />
             <main style={{backgroundColor: '#f8f8f8' }}>
                 <Routes>
-                    <Route path="/" element={<MainPage />} /> 
-                    <Route path="/events/:eventId" element={<EventDetail/>} />
+                    <Route path='/' element={<MainPage />} />
+                    <Route path='/events/:eventId' element={<EventDetail/>} />
+                    <Route path='/events/new' element={<EventCreatePage/>}/>
+                    <Route path='/events/:eventId/edit' element={<EventUpdatePage/>}/>
                     <Route path='/popular' element={<PopularEventsPage/>}/>
                     <Route path='/region' element={<RegionalEventsPage/>}/>
                     <Route path='/recommend' element={<RecommendedEventsPage/>}/>
                     <Route path='/mypage' element={<MyPage/>}/>
-                    <Route path='/events/new' element={<EventCreatePage/>}/>
                     <Route path='/admin/dashboard' element={<AdminDashboardPage/>}/>
                 </Routes>
             </main>
