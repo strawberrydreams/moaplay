@@ -1,5 +1,5 @@
 import axiosInstance from './core';
-import type { PaginatedResponse } from '../types';
+import type { PaginatedResponse } from '../types/index';
 import type { AdminDashboard, PendingEvent, ApprovedEvent, ManagedEvent } from '../types/admin';
 
 type PendingEventListResponse = PaginatedResponse<PendingEvent, 'pendingEvents'>;
@@ -37,4 +37,8 @@ export const getManagedEvents = async (params: {
 }): Promise<ManagedEventListResponse> => {
     const { data } = await axiosInstance.get<ManagedEventListResponse>('/admin/events-list', { params });
     return data;
+};
+
+export const getUsers = async () => {
+    // TODO: 전체 유저 목록 받아오기 추후 구현
 };

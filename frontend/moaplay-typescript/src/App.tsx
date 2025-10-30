@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import Header from './components/Header'; // Header 컴포넌트 경로 확인!
 import Modal from './components/common/Modal'; // 👈 Modal 임포트
@@ -20,6 +20,7 @@ import PopularEventsPage from './pages/PopularEventsPage';
 import RegionalEventsPage from './pages/RegionPage';
 import RecommendedEventsPage from './pages/RecommendPage';
 import MyPage from './pages/Mypage';
+import { AdminDashboardPage } from "./pages/admin/AdminDashboardPage";
 
 
 const App: React.FC = () => {
@@ -47,6 +48,7 @@ const App: React.FC = () => {
                     <Route path='/region' element={<RegionalEventsPage/>}/>
                     <Route path='/recommend' element={<RecommendedEventsPage/>}/>
                     <Route path='/mypage' element={<MyPage/>}/>
+                    <Route path='/admin/dashboard' element={<AdminDashboardPage/>}/>
                 </Routes>
             </main>
             
