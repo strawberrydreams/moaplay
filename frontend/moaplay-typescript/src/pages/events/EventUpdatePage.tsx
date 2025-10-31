@@ -6,7 +6,7 @@ import { validateEventForm } from '../../utils/validation';
 import { useEventUpdate } from '../../hooks/useEventCreate';
 import type { EventFormData } from './EventCreatePage';
 import * as E from '../../types/events';
-import { deleteEvent, getEventById } from "../../service/eventsApi";
+import { deleteEvent, getEventById } from "../../services/eventsApi";
 import TagSelector from "../../components/events/TagSelector";
 import { DateRangeSelector } from "../../components/events/DateRangeSelector";
 import { ImageUploader } from "../../components/events/ImageUploader";

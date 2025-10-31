@@ -1,10 +1,11 @@
-import axiosInstance from './core'; // 공용 Axios 인스턴스 (이미 프로젝트에 존재)
+import axiosInstance from './core/axios'; // 공용 Axios 인스턴스 (이미 프로젝트에 존재)
 import type {
     Tag,
     UserPreferredTagsPayload,
     UserPreferredTagsResponse,
 } from '../types/tags';
 
+// TODO: Tag API 구현
 /**
  * 태그 관련 API
  * 백엔드 Flask Blueprint가 /api/tags 로 마운트되어 있다고 가정.

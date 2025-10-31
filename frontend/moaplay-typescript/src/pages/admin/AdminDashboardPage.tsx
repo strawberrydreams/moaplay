@@ -1,14 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 
-import {useAdminDashboard} from "../../hooks/useAdminDashboard";
-import {ApprovedEventsModal} from "../../components/admin/ApprovedEventsModal";
-import {PendingEventsModal} from "../../components/admin/PendingEventsModal";
-import {UsersManagementModal} from "../../components/admin/UsersManagementModal";
-import { getApprovedEvents, getPendingEvents } from "../../service/adminApi";
-import Header from "../../components/Header";
-import Footer from "../../components/Footer";
-import {MenuItem} from "../../styles/ProfileDropdown.styles";
+import { useAdminDashboard } from "../../hooks/useAdminDashboard";
+import { ApprovedEventsModal } from "../../components/admin/ApprovedEventsModal";
+import { PendingEventsModal } from "../../components/admin/PendingEventsModal";
+import { UsersManagementModal } from "../../components/admin/UsersManagementModal";
+import { getApprovedEvents, getPendingEvents } from "../../services/adminApi";
+import { updateEventStatus } from "../../services/eventsApi";
+import { MenuItem } from "../../styles/ProfileDropdown.styles";
 import { useAuth } from "../../context/AuthContext";
 import {
     PageContainer,
@@ -34,9 +33,7 @@ export const AdminDashboardPage: React.FC = () => {
     const {
         stats,
         statsError,
-        refreshStats,
-        approveEvent,
-        rejectEvent
+        refreshStats
     } = useAdminDashboard();
 
     const [hasBootRefreshed, setHasBootRefreshed] = useState(false);
@@ -69,6 +66,25 @@ export const AdminDashboardPage: React.FC = () => {
         return Array.isArray(list) ? list.length : 0;
     };
 
+    // 승인/대기 카운트 로드
+    const loadCounts = async () => {
+        const [approvedRes, pendingRes] = await Promise.all([
+            getApprovedEvents({ page: 1, limit: 1 }),
+            getPendingEvents({ page: 1, limit: 1 }),
+        ]);
+        setApprovedCount(pickTotal(approvedRes));
+        setPendingCount(pickTotal(pendingRes));
+    };
+
+    // 통계 + 카운트를 모두 새로고침
+    const refreshAll = async () => {
+        try {
+            await Promise.all([refreshStats(), loadCounts()]);
+        } catch (e) {
+            console.error(e);
+        }
+    };
+
     useEffect(() => {
         const hasStoredUser = !!localStorage.getItem('user');
         if (!currentUser && !hasStoredUser) return; // 아직 토큰/유저 미하이드레이트 상태이면 대기
@@ -76,17 +92,11 @@ export const AdminDashboardPage: React.FC = () => {
         let cancelled = false;
         (async () => {
             try {
-                const [approvedRes, pendingRes] = await Promise.all([
-                    getApprovedEvents({ page: 1, limit: 1 }),
-                    getPendingEvents({ page: 1, limit: 1 }),
-                ]);
-
                 if (!cancelled) {
-                    setApprovedCount(pickTotal(approvedRes));
-                    setPendingCount(pickTotal(pendingRes));
+                    await loadCounts();
                 }
             } catch (error) {
-                console.log(error)
+                console.log(error);
             }
         })();
 
@@ -108,16 +118,22 @@ export const AdminDashboardPage: React.FC = () => {
 
     // 행사 승인
     const handleApproveEvent = async (eventId: number) => {
-        await approveEvent(eventId);
-        // 통계 새로고침
-        await refreshStats();
+        try {
+            await updateEventStatus(eventId, { status: 'approved' });
+            await refreshAll();
+        } catch (error) {
+            console.error(error);
+        }
     };
 
     // 행사 거절
     const handleRejectEvent = async (eventId: number, reason: string) => {
-        await rejectEvent(eventId, reason);
-        // 통계 새로고침
-        await refreshStats();
+        try {
+            await updateEventStatus(eventId, { status: 'rejected', message: reason });
+            await refreshAll();
+        } catch (error) {
+            console.error(error);
+        }
     };
 
     const handleLogout = () => {
@@ -128,9 +144,6 @@ export const AdminDashboardPage: React.FC = () => {
     if (statsError) {
         return (
             <PageContainer>
-                <Header onLoginClick={function(): void {
-                    throw new Error("Function not implemented.");
-                }}/>
                 <MainContent>
                     <ErrorMessage>
                         <h2>오류가 발생했습니다</h2>
@@ -138,7 +151,6 @@ export const AdminDashboardPage: React.FC = () => {
                         <RetryButton onClick={refreshStats}>다시 시도</RetryButton>
                     </ErrorMessage>
                 </MainContent>
-                <Footer />
             </PageContainer>
         );
     }
@@ -148,7 +160,7 @@ export const AdminDashboardPage: React.FC = () => {
             <MainContent>
                 <DashboardHeader>
                     <DashboardTitle>관리자 대시보드</DashboardTitle>
-                    <RefreshButton onClick={refreshStats}>새로고침</RefreshButton>
+                    <RefreshButton onClick={refreshAll}>새로고침</RefreshButton>
                 </DashboardHeader>
                 {stats && (
                     <StatsList>
@@ -197,8 +209,6 @@ export const AdminDashboardPage: React.FC = () => {
                     />
                 )}
             </MainContent>
-
-            <Footer />
         </PageContainer>
     );
 };

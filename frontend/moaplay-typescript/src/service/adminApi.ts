@@ -1,4 +1,4 @@
-import axiosInstance from './core';
+import axiosInstance from './core/axios';
 import type { PaginatedResponse } from '../types/index';
 import type { AdminDashboard, PendingEvent, ApprovedEvent, ManagedEvent } from '../types/admin';
 

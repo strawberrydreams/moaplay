@@ -1,5 +1,5 @@
-import axiosInstance from './core';
-import type { Review, GetReviewApiResponse, ReviewSummary, CreateReviewPayload, UpdateReviewPayload } from '../types/reviews';
+import axiosInstance from './core/axios';
+import type { Review, GetReviewApiResponse, CreateReviewPayload, UpdateReviewPayload } from '../types/reviews';
 
 // (GET) 특정 행사의 리뷰 목록 조회
 export const getReviews = async (params: {
@@ -7,7 +7,7 @@ export const getReviews = async (params: {
     page?: number;
     limit?: number;
 }): Promise<GetReviewApiResponse['data']> => {
-    const { data } = await axiosInstance.get<{reviews: Review[]}>('/reviews/', { params });
+    const { data } = await axiosInstance.get<{reviews: Review[]}>('/reviews', { params });
     return data;
 };
 
@@ -19,7 +19,7 @@ export const getReviewById = async (id: number): Promise<Review> => {
 
 // (POST) 새로운 리뷰 등록
 export const createReview = async (payload: CreateReviewPayload): Promise<Review> => {
-    const { data } = await axiosInstance.post<Review>('/reviews/', payload);
+    const { data } = await axiosInstance.post<Review>('/reviews', payload);
     return data;
 };
 

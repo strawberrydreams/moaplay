@@ -5,7 +5,7 @@ import * as E from './events';
 // =================================================================
 
 // 내 일정 목록에 포함된 행사 정보
-// API: GET /api/schedules (목록 조회의 event 객체)
+// API: GET /api/schedules (목록 조회의 events 객체)
 export interface ScheduleEventInfo {
     id: number;
     title: string;
