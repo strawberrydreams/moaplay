@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { useAuth } from '../context/AuthContext' // Auth 컨텍스트
+import { useAuthContext } from '../context/AuthContext' // Auth 컨텍스트
 import * as S from '../styles/ProfileDropdown.styles'; // 스타일 임포트
 import { FaChevronDown } from 'react-icons/fa';
 import defaultProfile from '../assets/default-profile.png';
@@ -7,7 +7,7 @@ import { useNavigate } from 'react-router-dom'; // 마이페이지 이동 시 �
 
 const ProfileDropdown: React.FC = () => {
   const navigate = useNavigate();
-  const { currentUser, logout } = useAuth(); // 컨텍스트에서 user, logout 가져오기
+  const { user, logout } = useAuthContext(); // 컨텍스트에서 user, logout 가져오기
   // const navigate = useNavigate(); // 마이페이지 이동 시 필요
 
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
@@ -29,7 +29,7 @@ const ProfileDropdown: React.FC = () => {
   }, [dropdownRef]);
 
   // user 정보가 없으면 아무것도 렌더링하지 않음 (Header에서 이미 처리하므로 불필요할 수도 있음)
-  if (!currentUser) {
+  if (!user) {
     return null;
   }
 
@@ -46,7 +46,7 @@ const ProfileDropdown: React.FC = () => {
   return (
     <S.ProfileContainer ref={dropdownRef}>
       <S.ProfileImage
-        src={currentUser.profile_image || defaultProfile}
+        src={user.profile_image || defaultProfile}
         alt="프로필 사진"
         onClick={toggleDropdown} // 이미지 클릭 시에도 드롭다운 토글
       />

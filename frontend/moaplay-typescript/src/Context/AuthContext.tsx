@@ -1,57 +1,67 @@
-import { createContext, useContext, useState, useEffect, type ReactNode, type SetStateAction,  } from "react";
-import type {LoginResponse} from "../types/auth";
+import React, { createContext, useContext, useMemo, type ReactNode } from 'react';
+// 1. useAuth 훅과 훅이 반환하는 사용자 타입을 임포트합니다.
+import { useAuth, type AuthenticatedUser } from '../hooks/useAuth'; 
+// 2. 찜(스케줄) 타입도 임포트합니다 (useAuth가 반환하므로).
+import type { Schedule } from '../types/schedules'; 
 
+// 3. Context가 제공할 값들의 타입을 정의합니다.
+// (useAuth 훅의 반환 타입과 일치시킵니다)
 interface AuthContextType {
-  currentUser: LoginResponse | null;
-  login: (userData: any) => void; // userData 타입도 구체화
-  logout: () => void;
+  user: AuthenticatedUser | null;
+  loading: boolean; // 전체 인증 로딩
+  error: string | null;
+  schedules: Schedule[]; // 찜 목록
+  schedulesLoading: boolean; // 찜 목록 로딩
+  login: (credentials: any) => Promise<AuthenticatedUser>; // (LoginPayload 타입 사용 권장)
+  logout: () => Promise<void>;
+  checkAuthStatus: () => Promise<void>;
+  fetchSchedules: () => Promise<void>; // 찜 목록 새로고침
 }
 
+// 4. Context를 생성합니다. (초기값은 undefined)
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-export function useAuth() {
+/**
+ * AuthProvider: 앱 전체에 인증 상태와 함수들을 제공하는 컴포넌트
+ */
+export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
+  // 5. useAuth 훅을 호출하여 실제 로직과 상태를 가져옵니다.
+  const auth = useAuth();
+
+  // 6. useMemo를 사용해 Provider의 value를 최적화합니다.
+  //    auth 훅의 주요 상태/함수 참조가 변경될 때만 value 객체가 새로 생성됩니다.
+  const value = useMemo(() => ({
+    user: auth.user,
+    loading: auth.loading,
+    error: auth.error,
+    schedules: auth.schedules,
+    schedulesLoading: auth.schedulesLoading,
+    login: auth.login,
+    logout: auth.logout,
+    checkAuthStatus: auth.checkAuthStatus,
+    fetchSchedules: auth.fetchSchedules
+  }), [
+    auth.user, auth.loading, auth.error, 
+    auth.schedules, auth.schedulesLoading,
+    auth.login, auth.logout, auth.checkAuthStatus, auth.fetchSchedules
+  ]);
+
+  // 7. Provider로 자식 컴포넌트들을 감싸고 value를 전달합니다.
+  return (
+    <AuthContext.Provider value={value}>
+      {children}
+    </AuthContext.Provider>
+  );
+};
+
+/**
+ * useAuthContext: 다른 컴포넌트에서 쉽게 Context 값에 접근하기 위한 커스텀 훅
+ */
+export const useAuthContext = () => {
   const context = useContext(AuthContext);
-  // 3. 컨텍스트 값이 undefined일 경우 에러 처리 (Provider 외부 사용 방지)
   if (context === undefined) {
-    throw new Error('useAuth는 AuthProvider 안에서 사용해야 합니다.');
+    // Provider로 감싸지지 않은 곳에서 호출 시 에러 발생
+    throw new Error('useAuthContext는 AuthProvider 안에서 사용해야 합니다.');
   }
   return context;
-}
-
-export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
-  const [currentUser, setCurrentUser] = useState<LoginResponse | null>(null); // currentUser 타입 구체화 권장
-
-  useEffect(() => {
-    const storedUserData = localStorage.getItem('user');
-    if (storedUserData) {
-      try { // JSON.parse 오류 방지
-        const userData = JSON.parse(storedUserData);
-        setCurrentUser(userData);
-        console.log('AuthProvider: 초기화 시 setCurrentUser 호출됨, user:', userData);
-      } catch (error) {
-        console.error("localStorage 사용자 데이터 파싱 오류:", error);
-        localStorage.removeItem('user'); // 잘못된 데이터 제거
-      }
-    }
-  }, []);
-
-  // 4. login 함수의 userData 타입 수정
-  const login = (userData: any) => { // SetStateAction<null> 대신 실제 데이터 타입 사용
-    try { // JSON.stringify 오류 방지
-      localStorage.setItem('user', JSON.stringify(userData));
-      setCurrentUser(userData);
-      // console.log('AuthProvider: setCurrentUser 호출됨, 새 user:', userData);
-    } catch (error) {
-      console.error("localStorage 사용자 데이터 저장 오류:", error);
-    }
-  };
-
-  const logout = () => {
-    localStorage.removeItem('user');
-    setCurrentUser(null);
-  };
-
-  const value: AuthContextType = { currentUser, login, logout }; // value 타입 명시
-
-  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 };

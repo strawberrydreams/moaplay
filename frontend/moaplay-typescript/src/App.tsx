@@ -23,6 +23,7 @@ import MyPage from './pages/Mypage';
 import { AdminDashboardPage } from "./pages/admin/AdminDashboardPage";
 import EventCreatePage from "./pages/events/EventCreatePage";
 import {EventUpdatePage} from "./pages/events/EventUpdatePage";
+import OtherUserPage from './pages/OtherUserPage';
 
 const App: React.FC = () => {
     const { 
@@ -41,7 +42,7 @@ const App: React.FC = () => {
         <Router>
             <GlobalStyle /> 
             <Header onLoginClick={openLoginModal} />
-            <main style={{backgroundColor: '#f8f8f8' }}>
+            <main style={{padding: '1rem', backgroundColor: '#f8f8f8' }}>
                 <Routes>
                     <Route path='/' element={<MainPage />} />
                     <Route path='/events/:eventId' element={<EventDetail/>} />
@@ -51,6 +52,7 @@ const App: React.FC = () => {
                     <Route path='/region' element={<RegionalEventsPage/>}/>
                     <Route path='/recommend' element={<RecommendedEventsPage/>}/>
                     <Route path='/mypage' element={<MyPage/>}/>
+                    <Route path='/users/:userId' element={<OtherUserPage/>}/>
                     <Route path='/admin/dashboard' element={<AdminDashboardPage/>}/>
                 </Routes>
             </main>

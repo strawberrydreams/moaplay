@@ -14,7 +14,7 @@ export const CalendarDetailWrapper = styled.div`
   border: 2px solid #d9d9d9;
   overflow: hidden;
   font-family: 'Noto Sans KR', sans-serif;
-  height: 100%;
+  height: 765px;
   color: #131313;
 `;
 

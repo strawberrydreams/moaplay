@@ -3,6 +3,9 @@ import Modal from './common/Modal'; // 기존 Modal 컴포넌트 임포트
 import * as R from '../types/reviews'; // Review 타입 임포트
 import * as S from '../styles/ReviewDetail.styles'; // 스타일 임포트
 import { FaImage } from 'react-icons/fa'; // 이미지 플레이스홀더 아이콘
+import { useNavigate } from 'react-router-dom';
+import { useAuthContext } from '../context/AuthContext';
+
 
 interface ReviewDetailModalProps {
   isOpen: boolean;
@@ -12,6 +15,8 @@ interface ReviewDetailModalProps {
 
 const ReviewDetail: React.FC<ReviewDetailModalProps> = ({ isOpen, onClose, review }) => {
   if (!isOpen || !review) return null; // 모달이 닫혀있거나 리뷰 데이터 없으면 렌더링 안 함
+  const navigate = useNavigate();
+  const { user: currentUser } = useAuthContext();
 
   // 별점 렌더링 함수
   const renderStars = (rating: number): string => {
@@ -21,6 +26,20 @@ const ReviewDetail: React.FC<ReviewDetailModalProps> = ({ isOpen, onClose, revie
 
   // 이미지 URL 배열 가져오기 (타입 확인 필요!)
   const images = review.image_urls || []; 
+
+    const handleProfileClick = (e: React.MouseEvent) => {
+      e.stopPropagation();
+      const reviewerId = review.user?.id;
+      if (!reviewerId) return;
+  
+      if (currentUser && currentUser.id === reviewerId) {
+        // 현재 로그인 사용자와 리뷰 작성자가 같으면 MyPage
+        navigate('/mypage');
+      } else {
+        // 타인의 프로필이면 OtherUserPage로 넘어가기 (userId를 URL param으로)
+        navigate(`/users/${reviewerId}`);
+      }
+    };
 
   return (
     <Modal isOpen={isOpen} onClose={onClose} title=""> {/* 제목은 비우거나 review.title 사용 */}
@@ -47,7 +66,11 @@ const ReviewDetail: React.FC<ReviewDetailModalProps> = ({ isOpen, onClose, revie
         {/* 하단 정보 (사용자, 날짜, 별점) */}
         <S.Footer>
           <S.UserInfo>
-            <S.UserImage src={review.user.profile_image || '/default-profile.png'} alt={review.user.nickname} />
+            <S.UserImage 
+              src={review.user.profile_image || '/default-profile.png'} 
+              alt={review.user.nickname} 
+              onClick={handleProfileClick} 
+            />
             <S.UserDetails>
               <S.UserName>{review.user.nickname}</S.UserName>
               {/* 날짜 포맷팅 필요 시 date-fns 라이브러리 사용 */}

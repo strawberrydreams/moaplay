@@ -1,9 +1,9 @@
 import axiosInstance from './core';
-import type { Favorite, FavoriteCreationResponse, CreateFavoritePayload, FavoriteStatus } from '../types/favorites';
+import type { Favorite, FavoriteCreationResponse, CreateFavoritePayload, FavoriteResponse, FavoriteStatus } from '../types/favorites';
 
 // (GET) 사용자의 모든 찜 목록 조회
-export const getFavorites = async (): Promise<{ favorites: Favorite[] }> => {
-    const { data } = await axiosInstance.get<{ favorites: Favorite[] }>('/favorites');
+export const getFavorites = async (): Promise<FavoriteResponse> => {
+    const { data } = await axiosInstance.get<FavoriteResponse>('/favorites');
     return data;
 };
 

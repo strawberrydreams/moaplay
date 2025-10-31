@@ -31,3 +31,19 @@ export const CalendarDetailWrapper = styled.div`
   flex: 1; /* 1의 비율 (약 33%) */
   min-width: 0;
 `;
+
+export const BannerImage = styled.img`
+  display: block;
+  align-item: center;
+  justify-content: center;
+  margin-top: -30px;
+  margin-bottom: 50px;
+  filter: drop-shadow(0 2px 4px rgba(0,0,0,0.25));
+
+  transition: filter 0.2s ease-in-out;
+
+  &:hover {
+    cursor: pointer;
+    filter: drop-shadow(0 4px 8px rgba(0,0,0,0.25));
+  }
+`;

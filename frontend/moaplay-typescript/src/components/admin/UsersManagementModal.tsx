@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import styled from 'styled-components';
 import type {Pagination} from '../../types/index';
 import type {DeleteUserPayload, User} from "../../types/user";
-import {DeleteUser} from "../../service/userApi";
+import {deleteUser} from "../../service/userApi";
 import {getUsers} from "../../service/adminApi";
 
 // 사용자 모달 관리 Props
@@ -95,7 +95,7 @@ export const UsersManagementModal: React.FC<UsersManagementModalProps> = ({
             password,
         };
 
-        await DeleteUser(payload);
+        await deleteUser(payload);
         await loadUsers(currentPage);
     };
 
@@ -171,7 +171,7 @@ export const UsersManagementModal: React.FC<UsersManagementModalProps> = ({
                                     <td>{user.nickname || user.nickname || '알 수 없음'}</td>
                                     <td>{user.email}</td>
                                     <td>
-                                        <RoleBadge role={user.role}>
+                                        <RoleBadge role={user.role || 'user'}>
                                             {user.role === 'admin' ? '관리자' : user.role === 'host' ? '주최자' : '일반'}
                                         </RoleBadge>
                                     </td>
@@ -180,7 +180,7 @@ export const UsersManagementModal: React.FC<UsersManagementModalProps> = ({
                                         <ActionButtons>
                                             <ActionButton
                                                 variant="warning"
-                                                onClick={() => handleRoleChange(user.id, user.role)}
+                                                onClick={() => handleRoleChange(user.id, user.role || '')}
                                             >
                                                 역할 변경
                                             </ActionButton>

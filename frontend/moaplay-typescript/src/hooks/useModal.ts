@@ -1,6 +1,5 @@
 // frontend/hooks/useSignupFlow.ts
 import { useState } from 'react';
-import type { RegisterPayload } from '../service/userApi';
 
 type Step = 'signup' | 'tags';
 
@@ -10,6 +9,7 @@ export function useModal() {
     const [isSelectTagsModalOpen, setisSelectTagsModalOpen] = useState(false);
     const [isReviewModalOpen, setIsReviewModalOpen] = useState(false);
     const [isReviewDetailModalOpen, setReviewDetailModalOpen] = useState(false);
+    const [isDeleteAccountModalOpen, setIsDeleteAccountModalOpen] = useState(false);
 
     // 2. 함수 이름을 컨텍스트와 맞추면 더 좋습니다 (옵션)
     const openLoginModal = () => setIsLoginModalOpen(true);
@@ -17,15 +17,18 @@ export function useModal() {
     const openSelectTagsModal = () => setisSelectTagsModalOpen(true);
     const openReviewModal = () => setIsReviewModalOpen(true);
     const openReviewDetailModal = () => setReviewDetailModalOpen (true);
+    const openDeleteAccountModal = () => setIsDeleteAccountModalOpen(true);
 
     const closeReviewModal = () => setIsReviewModalOpen(false);
     const closeReviewDetailModal = () => setReviewDetailModalOpen(false);
+    const closeDeleteAccountModal = () => setIsDeleteAccountModalOpen(false);
 
     const closeAllModals = () => {
         setIsLoginModalOpen(false);
         setIsSignupModalOpen(false);
         setisSelectTagsModalOpen(false);
         setIsReviewModalOpen(false);
+        setIsDeleteAccountModalOpen(false);
     };
     
     const loginToSignUp = () => {
@@ -50,14 +53,17 @@ export function useModal() {
         isSelectTagsModalOpen,
         isReviewModalOpen,
         isReviewDetailModalOpen,
+        isDeleteAccountModalOpen,
         openLoginModal,
         openSignupModal,
         openSelectTagsModal,
         openReviewModal,
         openReviewDetailModal,
+        openDeleteAccountModal,
         closeAllModals,
         closeReviewModal,
         closeReviewDetailModal,
+        closeDeleteAccountModal,
         loginToSignUp, 
         signUpToLogin, 
         signUpToTags,  };

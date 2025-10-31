@@ -2,23 +2,38 @@ import React, { useEffect, useState, useRef, useCallback } from 'react'; // useR
 import * as UserApi from '../service/userApi';     // 사용자 정보 API
 import * as ReviewApi from '../service/reviewsApi';  // 리뷰 API
 import * as FavoriteApi from '../service/favoritesApi';// 찜 API
-import { useAuth } from '../context/AuthContext';
+import { useAuthContext } from '../context/AuthContext';
 import type * as U from '../types/user';        // User 타입
 import type * as R from '../types/reviews';       // Review 타입
 import type * as F from '../types/favorites';     // Favorite 타입 (찜 목록용)
 import type * as E from '../types/events';        // Event 타입 (찜 목록 내부용)
 import EventCard from '../components/EventCard';   // EventCard 재사용
 import ReviewCard from '../components/ReviewCard'
+import { useModal } from '../hooks/useModal';
+import Modal from '../components/common/Modal';
+import DeleteAccountForm from '../components/auth/DeleteAccountForm';
+import ChangePasswordForm from '../components/auth/ChangePasswordForm';
 import * as S from '../styles/Mypage.styles';    // 스타일 임포트
 import { FaPencilAlt, FaChevronLeft, FaChevronRight } from 'react-icons/fa'; // 아이콘
+import FieldEditForm from '../components/FieldEditForm';
+
+type EditableUserField = 'nickname' | 'email' | 'phone' | 'password' | 'tags';
 
 const MyPage: React.FC = () => {
   const [userData, setUserData] = useState<U.User | null>(null);
   const [myReviews, setMyReviews] = useState<R.Review[]>([]);
   const [myFavorites, setMyFavorites] = useState<F.Favorite[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [editingField, setEditingField] = useState<EditableUserField | null>(null);
   const favoriteListRef = useRef<HTMLDivElement>(null); // 찜 목록 스크롤용
-  const { currentUser } = useAuth()
+  const { user:currentUser } = useAuthContext()
+
+  const { 
+    isDeleteAccountModalOpen,
+    openDeleteAccountModal,
+    closeDeleteAccountModal,
+    closeAllModals
+  } = useModal();
 
   // 데이터 로딩
   const loadMyPageData = useCallback(async () => {
@@ -28,15 +43,16 @@ const MyPage: React.FC = () => {
         const [userRes, favoritesRes] = await Promise.all([
             UserApi.getMe(), // 내 정보 가져오기
             //reviewsRes,
-        //   ReviewApi.getMyReviews({ page: 1, per_page: 3 }), // 내 리뷰 3개
+            // ReviewApi.getMyReview(currentUser?.id || 0), // 내 리뷰 3개
             FavoriteApi.getFavorites(), // 내 찜 8개
-            console.log("데이터로드 실패")
         ]);
         
         // 가상 데이터 사용 (이전과 동일)
         await new Promise(resolve => setTimeout(resolve, 500)); 
         setUserData(userRes);
-        // setMyReviews(reviewsRes.reviews || []);
+        // setMyReviews(reviewsRes.review || []);
+        // console.log('리뷰 응답:', reviewsRes);
+        // console.log('리뷰 응답:', myReviews);
         setMyFavorites(favoritesRes.favorites || []);
 
     } catch (error) {
@@ -52,6 +68,19 @@ const MyPage: React.FC = () => {
     useEffect(() => {
         loadMyPageData(); // 마운트 시 데이터 로딩 함수 호출
     }, [loadMyPageData]);
+
+  const handleFieldUpdate = async (field: keyof U.User, value: string) => {
+    if (!userData) return;
+    try {
+      // API 호출 예: UserApi.changeUser({ [field]: value })
+      const payload = { [field]: value } as Partial<U.User>;
+      const updated = await UserApi.changeUser(payload);
+      setUserData((prev) => prev ? { ...prev, ...updated } : prev);
+      setEditingField(null);
+    } catch (error) {
+      console.error('필드 수정 실패:', error);
+    }
+  };
 
   // 찜 목록 스크롤 함수
   const scrollFavorites = (direction: 'left' | 'right') => {
@@ -74,6 +103,14 @@ const MyPage: React.FC = () => {
       if (window.confirm("정말로 리뷰를 삭제하시겠습니까?")) {
         ReviewApi.deleteReview(reviewId).then(() => loadMyPageData()); // 예시
       }
+  };
+  
+
+  const handleAccountDeleted = () => {
+    // 예: 로그아웃 처리, 홈으로 이동 등
+    alert('회원탈퇴가 완료되었습니다.');
+    // 로그아웃 로직
+    // navigate('/');
   };
 
   if (isLoading) {
@@ -103,7 +140,7 @@ const MyPage: React.FC = () => {
         <S.InfoRow>
           <S.InfoLabel>닉네임</S.InfoLabel>
           <S.InfoValue>{userData.nickname}</S.InfoValue>
-          <S.ChangeButton>변경</S.ChangeButton>
+          <S.ChangeButton onClick={() => setEditingField('nickname')}>변경</S.ChangeButton>
         </S.InfoRow>
         <S.InfoRow>
           <S.InfoLabel>아이디</S.InfoLabel>
@@ -113,23 +150,23 @@ const MyPage: React.FC = () => {
         <S.InfoRow>
           <S.InfoLabel>비밀번호</S.InfoLabel>
           <S.InfoValue>************</S.InfoValue>
-          <S.ChangeButton>변경</S.ChangeButton>
+          <S.ChangeButton onClick={() => setEditingField('password')}>변경</S.ChangeButton>
         </S.InfoRow>
         <S.InfoRow>
           <S.InfoLabel>이메일</S.InfoLabel>
           <S.InfoValue>{userData.email}</S.InfoValue>
-          <S.ChangeButton>변경</S.ChangeButton>
+          <S.ChangeButton onClick={() => setEditingField('email')}>변경</S.ChangeButton>
         </S.InfoRow>
         <S.InfoRow>
           <S.InfoLabel>전화번호</S.InfoLabel>
           <S.InfoValue>{userData.phone || '-'}</S.InfoValue>
+          <S.ChangeButton onClick={() => setEditingField('phone')}>변경</S.ChangeButton>
+        </S.InfoRow>
+        <S.InfoRow>
+          <S.InfoLabel>선호 태그</S.InfoLabel>
+          {/* <S.InfoValue>{(userData.tags || []).join(', ') || '-'}</S.InfoValue> */}
           <S.ChangeButton>변경</S.ChangeButton>
         </S.InfoRow>
-        {/* <S.InfoRow>
-          <S.InfoLabel>선호 태그</S.InfoLabel>
-          <S.InfoValue>{(userData.tags || []).join(', ') || '-'}</S.InfoValue>
-          <S.ChangeButton>변경</S.ChangeButton>
-        </S.InfoRow> */}
       </S.InfoSection>
 
       {/* --- 3. 내 리뷰 --- */}
@@ -176,18 +213,58 @@ const MyPage: React.FC = () => {
                 favorite.event && <EventCard key={favorite.id} event={favorite.event as E.Event} /> 
               ))
             )}
-          </S.FavoriteGrid>
-           <S.ArrowButton direction="right" onClick={() => scrollFavorites('right')} aria-label="오른쪽으로 스크롤">
+            <S.ArrowButton direction="right" onClick={() => scrollFavorites('right')} aria-label="오른쪽으로 스크롤">
             <FaChevronRight />
           </S.ArrowButton>
+          </S.FavoriteGrid>
+          
         </S.FavoriteListContainer>
       </section>
 
       {/* --- 5. 하단 링크 --- */}
       <S.ActionLinks>
         <S.ActionLink href="/host-apply">행사 주최자 신청하기</S.ActionLink>
-        <S.ActionLink onClick={() => alert('회원 탈퇴 처리')}>회원탈퇴</S.ActionLink>
+        <S.ActionLink onClick={openDeleteAccountModal}>회원탈퇴</S.ActionLink>
       </S.ActionLinks>
+
+
+      {/* --- 6. 모달창 --- */}
+      {/* 필드 수정용 모달 */}
+      {editingField && editingField !== 'password' && editingField !== 'tags' && (
+        <Modal
+          isOpen={true}
+          onClose={() => setEditingField(null)}
+          title={`“${editingField}” 변경`}
+        >
+          <FieldEditForm
+            field={editingField}
+            initialValue={String(userData[editingField] || '')}
+            onCancel={() => setEditingField(null)}
+            onSave={(value) => handleFieldUpdate(editingField, value)}
+          />
+        </Modal>
+      )}
+
+      {editingField === 'password' && (
+        <Modal isOpen={true} onClose={() => setEditingField(null)} title="">
+          <ChangePasswordForm
+            onClose={() => setEditingField(null)}
+            onSuccess={() => alert('비밀번호가 변경되었습니다.')}
+          />
+        </Modal>
+      )}
+
+
+      <Modal
+        isOpen={isDeleteAccountModalOpen}
+        onClose={closeDeleteAccountModal}
+        title=""
+      >
+        <DeleteAccountForm
+          onClose={closeDeleteAccountModal}
+          onDeleted={handleAccountDeleted}
+        />
+      </Modal>
 
     </S.PageContainer>
   );

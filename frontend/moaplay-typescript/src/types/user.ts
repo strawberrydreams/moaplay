@@ -21,14 +21,14 @@ export interface RegisterPayload {
     nickname: string,
     email: string,
     password: string,
-    phone: string,
+    phone?: string,
     profile_image?: string
 }
 
 export interface DuplicateCheckPayload {
-    user_id: string,
-    nickname: string,
-    email: string
+    user_id?: string,
+    nickname?: string,
+    email?: string
 }
 
 export interface DeleteUserPayload {
@@ -41,9 +41,12 @@ export interface ChangePasswordPayload {
     new_password: string
 }
 
+
 export interface ChangeUserPayload {
     nickname?: string,
     email?: string,
     phone?: string,
+    password?: string;
+    tags?: string[],
     profile_image?: string
 }

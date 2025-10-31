@@ -54,11 +54,15 @@ export const RegionButtonWrapper = styled.button`
   border-radius: 8px;
   
   min-width: 120px; // 버튼 최소 너비
+
+  &:focus {
+    outline: none;
+  }
 `;
 
 export const RegionButtonIcon = styled.div<{ $isActive: boolean }>`
-  width: 120px; // 원형 아이콘 크기
-  height: 120px;
+  width: 90px; // 원형 아이콘 크기
+  height: 90px;
   border-radius: 50%;
   background-color: white; // 흰색 원
   display: flex;

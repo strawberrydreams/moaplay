@@ -26,12 +26,12 @@ export const Card = styled.div`
   box-shadow: 0 2px 4px rgba(0,0,0,0.05);
   display: flex;
   flex-direction: column;
+  
 
-  transition: transform 0.2s ease-in-out;
+  transition: box-shadow 0.2s ease-in-out;
 
   &:hover {
-    /* 마우스를 올리면 1.1배 커지도록 설정 */
-    transform: scale(1.01); 
+    box-shadow: 0 8px 10px rgba(0,0,0,0.07); 
   }
 `;
 
@@ -156,5 +156,9 @@ export const AddScheduleButton = styled.button`
   &:hover {
     background: #865dd1; /* 호버 시 약간 어둡게 */
     border-color: #865dd1;
+  }
+
+  &:focus {
+    outline: none;
   }
 `;

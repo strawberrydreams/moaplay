@@ -74,6 +74,7 @@ export const InputGroup = styled.div`
     flex-grow: 1; /* input이 남은 공간 채우도록 */
     width: 100%;
   }
+    
 `;
 
 
@@ -95,6 +96,10 @@ export const SearchButton = styled.button`
 
   &:hover {
     color: #333;
+  }
+
+  &:focus {
+    outline: none;
   }
 `;
 
@@ -118,6 +123,10 @@ export const ClearButton = styled.button`
 
   &:hover {
     color: #555;
+  }
+
+  &:focus {
+    outline: none;
   }
 `;
 
@@ -208,12 +217,16 @@ export const TagButton = styled.button<ITagButtonProps>`
     color: #777; 
     padding: 0.4rem 1rem; /* 👈 + 버튼은 오른쪽 패딩이 필요 없음 */
   }
+
+  &:focus {
+    outline: none;
+  }
 `;
 
 // --- 👇 1. 이 스타일을 새로 추가합니다. ---
 export const TagInput = styled.input`
   background-color: #fff;
-  border: 1px solid #8A2BE2; /* 활성화된 태그 버튼과 유사하게 */
+  border: 1px solid #E0E0E0;
   border-radius: 15px;
   padding: 0.4rem 0.8rem;
   font-size: 0.85rem;
@@ -224,6 +237,11 @@ export const TagInput = styled.input`
   
   &::placeholder {
     color: #aaa;
+  }
+    
+  &:focus {
+    outline: none;
+    border: 1px solid #8A2BE2; /* 활성화된 태그 버튼과 유사하게 */
   }
 `;
 
@@ -250,5 +268,12 @@ export const NoResultsMessage = styled.p`
   /* 추가 스타일 (선택 사항) */
   color: #777;
   padding: 3rem 0; /* 위아래 여백 */
+  font-size: 1rem;
+`;
+
+export const LoadingMessage = styled.div`
+  margin: 32px auto;
+  text-align: center;
+  color: #888;
   font-size: 1rem;
 `;

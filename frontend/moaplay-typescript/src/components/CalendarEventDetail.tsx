@@ -6,27 +6,30 @@ import { FaImage, FaSignInAlt, FaArrowLeft } from 'react-icons/fa';
 import { useModal } from '../hooks/useModal'; // 1. AuthModalContext 훅 임포트
 import * as SchedulesApi from '../service/schedulesApi'; // 일정 삭제 API
 import type { Schedule } from '../types/schedules'; // Schedule 타입 임포트
+import { useAuthContext } from '../context/AuthContext';
+
 
 // --- Props 타입 정의 ---
 interface IDetailProps {
-  // 👇 Prop 이름은 events, 타입은 E.Event[] (색상 포함)
-  events: E.Event[];      
-  schedules: Schedule[];
-  event: E.Event | null; // Calendar에서 클릭된 *이벤트* 정보 (유지)
-  onScheduleDeleted: () => void;
+  events: E.Event[];      // 찜한 이벤트 목록 (색상 포함)
+  schedules: Schedule[];  // 원본 찜 목록 (삭제용)
+  event: E.Event | null; // 캘린더/목록에서 클릭된 *이벤트* 정보
+  onScheduleDeleted: () => void; // 찜 삭제 후 새로고침 콜백
+  // 👇 3. 부모의 상태를 변경할 핸들러 2개 추가
+  onEventClick: (on: boolean, event?: E.Event) => void; // 목록에서 이벤트 선택용
+  onBackToList: () => void; // 뒤로가기용 (선택 해제)
 }
 
-const CalendarEventDetail: React.FC<IDetailProps> = ({ events = [], event, schedules, onScheduleDeleted}) => {
+const CalendarEventDetail: React.FC<IDetailProps> = ({ events = [], 
+  schedules, 
+  event, 
+  onScheduleDeleted,
+  onEventClick, // 4. 핸들러 받기
+  onBackToList  // 4. 핸들러 받기
+}) => {
   // --- 👇 로그인 관련 로직 유지 ---
   const { openLoginModal } = useModal();  // 로그인 모달 열기 함수 가져오기
-  const [isLoggedIn, setIsLoggedIn] = useState(false); // 로그인 상태
-  useEffect(() => {
-    checkLoginStatus(); // 마운트 시 로그인 상태 확인
-  }, []);
-  const checkLoginStatus = () => {
-    const token = localStorage.getItem('token'); // 또는 쿠키 확인 로직
-    setIsLoggedIn(!!token); 
-  };
+  const { user } = useAuthContext(); // 2. 로그인 사용자 정보 가져오기
   // --- 👆 로그인 관련 로직 끝 ---
 
 
@@ -51,7 +54,6 @@ const CalendarEventDetail: React.FC<IDetailProps> = ({ events = [], event, sched
   // --- 상세 카드 보기 ---
   const ShowEventsDetail: React.FC = () => {
     const displayEvent = selectedDetailEvent; 
-    console.log('선택된 상세 이벤트:', displayEvent);
 
     if (!displayEvent) {      
       return (
@@ -85,7 +87,7 @@ const CalendarEventDetail: React.FC<IDetailProps> = ({ events = [], event, sched
         
         // 6. 성공 시: 목록 보기로 돌아가고, 부모에게 새로고침 요청
         setSelectedDetailEvent(null); 
-        onScheduleDeleted(); // 👈 부모의 fetchAndSetSchedules 호출
+        onBackToList(); // 👈 부모의 fetchAndSetSchedules 호출
         alert("찜이 삭제되었습니다.");
 
       } catch (error) {
@@ -99,25 +101,23 @@ const CalendarEventDetail: React.FC<IDetailProps> = ({ events = [], event, sched
     return (
       <S.DetailCardWrapper> 
         <S.DetailImagePlaceholder>
+          {/* 11. displayEvent(E.Event)의 image_urls 사용 */}
           {displayEvent.image_urls && displayEvent.image_urls.length > 0 ? ( 
             <img src={displayEvent.image_urls[0]} alt={displayEvent.title} />
           ) : ( <FaImage className="placeholder-icon" /> )}
         </S.DetailImagePlaceholder>
-        <S.DetailTitle>{displayEvent.title}</S.DetailTitle>
+        {/* ... (DetailTitle, DetailInfoGrid - displayEvent 사용) ... */}
         <S.DetailInfoGrid>
-          <p>날짜: <span>{displayEvent.start_date}</span> ~ <span>{displayEvent.end_date}</span></p>
-          <p>주최자: <span>{displayEvent.host?.nickname || '정보 없음'}</span></p> 
-          <p>장소: <span>{displayEvent.location}</span></p>
-          <p>연락처: <span>{displayEvent.phone || '정보 없음'}</span></p> 
+           <p>날짜: <span>{displayEvent.start_date}</span> ~ <span>{displayEvent.end_date}</span></p>
+           <p>주최자: <span>{displayEvent.host?.nickname || '정보 없음'}</span></p> 
+           <p>장소: <span>{displayEvent.location}</span></p>
+           <p>연락처: <span>{displayEvent.phone || '정보 없음'}</span></p> 
         </S.DetailInfoGrid>
         <S.DetailTagList>
-          <h4>태그</h4> <br />
-          {tagsArray.map((tag, index) => ( <S.DetailTag key={index}>{tag}</S.DetailTag> ))}
+           <h4>태그</h4> <br />
+           {tagsArray.map((tag, index) => ( <S.DetailTag key={index}>{tag}</S.DetailTag> ))}
         </S.DetailTagList>
-        <S.DetailDescription>
-          <h4>행사 소개</h4>
-          <p>{displayEvent.description || '행사 소개가 없습니다.'}</p> 
-        </S.DetailDescription>
+        {/* ... (DetailDescription - displayEvent 사용) ... */}
         <S.ButtonGroup>
           <S.DetailButton>상세보기</S.DetailButton>
           <S.DetailButton danger onClick={handleDeleteSchedule}>삭제하기</S.DetailButton>
@@ -130,13 +130,13 @@ const CalendarEventDetail: React.FC<IDetailProps> = ({ events = [], event, sched
   const ShowEventList: React.FC = () => {
     return (
       <S.EventListWrapper>
-        {/* events 배열 (E.Event[]) 직접 사용 */}
-        {events.map(eventCard => ( 
-          console.log('이벤트 카드:', eventCard),
+        {/* 12. events prop (E.Event[])을 map으로 순회 */}
+        {events.map(eventCard => ( // 👈 변수명 eventCard (E.Event 타입)
           <S.EventListItem 
             key={eventCard.id} 
-            $dotColor={eventCard.color || '#4285F4'} 
-            onClick={() => setSelectedDetailEvent(eventCard)} 
+            $dotColor={eventCard.color || '#4285F4'} // 👈 eventCard.color
+            // 13. 클릭 시 부모의 handleCalendarEventSelect 호출
+            onClick={() => onEventClick(true, eventCard)} 
           >
             <div className="event-dot"></div>
             <div className="event-title">{eventCard.title}</div> 
@@ -151,14 +151,14 @@ const CalendarEventDetail: React.FC<IDetailProps> = ({ events = [], event, sched
   return (
     <S.CalendarDetailWrapper>
       <S.CalendarDetailHeader>
-        {selectedDetailEvent && ( 
-          <S.BackButton onClick={handleBackToList}> <FaArrowLeft /> </S.BackButton>
+        {event && ( 
+          <S.BackButton onClick={onBackToList}> <FaArrowLeft /> </S.BackButton>
         )}
         <S.HeaderTitle>담은 행사</S.HeaderTitle>
       </S.CalendarDetailHeader>
 
       {/* --- 👇 로그인 관련 조건 렌더링 유지 --- */}
-      {isLoggedIn ? ( 
+      {!user ? ( 
         <S.LoginPromptWrapper>
           <p>담은 행사를 보려면 로그인 해주세요.</p>
           <S.LoginButton onClick={openLoginModal}> 

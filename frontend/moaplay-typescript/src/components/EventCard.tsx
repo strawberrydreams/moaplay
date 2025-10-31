@@ -5,7 +5,7 @@ import * as E from '../types/events'; // 행사 타입
 import { FaImage, FaHeart, FaRegHeart } from 'react-icons/fa';
 import * as S from '../styles/EventCard.styles';
 import * as FavoriteApi from '../service/favoritesApi';
-import { useAuth } from '../context/AuthContext';
+import { useAuthContext } from '../context/AuthContext';
 import type {FavoriteStatus } from '../types/favorites';
 import * as CalendarApi from '../service/schedulesApi';
 
@@ -18,7 +18,7 @@ const EventCard: React.FC<{ event: E.Event }> = ({ event }) => {
   const [isLiked, setIsLiked] = useState(false);
   let navigate = useNavigate();
   
-  const { currentUser } = useAuth();
+  const { user: currentUser} = useAuthContext();
   const checkFavorite = async () => {
     if (!currentUser) return;
     const favorite = await FavoriteApi.getFavoriteById(event.id);
@@ -76,7 +76,9 @@ const EventCard: React.FC<{ event: E.Event }> = ({ event }) => {
         <h3>{event.title}</h3>
         <p>날짜: {event.start_date} ~ {event.end_date}</p>
         <p>주소: {event.location}</p>
-        <span className="card-tag">태그: {event.tags.join(', ')}</span>
+        <span className="card-tag">
+          태그: {event.tags?.length ? event.tags.join(', ') : '없음'}
+        </span>
       </S.CardContent>
       <S.CardFooter>
         <S.AddScheduleButton onClick={handleAddToSchedule}>일정 추가</S.AddScheduleButton>

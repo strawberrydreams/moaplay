@@ -1,137 +1,128 @@
-// src/pages/EventSearchPage.tsx
-import React, { useEffect, useState, type KeyboardEvent, type MouseEvent } from 'react';
-import {useForm} from '../hooks/useForm';
-import * as E from '../types/events'; // 행사 타입
+import React, { useEffect, useRef, type KeyboardEvent, type MouseEvent } from 'react';
+import { useForm } from '../hooks/useForm';
+import { useTags } from '../hooks/useTags';
+import * as E from '../types/events';
+import * as EventApi from '../service/eventsApi';
 import EventCard from './EventCard';
-import * as EventApi from '../service/eventsApi'; // 행사 API
 import { FaFilter, FaSearch } from 'react-icons/fa';
 import * as S from '../styles/EventSearch.styles';
 
-
-// const initialSearchValues: E.GetEventsPayload = {
-//     // search: '',
-//     page: 1,
-//     limit: 12,
-//     region: '',
-//     tag: [],
-//     date_from: '',
-//     date_to: '',
-//     sort: '',
-//     order: 'desc',
-// };
-
 const initialSearchValues: E.GetEventsPayload = {
-    page: 1,
-    per_page: 12,
-    status: 'approved',
-    location: '',
-    sort: 'start_date',
-    order: 'desc',
+  page: 1,
+  per_page: 12,
+  status: 'approved',
+  location: '',
+  sort: 'start_date',
+  order: 'desc',
 };
 
 const validateSearch = (values: E.GetEventsPayload): Partial<Record<keyof E.GetEventsPayload, string>> => {
-    const errors: Partial<Record<keyof E.GetEventsPayload, string>> = {};
-    // if (!values.search) {
-    //     errors.search = '검색어를 입력해주세요.';
-    // }
-    return errors;
+  const errors: Partial<Record<keyof E.GetEventsPayload, string>> = {};
+  return errors;
 };
 
-// 태그 최대 개수 상수로 정의
-const MAX_TAGS = 5;
-
-// 초기 태그 목록을 빈 배열로 변경
-const initialTags: string[] = [];
-
 const EventSearchPage: React.FC = () => {
-  const [tags, setTags] = useState(initialTags); 
-  // 3. activeTag 초기값을 null로 변경
-  const [activeTag, setActiveTag] = useState<string | null>(null);
-  const [events, setEvents] = useState<E.Event[]>([]);
-
-  // 4. 태그 추가 UI를 위한 state 추가
-  const [isAddingTag, setIsAddingTag] = useState(false);
-  const [newTagInput, setNewTagInput] = useState("");
-
-  const handleAddTag = () => {
-    // 1. 태그 개수가 이미 5개 이상인지 먼저 확인
-    if (tags.length >= MAX_TAGS) {
-      alert("태그는 최대 5개까지 추가할 수 있습니다.");
-      setIsAddingTag(false); // 입력창 닫기
-      setNewTagInput(""); // 입력창 초기화
-      return;
+  const {
+    values,
+    setValues,
+    errors,
+    isSubmitting,
+    handleChange,
+    handleSubmit
+  } = useForm<E.GetEventsPayload>({
+    initialValues: initialSearchValues,
+    validate: validateSearch,
+    onSubmit: EventApi.getEvents,
+    onSuccess: () => {
+      // 초기 호출에서는 아래 effect에서 처리
+    },
+    onError: (err) => {
+      console.error('검색 오류:', err);
+      alert(err.response?.data?.error || '검색 중 오류가 발생했습니다.');
     }
-
-    if (newTagInput.trim() && !tags.includes(newTagInput.trim())) {
-      const newTag = newTagInput.trim();
-      setTags([...tags, newTag]);
-      setActiveTag(newTag); // 4. 새 태그를 추가하면 바로 활성화
-      setNewTagInput(""); 
-      setIsAddingTag(false); 
-    }
-  };
-
-  // Enter 키로 태그를 추가하는 핸들러
-  const handleInputKeyDown = (e: KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === 'Enter') {
-      e.preventDefault(); // 폼 제출 방지
-      handleAddTag();
-    }
-    if (e.key === 'Escape') {
-      setIsAddingTag(false); // Esc로 취소
-      setNewTagInput("");
-    }
-  };
-
-  // 태그 삭제 핸들러 추가
-  const handleDeleteTag = (e: MouseEvent<HTMLSpanElement>, tagToDelete: string) => {
-    e.stopPropagation(); // 👈 중요: 부모(TagButton)의 onClick이 실행되지 않도록 막기
-    setTags(prevTags => prevTags.filter(tag => tag !== tagToDelete));
-
-    // 만약 활성화된 태그를 삭제하면 activeTag를 null로 초기화
-    if (activeTag === tagToDelete) {
-      setActiveTag(null);
-    }
-  };
-
-  // 검색 입력 지우는 함수
-  const clearSearch = () => {
-      // useForm 훅의 setValues를 사용해 'search' 필드 업데이트
-      setValues(prev => ({
-          ...prev,
-          search: '' // search 값을 빈 문자열로 설정
-      }));
-  };
-
-  const {values, setValues, errors, isSubmitting, handleChange, handleSubmit} = useForm<E.GetEventsPayload>({
-      initialValues: initialSearchValues,
-      validate: validateSearch,
-      onSubmit: EventApi.getEvents,
-      onSuccess: (response) => {
-          console.log('검색 성공:', response);
-          setEvents(response.events || []);
-      },
-      onError: (error) => {
-          console.error('검색 오류:', error);
-          alert(error.response?.data?.error || "검색 중 오류가 발생했습니다.");
-      }
   });
 
-  // --- 컴포넌트 마운트 시 초기 데이터 로드 ---
-  useEffect(() => {
-    const fetchInitialEvents = async () => {
-      try {
-        const response = await EventApi.getEvents(initialSearchValues);
-        setEvents(response.events || []);
-      } catch (error) {
-        console.error("초기 행사 목록 로딩 실패:", error);
-        setEvents([]);
-      }
-    };
-    fetchInitialEvents();
-  }, []);
+  const { tags, activeTag, newTagInput, setNewTagInput, handleNewTagInputChange, addTag, deleteTag, setActiveTag } = useTags(5);
 
-  // 2. 모든 컴포넌트를 S.xxx로 변경
+  const [events, setEvents] = React.useState<E.Event[]>([]);
+  const [page, setPage] = React.useState(1);
+  const [hasMore, setHasMore] = React.useState(true);
+  const [loadingMore, setLoadingMore] = React.useState(false);
+
+  const bottomRef = useRef<HTMLDivElement | null>(null);
+
+  // 검색 조건이 바뀌면 페이지 리셋 & 데이터 초기화
+  useEffect(() => {
+    setPage(1);
+    setEvents([]);
+    setHasMore(true);
+    // fetch first page
+    fetchEvents(1);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [values.location, values.sort, activeTag /* + tags if 태그 필터 API 반영시 */]);
+
+  // 페이지 변경시 더 로드
+  useEffect(() => {
+    if (page === 1) return; // 이미 첫 페이지는 위에서 호출됨
+    fetchEvents(page);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [page]);
+
+  const fetchEvents = async (pageToLoad: number) => {
+    if (loadingMore) return;
+    setLoadingMore(true);
+    try {
+      const payload: E.GetEventsPayload = {
+        ...values,
+        page: pageToLoad,
+        // 태그 필터가 있다면 추가
+        tag: tags,
+      } as any;
+      const res = await EventApi.getEvents(payload);
+      const newEvents = res.events || [];
+      setEvents(prev => (pageToLoad === 1 ? newEvents : [...prev, ...newEvents]));
+      setHasMore(newEvents.length >= values.per_page!);
+    } catch (err) {
+      console.error('행사 목록 로딩 실패:', err);
+    } finally {
+      setLoadingMore(false);
+    }
+  };
+
+  const handleInputKeyDown = (e: KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      addTag();
+    }
+    if (e.key === 'Escape') {
+      setNewTagInput('');
+    }
+  };
+
+  const handleDeleteTagClick = (e: MouseEvent<HTMLSpanElement>, tag: string) => {
+    e.stopPropagation();
+    deleteTag(tag);
+  };
+
+  // IntersectionObserver for infinite scroll
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      entries => {
+        const first = entries[0];
+        if (first.isIntersecting && hasMore && !loadingMore) {
+          setPage(prev => prev + 1);
+        }
+      },
+      { threshold: 1 }
+    );
+    const current = bottomRef.current;
+    if (current) observer.observe(current);
+
+    return () => {
+      if (current) observer.unobserve(current);
+    };
+  }, [hasMore, loadingMore]);
+
   return (
     <S.Container>
       <S.SearchContainer onSubmit={handleSubmit}>
@@ -139,32 +130,28 @@ const EventSearchPage: React.FC = () => {
           <S.InputGroup className="search-bar">
             <label htmlFor="event-search">검색</label>
             <input
-                id="event-search"
-                type="text"
-                // name="search"
-                placeholder="행사의 제목을 입력해주세요"
-                // value={values.search || ''}
-                // onChange={handleChange}
+              id="event-search"
+              type="text"
+              name="search"
+              placeholder="행사의 제목을 입력해주세요"
+              value={(values as any).search || ''}
+              onChange={handleChange}
             />
-            {/* {values.search && (
-                <S.ClearButton type="button" onClick={clearSearch}>
-                    &times;
-                </S.ClearButton>
-            )} */}
             <S.SearchButton type="submit" disabled={isSubmitting}>
-                <FaSearch />
+              <FaSearch />
             </S.SearchButton>
-        </S.InputGroup>
+          </S.InputGroup>
+
           <S.InputGroup>
             <label htmlFor="location">장소</label>
-            <select id="location"
-              name='location'
-              // value={values.region || ''}
+            <select
+              id="location"
+              name="location"
               value={values.location || ''}
               onChange={handleChange}
               onClick={handleSubmit}
             >
-              <option value="">전체</option>
+               <option value="">전체</option>
               <option value="서울">서울</option>
               <option value="부산">부산</option>
               <option value="대구">대구</option>
@@ -182,34 +169,35 @@ const EventSearchPage: React.FC = () => {
               <option value="경북">경북</option>
               <option value="경남">경남</option>
               <option value="제주">제주</option>
+              <option value="서울">서울</option>
+              {/* ... */}
             </select>
           </S.InputGroup>
+
           <S.DateRangeGroup>
             <label htmlFor="start-date">시작일</label>
-            <input 
-                type="date" 
-                id="start-date" 
-                // name='date_from'
-                // value={values.date_from}
-                // onChange={handleChange}
-                // onClick={handleSubmit}
+            <input
+              type="date"
+              id="start-date"
+              name="date_from"
+              value={(values as any).date_from || ''}
+              onChange={handleChange}
             />
             <span>~</span>
             <label htmlFor="end-date">종료일</label>
-            <input 
-                type="date" 
-                id="end-date" 
-                // name='date_to'
-                // value={values.date_to}
-                // onChange={handleChange}
-                // onClick={handleSubmit}
+            <input
+              type="date"
+              id="end-date"
+              name="date_to"
+              value={(values as any).date_to || ''}
+              onChange={handleChange}
             />
           </S.DateRangeGroup>
         </S.FormRow>
 
         <S.FilterRow>
           <S.FilterGroup>
-            <label className="filter-label"><FaFilter size={14} /> 필터</label>
+            <label className="filter-label"><FaFilter size={14} /> 필터</label>
             <S.TagList>
               {tags.map(tag => (
                 <S.TagButton
@@ -218,39 +206,26 @@ const EventSearchPage: React.FC = () => {
                   onClick={() => setActiveTag(tag)}
                 >
                   {tag}
-                  <S.DeleteTagButton onClick={(e) => handleDeleteTag(e, tag)}>
+                  <S.DeleteTagButton onClick={(e) => handleDeleteTagClick(e, tag)}>
                     &times;
                   </S.DeleteTagButton>
                 </S.TagButton>
               ))}
 
-              {isAddingTag ? (
-                <S.TagInput //
-                  type="text"
-                  value={newTagInput}
-                  onChange={(e) => setNewTagInput(e.target.value)}
-                  onKeyDown={handleInputKeyDown}
-                  onBlur={handleAddTag} // 포커스가T(DOM)에서 벗어날 때도 추가
-                  placeholder="태그 입력..."
-                  autoFocus // 입력창이 나타날 때 자동으로 포커스
-                  onClick={handleSubmit}
-                />
-              ) : (
-                <S.TagButton
-                  className="add-tag"
-                  onClick={() => setIsAddingTag(true)} // + 버튼 클릭 시 입력창 표시
-                >
-                  태그 추가 +
-                </S.TagButton>
-              )}
-
-
+              <S.TagInput
+                type="text"
+                value={newTagInput}
+                onChange={handleNewTagInputChange}
+                onKeyDown={handleInputKeyDown}
+                placeholder="태그 입력"
+              />
             </S.TagList>
           </S.FilterGroup>
+
           <S.InputGroup>
-            <select 
-              id="sort" 
-              name='sort' 
+            <select
+              id="sort"
+              name="sort"
               value={values.sort || 'start_date'}
               onChange={handleChange}
               onClick={handleSubmit}
@@ -260,17 +235,17 @@ const EventSearchPage: React.FC = () => {
             </select>
           </S.InputGroup>
         </S.FilterRow>
-
       </S.SearchContainer>
 
       <S.EventGrid>
-        {events.length === 0 && 
+        {events.length === 0 && !loadingMore && (
           <S.NoResultsMessage>검색된 행사가 없습니다.</S.NoResultsMessage>
-        }
-        {events.map(event => (
-          <EventCard key={event.id} event={event} />
-        ))}
+        )}
+        {events.map(event => <EventCard key={event.id} event={event} />)}
       </S.EventGrid>
+
+      {loadingMore && <S.LoadingMessage>불러오는 중…</S.LoadingMessage>}
+      <div ref={bottomRef} />
     </S.Container>
   );
 };

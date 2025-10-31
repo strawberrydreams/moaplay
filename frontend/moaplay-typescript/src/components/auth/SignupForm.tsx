@@ -1,7 +1,7 @@
 import React, { useState, useCallback, type FocusEvent } from 'react'; // 1. FocusEvent 임포트
 import { useForm } from '../../hooks/useForm'; // 👈 제네릭 훅 임포트
 import * as UserApi from '../../service/userApi'; // 회원가입 API
-import type { RegisterPayload } from '../../service/userApi';
+import type { RegisterPayload, DuplicateCheckPayload } from '../../types/user';
 
 import {
     FormContainer,
@@ -114,10 +114,10 @@ const SignupForm: React.FC<SignupFormProps> = ({ onSwitchToLogin, onGoTags }) =>
 
     // 5. handleBlur (중복 확인) 함수 정의
     const handleBlur = useCallback(async (e: FocusEvent<HTMLInputElement>) => {
-        const { name, value } = e.target as { name: keyof typeof isDuplicate; value: string };
+        const { name, value } = e.target;
 
         // 빈 값이거나 중복 확인 대상 필드가 아니면 종료
-        if (!value || !(name === 'user_id' || name === 'nickname' || name === 'email')) return;
+        if (!value || !['user_id', 'nickname', 'email'].includes(name)) return;
 
         // 기존 에러/성공 메시지 초기화
         setSuccessMessage(prev => ({ ...prev, [name]: '' }));
@@ -125,7 +125,7 @@ const SignupForm: React.FC<SignupFormProps> = ({ onSwitchToLogin, onGoTags }) =>
         // setErrors(prev => ({ ...prev, [name]: undefined }));
 
         try {
-            const payload = { type: name, value: value };
+            const payload: DuplicateCheckPayload = { [name]: value };
             const response = await UserApi.checkDuplicate(payload); // API 이름 확인!
 
             if (response.available) {

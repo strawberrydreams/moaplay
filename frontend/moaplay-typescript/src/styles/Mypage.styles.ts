@@ -151,6 +151,7 @@ export const FavoriteGrid = styled.div`
   &::-webkit-scrollbar { display: none; }
   -ms-overflow-style: none; 
   scrollbar-width: none; 
+  width: 300px;
 `;
 
 export const ArrowButton = styled.button<{ direction: 'left' | 'right' }>`
@@ -173,6 +174,7 @@ export const ArrowButton = styled.button<{ direction: 'left' | 'right' }>`
   z-index: 2;
   opacity: 0.7;
   transition: opacity 0.2s ease;
+  padding: 0px;
 
   &:hover { opacity: 1; }
   // 맨 처음/끝일 때 숨기거나 비활성화하는 로직 필요

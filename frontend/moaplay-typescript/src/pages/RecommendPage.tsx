@@ -5,7 +5,7 @@ import type * as E from '../types/events';          // Event 타입 경로 확�
 import EventCard from '../components/EventCard';               // EventCard 컴포넌트 경로 확인
 import { EventGrid, NoResultsMessage } from '../styles/EventSearch.styles'; // EventGrid 스타일 경로 확인
 import styled from 'styled-components';            // styled-components 임포트
-import { useAuth } from '../context/AuthContext'; // 사용자 로그인 상태 확인용
+import { useAuthContext } from '../context/AuthContext'; // 사용자 로그인 상태 확인용
 
 // --- 페이지 스타일 (다른 추천 페이지와 유사하게) ---
 const PageContainer = styled.div`
@@ -22,7 +22,7 @@ const PageTitle = styled.h1`
 
 // --- 선호 태그 기반 추천 페이지 컴포넌트 ---
 const RecommendedEventsPage: React.FC = () => {
-  const { currentUser } = useAuth(); // 로그인 사용자 정보 가져오기
+  const { user:currentUser } = useAuthContext(); // 로그인 사용자 정보 가져오기
   const [recommendedEvents, setRecommendedEvents] = useState<E.Event[]>([]);
   const [preferredTags, setPreferredTags] = useState<string[]>([]); // 사용자 선호 태그
   const [isLoading, setIsLoading] = useState(true);

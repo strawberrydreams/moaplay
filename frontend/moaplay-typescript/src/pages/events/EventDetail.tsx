@@ -12,7 +12,8 @@ import {useModal} from '../../hooks/useModal';
 import ReviewForm from '../../components/ReviewForm.tsx';
 import ReviewDetail from '../../components/ReviewDetail';
 import { FaImage } from 'react-icons/fa';
-import {useAuth} from '../../context/AuthContext.tsx';
+import {useAuthContext} from '../../context/AuthContext.tsx';
+import LoginForm from '../../components/auth/LoginForm.tsx';
 
   // 리뷰 배열을 받아 평균 평점을 계산하는 함수
 const calculateAverageRating = (reviews: R.Review[]): number => {
@@ -28,13 +29,14 @@ const calculateAverageRating = (reviews: R.Review[]): number => {
 
 
 const EventDetail: React.FC = () => {
-  const { currentUser } = useAuth(); // 2. 로그인 사용자 정보 가져오기
+  const { user } = useAuthContext(); // 2. 로그인 사용자 정보 가져오기
   const [currentImageIndex, setCurrentImageIndex] = useState<number>(0);
   const [eventDetail, setEventDetail] = useState<E.Event>();
   const [eventReview, setEventReview] = useState<R.Review[]>([]);
   const [selectedReview, setSelectedReview] = useState<R.Review | null>(null);
   const { eventId } = useParams<{ eventId: string }>();
   const numericEventId = Number(eventId); // 숫자로 변환
+  const [editingReview, setEditingReview] = useState<R.Review | null>(null);
 
   const { 
       setReviewDetailModalOpen,
@@ -42,7 +44,10 @@ const EventDetail: React.FC = () => {
       isReviewDetailModalOpen,
       openReviewModal,
       closeReviewModal,
-      closeReviewDetailModal
+      closeReviewDetailModal,
+      openLoginModal,
+      loginToSignUp,
+      closeAllModals
   } = useModal();
 
   const openDetailModal = (review: R.Review) => {
@@ -109,10 +114,11 @@ const EventDetail: React.FC = () => {
   }
 
   // --- (리뷰 수정/삭제 핸들러 - 임시) ---
-  const handleEditReview = (reviewId: number) => {
-      console.log(`리뷰 수정: ${reviewId}`);
-      // TODO: 리뷰 수정 모달 열기 또는 페이지 이동 로직
+  const handleEditReview = (review: R.Review) => {
+    setEditingReview(review);
+    openReviewModal(); // 기존 모달 재활용
   };
+
   const handleDeleteReview = (reviewId: number) => {
       console.log(`리뷰 삭제: ${reviewId}`);
       // TODO: 리뷰 삭제 API 호출 및 목록 새로고침 로직
@@ -121,6 +127,11 @@ const EventDetail: React.FC = () => {
           window.location.reload();
       }
   };
+
+  const onClose = () => {
+    closeReviewModal();
+    setEditingReview(null);
+  }
 
   return (
     <S.DetailContainer>
@@ -202,7 +213,15 @@ const EventDetail: React.FC = () => {
             총 <span>{eventReview?.length}개</span>
           </p>
         </S.ReviewStats>
-        <S.ReviewWriteButton onClick={openReviewModal}>글쓰기</S.ReviewWriteButton>
+        <S.ReviewWriteButton onClick={() => {
+          if (user) {
+            openReviewModal();
+          } else {
+            openLoginModal(); // 🔥 비로그인 시 로그인 유도
+          }
+        }}>
+          글쓰기
+        </S.ReviewWriteButton>
       </S.ReviewHeader>
 
       <S.ReviewGrid>
@@ -243,9 +262,9 @@ const EventDetail: React.FC = () => {
                 <S.ReviewRating>{renderStars(review.rating)}</S.ReviewRating>
               </S.ReviewFooter>
 
-              {currentUser && currentUser.id === review.user.id && ( // 로그인했고 작성자와 ID가 같으면
+              {user && user.id === review.user.id && ( // 로그인했고 작성자와 ID가 같으면
                 <S.ReviewActions onClick={(e) => e.stopPropagation()}> {/* 카드 클릭 방지 */}
-                  <S.ActionButton onClick={() => handleEditReview(review.id)}>
+                  <S.ActionButton onClick={() => handleEditReview(review)}>
                     수정
                   </S.ActionButton>
                   <S.ActionButton danger onClick={() => handleDeleteReview(review.id)}>
@@ -261,14 +280,14 @@ const EventDetail: React.FC = () => {
 
       <Modal 
         isOpen={isReviewModalOpen} 
-        onClose={closeReviewModal} 
+        onClose={onClose} 
         title=""
       >
         <ReviewForm 
-          event_id={Number(eventId)} 
-          onClose={closeReviewModal} 
-          // (선택) 리뷰 작성 성공 시 리뷰 목록 새로고침 함수 전달
-          onReviewSubmitSuccess={loadEventDetails} 
+          event_id={Number(eventId)}
+          onClose={onClose}
+          onReviewSubmitSuccess={loadEventDetails}
+          review={editingReview || undefined} // 수정용 데이터 전달
         />
       </Modal>
 

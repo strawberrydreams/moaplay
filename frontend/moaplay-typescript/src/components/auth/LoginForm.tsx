@@ -1,7 +1,7 @@
 import React from 'react';
 import { useForm } from '../../hooks/useForm'; // 👈 제네릭 훅 임포트
-import type { LoginPayload } from '../../types/user';
-import { useAuth } from '../../context/AuthContext';
+import type { LoginPayload } from '../../types/auth';
+import { useAuthContext } from '../../context/AuthContext';
 import * as AuthApi from '../../service/authApi'; // 로그인 API
 import {
     FormContainer,
@@ -28,7 +28,7 @@ interface LoginFormProps {
 
 // --- LoginForm 컴포넌트 ---
 const LoginForm: React.FC<LoginFormProps> = ({ onSwitchToSignUp, onCloseModal }) => {
-  const { login } = useAuth();
+  const { login } = useAuthContext();
   // 2. useForm 훅 호출 (타입 <LoginPayload> 지정)
   const { values, errors, isSubmitting, handleChange, handleSubmit } = useForm<LoginPayload>({
     initialValues: initialLoginValues,
@@ -40,6 +40,7 @@ const LoginForm: React.FC<LoginFormProps> = ({ onSwitchToSignUp, onCloseModal })
       // setLoggedInUser(response); 
       login(response);
       onCloseModal();
+      window.location.reload(); // 페이지 새로고침
     },
     onError: (error) => {             // 실패 시 실행할 콜백
       console.error('Login error:', error);

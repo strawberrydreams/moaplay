@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 
-import { useAuth } from "../../context/AuthContext";
+import { useAuthContext } from "../../context/AuthContext";
 import { validateEventForm } from '../../utils/validation';
 import { useEventUpdate } from '../../hooks/useEventCreate';
 import type { EventFormData } from './EventCreatePage';
@@ -53,8 +53,8 @@ export const EventUpdatePage: React.FC = () => {
         ?? (params.event_id as string | undefined);
     const eventId = rawId ? Number(rawId) : NaN;
     const navigate = useNavigate();
-    const auth = useAuth();
-    const user = auth?.currentUser;
+    const auth = useAuthContext();
+    const user = auth?.user;
     const isAuthenticated = !!user;
 
     const { updateEvent, isLoading, error } = useEventUpdate(eventId);

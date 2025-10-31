@@ -33,9 +33,9 @@ export const getServerStatus = async (): Promise<boolean> => {
 // 성공 시 True (사용 가능), 실패 시 False 또는 오류 응답
 export const checkDuplicate = async (
     payload: DuplicateCheckPayload
-): Promise<User> => {
+): Promise<{available: boolean}> => {
     // //users/check?type=user_id&value=testuser 형태로 요청
-    const { data } = await axiosInstance.get<User>('/users/check', {
+    const { data } = await axiosInstance.get<{available: boolean}>('/users/check/', {
         params: payload,
     });
     return data;
@@ -62,18 +62,18 @@ export const changeUser = async (payload: ChangeUserPayload): Promise<User> => {
 
 // (PUT) 내 정보 가져오기
 export const getMe = async (): Promise<User> => {
-    const { data } = await axiosInstance.get<User>('/users/me/');
+    const { data } = await axiosInstance.get<User>('/users/me');
     return data;
 };
 
 // (PUT) 유저 정보 가져오기
 export const getUser = async (id : number): Promise<User> => {
-    const { data } = await axiosInstance.put<User>(`/users/me/${id}`);
+    const { data } = await axiosInstance.get<User>(`/users/${id}`);
     return data;
 };
 
 // (DELETE) 회원 탈퇴
-export const DeleteUser = async (payload: DeleteUserPayload): Promise<{success: boolean}> => {
+export const deleteUser = async (payload: DeleteUserPayload): Promise<{success: boolean}> => {
     const {data} = await axiosInstance.delete<{success: boolean}>('/users/me/', { data: payload });
     return data;
 }

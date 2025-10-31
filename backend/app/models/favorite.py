@@ -43,7 +43,8 @@ class Favorite(db.Model):
                 "location": self.event.location,
                 "image_urls": self.event.image_urls or [],
                 "status": self.event.status.value,
-                "average_rating": float(self.event.average_rating)
+                "average_rating": float(self.event.average_rating),
+                "tags": [tag.tag.name for tag in self.event.tags] if self.event.tags else []
             },
             "created_at": self.created_at.isoformat()
         }

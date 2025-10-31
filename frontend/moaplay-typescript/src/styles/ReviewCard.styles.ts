@@ -152,4 +152,6 @@ export const ActionButton = styled.button<{ danger?: boolean }>`
     color: ${props => props.danger ? '#d9363e' : '#333'};
     text-decoration: underline;
   }
+
+  outline: none;
 `;

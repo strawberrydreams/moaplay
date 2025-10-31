@@ -1,3 +1,5 @@
+import type {Event} from '../types/events';
+
 // =================================================================
 // == Response (응답) 타입들
 // =================================================================
@@ -6,9 +8,24 @@
 // API: GET /api/favorites (목록 조회의 각 항목)
 export interface Favorite {
     id: number;
-    user_id: number;
-    event_id: number;
+    user: {
+        id: number;
+        nickname: string;
+        profile_image: string | null;
+    }
+    event : Event;
     created_at: string;
+}
+
+
+export interface FavoriteResponse {
+    "favorites": Favorite;
+    "pagination": {
+        "page": number;
+        "per_page": number;
+        "total": number;
+        "pages": number;
+    }
 }
 
 export interface FavoriteStatus {

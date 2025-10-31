@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-
 import {useAdminDashboard} from "../../hooks/useAdminDashboard";
 import {ApprovedEventsModal} from "../../components/admin/ApprovedEventsModal";
 import {PendingEventsModal} from "../../components/admin/PendingEventsModal";
@@ -9,7 +8,7 @@ import { getApprovedEvents, getPendingEvents } from "../../service/adminApi";
 import Header from "../../components/Header";
 import Footer from "../../components/Footer";
 import {MenuItem} from "../../styles/ProfileDropdown.styles";
-import { useAuth } from "../../context/AuthContext";
+import { useAuthContext } from "../../context/AuthContext";
 import {
     PageContainer,
     MainContent,
@@ -30,7 +29,7 @@ export const AdminDashboardPage: React.FC = () => {
     const [approvedCount, setApprovedCount] = useState(0);
     const [pendingCount, setPendingCount] = useState(0);
     // TODO: 추후 전체 사용자 목록 받아오는 부분 업데이트
-    const { logout, currentUser } = useAuth();
+    const { logout, user:currentUser } = useAuthContext();
     const {
         stats,
         statsError,

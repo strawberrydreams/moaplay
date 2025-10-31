@@ -1,4 +1,4 @@
-import axiosInstance from './core'; // 공용 Axios 인스턴스 (이미 프로젝트에 존재)
+import axiosInstance from './core';
 import type {
     Tag,
     UserPreferredTagsPayload,

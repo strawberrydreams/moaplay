@@ -57,5 +57,5 @@ export interface UpdateReviewPayload {
     title: string;
     content: string;
     rating: number;
-    image_urls: string[];
+    image_urls?: string[];
 }

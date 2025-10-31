@@ -5,7 +5,7 @@ import type * as E from '../types/events';
 
 // (GET) 모든 행사 목록 조회 (페이지네이션)
 export const getEvents = async (params : E.GetEventsPayload): Promise<E.Event[]> => {
-    const { data } = await axiosInstance.get<E.Event[]>('/events', {params: params});
+    const { data } = await axiosInstance.get<E.Event[]>('/events/', {params: params});
     return data;
 };
 
@@ -17,7 +17,7 @@ export const getEventById = async (id: number): Promise<E.Event> => {
 
 // (POST) 새로운 행사 등록 & 신청
 export const createEvent = async (payload: Partial<E.CreateEventPayload>): Promise<Event> => {
-    const { data } = await axiosInstance.post<Event>('/events', payload);
+    const { data } = await axiosInstance.post<Event>('/events/', payload);
     return data;
 };
 
