@@ -1,9 +1,8 @@
-import React, {useMemo} from 'react';
+import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import logoImage from '../assets/logo.png';
 import { FaSignInAlt } from 'react-icons/fa';
-import { useAuthContext } from '../context/AuthContext';
-import { useModal } from '../hooks/useModal';
+import { useAuthContext } from '../contexts/AuthContext';
 
 import { StyledHeader, LogoContainer, Nav, AuthSection, LoginButton } from '../styles/Header.styles';
 import ProfileDropdown from './ProfileDropdown.tsx';

@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { tagsApi } from "../../service/tagsApi";
+import { tagsApi } from "../../services/tagsApi";
 import type { Tag } from "../../types/tags";
 import {
     FormContainer,

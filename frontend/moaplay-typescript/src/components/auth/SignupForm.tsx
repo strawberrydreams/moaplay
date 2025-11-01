@@ -1,7 +1,7 @@
 import React, { useState, useCallback, type FocusEvent } from 'react'; // 1. FocusEvent 임포트
 import { useForm } from '../../hooks/useForm'; // 👈 제네릭 훅 임포트
-import * as UserApi from '../../service/userApi'; // 회원가입 API
-import type { RegisterPayload, DuplicateCheckPayload } from '../../types/user';
+import * as UserApi from '../../services/usersApi'; // 회원가입 API
+import type { RegisterPayload, DuplicateCheckPayload } from '../../types/users';
 
 import {
     FormContainer,

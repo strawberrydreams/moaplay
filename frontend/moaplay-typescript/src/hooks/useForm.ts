@@ -91,7 +91,7 @@ export function useForm<T>({
     } else {
       setIsSubmitting(false); // 유효성 검사 실패 시 로딩 해제
     }
-  }, [values, validate, onSubmit, onSuccess, onError, initialValues]);
+  }, [values, validate, onSubmit, onSuccess, onError]);
 
   // 훅 반환 값
   return {

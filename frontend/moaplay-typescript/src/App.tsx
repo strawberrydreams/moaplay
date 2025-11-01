@@ -15,7 +15,7 @@ import Footer from './components/Footer';
 
 // Modal 제어 커스텀 Hook
 import { useModal } from './hooks/useModal';
-import { AuthProvider } from './context/AuthContext';
+import { AuthProvider } from './contexts/AuthContext';
 import PopularEventsPage from './pages/PopularEventsPage';
 import RegionalEventsPage from './pages/RegionPage';
 import RecommendedEventsPage from './pages/RecommendPage';

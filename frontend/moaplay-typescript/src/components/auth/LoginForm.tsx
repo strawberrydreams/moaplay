@@ -1,8 +1,8 @@
 import React from 'react';
 import { useForm } from '../../hooks/useForm'; // 👈 제네릭 훅 임포트
 import type { LoginPayload } from '../../types/auth';
-import { useAuthContext } from '../../context/AuthContext';
-import * as AuthApi from '../../service/authApi'; // 로그인 API
+import { useAuthContext } from '../../contexts/AuthContext';
+import * as AuthApi from '../../services/authApi'; // 로그인 API
 import {
     FormContainer,
     InputGroup,

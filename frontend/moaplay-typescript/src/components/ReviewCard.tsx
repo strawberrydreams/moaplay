@@ -2,7 +2,7 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import type * as R from '../types/reviews';
-import { useAuthContext } from '../context/AuthContext';
+import { useAuthContext } from '../contexts/AuthContext';
 import * as S from '../styles/ReviewCard.styles';
 import { FaImage } from 'react-icons/fa';
 

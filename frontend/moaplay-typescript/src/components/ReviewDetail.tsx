@@ -4,7 +4,7 @@ import * as R from '../types/reviews'; // Review 타입 임포트
 import * as S from '../styles/ReviewDetail.styles'; // 스타일 임포트
 import { FaImage } from 'react-icons/fa'; // 이미지 플레이스홀더 아이콘
 import { useNavigate } from 'react-router-dom';
-import { useAuthContext } from '../context/AuthContext';
+import { useAuthContext } from '../contexts/AuthContext';
 
 
 interface ReviewDetailModalProps {

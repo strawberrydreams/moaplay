@@ -3,7 +3,7 @@ import Modal from './common/Modal'; // 1. 기존 Modal 컴포넌트 임포트
 import * as S from '../styles/ProfileUploadModal.styles'; // 2. 스타일 임포트
 import { useAuthContext } from '../context/AuthContext'; // 3. AuthContext 임포트
 // 👇 4. UserApi 대신 (또는 추가로) ImageApi 임포트
-import * as UploadApi from '../service/uploadApi'; // (경로가 userApi와 동일하다고 가정)
+import * as UploadApi from '../services/uploadApi'; // (경로가 userApi와 동일하다고 가정)
 import defaultProfile from '../../assets/default-profile.png'; // 기본 이미지
 
 interface ProfileUploadModalProps {

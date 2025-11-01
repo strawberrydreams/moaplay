@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { useAuthContext } from '../context/AuthContext' // Auth 컨텍스트
+import { useAuthContext } from '../contexts/AuthContext' // Auth 컨텍스트
 import * as S from '../styles/ProfileDropdown.styles'; // 스타일 임포트
 import { FaChevronDown } from 'react-icons/fa';
 import defaultProfile from '../assets/default-profile.png';
