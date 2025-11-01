@@ -1,5 +1,6 @@
-from flask import Blueprint, request, session
-from sqlalchemy import func, extract
+from flask import Blueprint, request
+from flask_login import current_user, login_required
+from sqlalchemy import func
 from app.models import db
 from app.models.event import Event
 from app.models.user import User
@@ -13,41 +14,18 @@ admin_bp = Blueprint('admin', __name__)
 
 # ==================== Helper Functions ====================
 
-def get_current_user():
-    """현재 로그인한 사용자 조회"""
-    user_id = session.get('id')
-    if not user_id:
-        return None
-    return db.session.get(User, user_id)
-
-
-def login_required(f):
-    """로그인 필수 데코레이터"""
-    from functools import wraps
-    @wraps(f)
-    def decorated_function(*args, **kwargs):
-        if 'id' not in session:
-            return {
-                "error_code": "UNAUTHORIZED",
-                "message": "로그인이 필요합니다."
-            }, 401
-        return f(*args, **kwargs)
-    return decorated_function
-
-
+# 관리자 권한 체크 데코레이터
 def admin_required(f):
-    """관리자 권한 필수 데코레이터"""
     from functools import wraps
     @wraps(f)
     def decorated_function(*args, **kwargs):
-        user = get_current_user()
-        if not user:
+        if not current_user.is_authenticated:
             return {
                 "error_code": "UNAUTHORIZED",
                 "message": "로그인이 필요합니다."
             }, 401
         
-        if user.role != UserRole.ADMIN:
+        if current_user.role != UserRole.ADMIN:
             return {
                 "error_code": "PERMISSION_DENIED",
                 "message": "관리자 권한이 필요합니다."
@@ -57,13 +35,12 @@ def admin_required(f):
     return decorated_function
 
 
-# ==================== 1. GET /dashboard - 관리자 대시보드 ====================
-
+### 관리자 대시보드 API
+### GET /api/admin/dashboard
 @admin_bp.route('/dashboard', methods=['GET'])
 @login_required
 @admin_required
 def get_dashboard():
-    """관리자 대시보드 - 통계 데이터 조회"""
     try:
         # 1. 사용자 통계
         total_users = db.session.query(func.count(User.id)).scalar()
@@ -150,13 +127,12 @@ def get_dashboard():
         }, 500
 
 
-# ==================== 2. GET /pending-list - 승인 대기 목록 ====================
-
+### 승인 대기 목록 API
+### GET /api/admin/pending-list
 @admin_bp.route('/pending-list', methods=['GET'])
 @login_required
 @admin_required
 def get_pending_list():
-    """승인 대기 중인 행사 목록 조회"""
     # 페이징 파라미터
     page = request.args.get('page', 1, type=int)
     per_page = request.args.get('per_page', 20, type=int)
@@ -195,13 +171,12 @@ def get_pending_list():
         }, 500
 
 
-# ==================== 3. GET /approved-list - 승인 완료 목록 ====================
-
+### 승인 완료 목록 API
+### GET /api/admin/approved-list
 @admin_bp.route('/approved-list', methods=['GET'])
 @login_required
 @admin_required
 def get_approved_list():
-    """승인 완료된 행사 목록 조회"""
     # 페이징 파라미터
     page = request.args.get('page', 1, type=int)
     per_page = request.args.get('per_page', 20, type=int)
@@ -240,13 +215,12 @@ def get_approved_list():
         }, 500
 
 
-# ==================== 4. GET /events-list - 전체 행사 관리 ====================
-
+### 전체 행사 관리 API
+### GET /api/admin/events-list
 @admin_bp.route('/events-list', methods=['GET'])
 @login_required
 @admin_required
 def get_events_list():
-    """전체 행사 목록 조회 (상태 필터링 가능)"""
     # 페이징 파라미터
     page = request.args.get('page', 1, type=int)
     per_page = request.args.get('per_page', 20, type=int)

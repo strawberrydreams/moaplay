@@ -1,9 +1,8 @@
-from flask import Blueprint, request, session
-from sqlalchemy import and_
+from flask import Blueprint, request
+from flask_login import current_user, login_required
 from app.models import db
 from app.models.review import Review
 from app.models.event import Event
-from app.models.user import User
 from app.models.enums import EventStatus, UserRole
 from datetime import datetime
 from decimal import Decimal
@@ -12,30 +11,8 @@ review_bp = Blueprint('reviews', __name__)
 
 # ==================== Helper Functions ====================
 
-def get_current_user():
-    """현재 로그인한 사용자 조회"""
-    user_id = session.get('id')
-    if not user_id:
-        return None
-    return db.session.get(User, user_id)
-
-
-def login_required(f):
-    """로그인 필수 데코레이터"""
-    from functools import wraps
-    @wraps(f)
-    def decorated_function(*args, **kwargs):
-        if 'id' not in session:
-            return {
-                "error_code": "UNAUTHORIZED",
-                "message": "로그인이 필요합니다."
-            }, 401
-        return f(*args, **kwargs)
-    return decorated_function
-
-
+# 행사의 평균 평점 업데이트
 def update_event_rating(event_id):
-    """행사의 평균 평점 업데이트"""
     reviews = db.session.query(Review).filter_by(event_id=event_id).all()
     
     if not reviews:
@@ -50,11 +27,10 @@ def update_event_rating(event_id):
     db.session.commit()
 
 
-# ==================== 1. GET /api/reviews - 리뷰 목록 조회 ====================
-
+### 리뷰 목록 조회 API
+### GET /api/reviews
 @review_bp.route('/', methods=['GET'])
 def get_reviews():
-    """리뷰 목록 조회 (이벤트별, 페이징 지원)"""
     # 쿼리 파라미터
     event_id = request.args.get('event_id', type=int)
     page = request.args.get('page', 1, type=int)
@@ -100,12 +76,11 @@ def get_reviews():
     }, 200
 
 
-# ==================== 2. POST /api/reviews - 리뷰 작성 ====================
-
+### 리뷰 작성 API
+### POST /api/reviews
 @review_bp.route('/', methods=['POST'])
 @login_required
 def create_review():
-    """리뷰 작성 (로그인 사용자만 가능)"""
     data = request.get_json()
     
     # 필수 필드 검증
@@ -148,7 +123,7 @@ def create_review():
             content=data['content'],
             rating=data['rating'],
             image_urls=data.get('image_urls', []),
-            user_id=session['id'],
+            user_id=current_user.id,
             event_id=data['event_id']
         )
         
@@ -168,11 +143,10 @@ def create_review():
         }, 500
 
 
-# ==================== 3. GET /api/reviews/{id} - 리뷰 상세 조회 ====================
-
+### 리뷰 상세 조회 API
+### GET /api/reviews/<id>
 @review_bp.route('/<int:review_id>', methods=['GET'])
 def get_review(review_id):
-    """리뷰 상세 조회"""
     review = db.session.get(Review, review_id)
     
     if not review:
@@ -184,12 +158,11 @@ def get_review(review_id):
     return review.to_dict(), 200
 
 
-# ==================== 4. PUT /api/reviews/{id} - 리뷰 수정 ====================
-
+### 리뷰 수정 API
+### PUT /api/reviews/<id>
 @review_bp.route('/<int:review_id>', methods=['PUT'])
 @login_required
 def update_review(review_id):
-    """리뷰 수정 (작성자만 가능)"""
     review = db.session.get(Review, review_id)
     
     if not review:
@@ -198,10 +171,8 @@ def update_review(review_id):
             "message": "리뷰를 찾을 수 없습니다."
         }, 404
     
-    user = get_current_user()
-    
     # 작성자 확인
-    if review.user_id != user.id:
+    if review.user_id != current_user.id:
         return {
             "error_code": "PERMISSION_DENIED",
             "message": "리뷰를 수정할 권한이 없습니다."
@@ -244,12 +215,11 @@ def update_review(review_id):
         }, 500
 
 
-# ==================== 5. DELETE /api/reviews/{id} - 리뷰 삭제 ====================
-
+### 리뷰 삭제 API
+### DELETE /api/reviews/<id>
 @review_bp.route('/<int:review_id>', methods=['DELETE'])
 @login_required
 def delete_review(review_id):
-    """리뷰 삭제 (작성자 + 관리자만 가능)"""
     review = db.session.get(Review, review_id)
     
     if not review:
@@ -258,10 +228,8 @@ def delete_review(review_id):
             "message": "리뷰를 찾을 수 없습니다."
         }, 404
     
-    user = get_current_user()
-    
     # 권한 체크 (작성자 또는 관리자)
-    if review.user_id != user.id and user.role != UserRole.ADMIN:
+    if review.user_id != current_user.id and current_user.role != UserRole.ADMIN:
         return {
             "error_code": "PERMISSION_DENIED",
             "message": "리뷰를 삭제할 권한이 없습니다."

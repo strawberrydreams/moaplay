@@ -1,4 +1,5 @@
-from flask import Blueprint, request, session
+from flask import Blueprint, request
+from flask_login import current_user, login_required
 from werkzeug.utils import secure_filename
 import os
 import uuid
@@ -23,66 +24,91 @@ SERVER_URL = os.environ.get('SERVER_URL', 'http://localhost:5000')
 
 # ==================== Helper Functions ====================
 
-def get_current_user():
-    """현재 로그인한 사용자 조회"""
-    from app.models import db
-    from app.models.user import User
-    user_id = session.get('id')
-    if not user_id:
-        return None
-    return db.session.get(User, user_id)
-
-
-def login_required(f):
-    """로그인 필수 데코레이터"""
-    from functools import wraps
-    @wraps(f)
-    def decorated_function(*args, **kwargs):
-        if 'id' not in session:
-            return {
-                "error_code": "UNAUTHORIZED",
-                "message": "로그인이 필요합니다."
-            }, 401
-        return f(*args, **kwargs)
-    return decorated_function
-
-
+# 허용된 확장자인지 확인
 def allowed_file(filename):
-    """허용된 확장자인지 확인"""
     return '.' in filename and \
            filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
 
+# 파일 확장자 추출
 def get_file_extension(filename):
-    """파일 확장자 추출"""
     return filename.rsplit('.', 1)[1].lower() if '.' in filename else ''
 
 
+# 고유한 파일명 생성 (UUID + 타임스탬프)
 def generate_unique_filename(original_filename):
-    """고유한 파일명 생성 (UUID + 타임스탬프)"""
     ext = get_file_extension(original_filename)
     timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
     unique_id = str(uuid.uuid4())[:8]
     return f"{timestamp}_{unique_id}.{ext}"
 
 
-# ==================== POST /image - 이미지 업로드 ====================
+# 단일 파일 처리
+def process_single_file(file):
+    filename = file.filename
+    
+    # 파일명이 비어있는지 확인
+    if filename == '':
+        return {
+            "success": False,
+            "error": {
+                "error_code": "EMPTY_FILENAME",
+                "message": "파일명이 비어있습니다."
+            },
+            "status_code": 400
+        }
+    
+    # 허용된 확장자인지 확인
+    if not allowed_file(filename):
+        return {
+            "success": False,
+            "error": {
+                "error_code": "INVALID_FILE_TYPE",
+                "message": f"허용되지 않은 파일 형식입니다. 허용 형식: {', '.join(ALLOWED_EXTENSIONS)}"
+            },
+            "status_code": 400
+        }
+    
+    # 파일 크기 확인
+    file.seek(0, os.SEEK_END)
+    file_size = file.tell()
+    file.seek(0)
+    
+    if file_size > MAX_FILE_SIZE:
+        return {
+            "success": False,
+            "error": {
+                "error_code": "FILE_TOO_LARGE",
+                "message": f"파일 크기가 너무 큽니다. 최대 크기: {MAX_FILE_SIZE // (1024*1024)}MB"
+            },
+            "status_code": 400
+        }
+    
+    # 안전한 파일명으로 변환
+    original_filename = secure_filename(filename)
+    unique_filename = generate_unique_filename(original_filename)
+    
+    # 파일 저장
+    filepath = os.path.join(UPLOAD_FOLDER, unique_filename)
+    file.save(filepath)
+    
+    # URL 생성
+    file_url = f"{SERVER_URL}/uploads/{unique_filename}"
+    
+    return {
+        "success": True,
+        "url": file_url,
+        "filename": unique_filename,
+        "original_filename": original_filename,
+        "size": file_size
+    }
 
+
+### 이미지 업로드 API
+### POST /api/upload/image
 @upload_bp.route('/image', methods=['POST'])
 @login_required
 def upload_image():
-    """
-    이미지 업로드
-    
-    Request:
-    - Content-Type: multipart/form-data
-    - Field name: 'image' 또는 'images' (다중 업로드)
-    
-    Response:
-    - 단일 업로드: {"url": "..."}
-    - 다중 업로드: {"urls": ["...", "..."]}
-    """
-    
     # 파일이 요청에 포함되어 있는지 확인
     if 'image' not in request.files and 'images' not in request.files:
         return {
@@ -143,6 +169,11 @@ def upload_image():
         }, 500
 
 
+<<<<<<< HEAD
+### 이미지 제공 API
+### GET /api/upload/uploads/<filename>
+@upload_bp.route('/uploads/<filename>', methods=['GET'])
+=======
 def process_single_file(file):
     """단일 파일 처리"""
     filename = file.filename
@@ -207,8 +238,8 @@ def process_single_file(file):
 # ==================== GET /uploads/<filename> - 이미지 제공 (선택적) ====================
 
 @upload_bp.route('/<filename>', methods=['GET'])
+>>>>>>> c18e99d736bae9483cadc84ce75f858c4b26ef75
 def serve_image(filename):
-    """업로드된 이미지 제공"""
     from flask import send_from_directory
 
     abs_folder = os.path.abspath(UPLOAD_FOLDER)

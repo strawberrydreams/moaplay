@@ -1,4 +1,5 @@
-from flask import Blueprint, request, session
+from flask import Blueprint, request
+from flask_login import current_user, login_required
 from app.models import db
 from app.models.favorite import Favorite
 from app.models.event import Event
@@ -7,36 +8,11 @@ from app.models.enums import EventStatus
 
 favorite_bp = Blueprint('favorites', __name__)
 
-# ==================== Helper Functions ====================
-
-def get_current_user():
-    """현재 로그인한 사용자 조회"""
-    user_id = session.get('id')
-    if not user_id:
-        return None
-    return db.session.get(User, user_id)
-
-
-def login_required(f):
-    """로그인 필수 데코레이터"""
-    from functools import wraps
-    @wraps(f)
-    def decorated_function(*args, **kwargs):
-        if 'id' not in session:
-            return {
-                "error_code": "UNAUTHORIZED",
-                "message": "로그인이 필요합니다."
-            }, 401
-        return f(*args, **kwargs)
-    return decorated_function
-
-
-# ==================== 1. POST / - 찜 추가 ====================
-
+### 찜 추가 API
+### POST /api/favorites
 @favorite_bp.route('/', methods=['POST'])
 @login_required
 def create_favorite():
-    """찜 추가 (로그인 사용자만 가능)"""
     data = request.get_json()
     
     # 필수 필드 검증
@@ -47,7 +23,7 @@ def create_favorite():
         }, 400
     
     event_id = data['event_id']
-    user_id = session['id']
+    user_id = current_user.id
     
     # 행사 존재 확인
     event = db.session.get(Event, event_id)
@@ -96,13 +72,12 @@ def create_favorite():
         }, 500
 
 
-# ==================== 2. GET / - 찜 목록 조회 ====================
-
+### 찜 목록 조회 API
+### GET /api/favorites
 @favorite_bp.route('/', methods=['GET'])
 @login_required
 def get_favorites():
-    """찜 목록 조회 (로그인 사용자만 가능)"""
-    user_id = session['id']
+    user_id = current_user.id
     
     # 페이징 파라미터 (선택적)
     page = request.args.get('page', 1, type=int)
@@ -140,6 +115,10 @@ def get_favorites():
         }, 500
 
 
+<<<<<<< HEAD
+### 찜 삭제 API
+### DELETE /api/favorites/<id>
+=======
 # ==================== GET /event/<event_id> - 특정 이벤트 찜 여부 확인 ====================
 @favorite_bp.route('/event/<int:event_id>', methods=['GET']) 
 @login_required
@@ -175,10 +154,10 @@ def check_favorite_status(event_id):
 
 # ==================== 4. DELETE /<id> - 찜 삭제 ====================
 
+>>>>>>> c18e99d736bae9483cadc84ce75f858c4b26ef75
 @favorite_bp.route('/<int:favorite_id>', methods=['DELETE'])
 @login_required
 def delete_favorite(favorite_id):
-    """찜 삭제 (본인만 가능)"""
     favorite = db.session.get(Favorite, favorite_id)
 
     if not favorite:
@@ -187,10 +166,8 @@ def delete_favorite(favorite_id):
             "message": "찜을 찾을 수 없습니다."
         }, 404
     
-    user_id = session['id']
-    
     # 본인의 찜인지 확인
-    if favorite.user_id != user_id:
+    if favorite.user_id != current_user.id:
         return {
             "error_code": "PERMISSION_DENIED",
             "message": "본인의 찜만 삭제할 수 있습니다."

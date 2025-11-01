@@ -1,8 +1,8 @@
-from flask import Blueprint, request, session
-from sqlalchemy import or_, and_
+from flask import Blueprint, request
+from flask_login import current_user, login_required
+from sqlalchemy import or_
 from app.models import db
 from app.models.event import Event
-from app.models.user import User
 from app.models.tag import Tag
 from app.models.event_tag import EventTag
 from app.models.enums import EventStatus, UserRole
@@ -12,42 +12,19 @@ event_bp = Blueprint('events', __name__)
 
 # ==================== Helper Functions ====================
 
-def get_current_user():
-    """현재 로그인한 사용자 조회"""
-    user_id = session.get('id')
-    if not user_id:
-        return None
-    return db.session.get(User, user_id)
-
-
-def login_required(f):
-    """로그인 필수 데코레이터"""
-    from functools import wraps
-    @wraps(f)
-    def decorated_function(*args, **kwargs):
-        if 'id' not in session:
-            return {
-                "error_code": "UNAUTHORIZED",
-                "message": "로그인이 필요합니다."
-            }, 401
-        return f(*args, **kwargs)
-    return decorated_function
-
-
-def role_required(allowed_roles):
-    """역할 권한 체크 데코레이터"""
+# 역할 권한 체크 데코레이터
+def role_required(*allowed_roles):
     from functools import wraps
     def decorator(f):
         @wraps(f)
         def decorated_function(*args, **kwargs):
-            user = get_current_user()
-            if not user:
+            if not current_user.is_authenticated:
                 return {
                     "error_code": "UNAUTHORIZED",
                     "message": "로그인이 필요합니다."
                 }, 401
             
-            if user.role not in allowed_roles:
+            if current_user.role not in allowed_roles:
                 return {
                     "error_code": "PERMISSION_DENIED",
                     "message": "권한이 없습니다."
@@ -57,26 +34,24 @@ def role_required(allowed_roles):
         return decorated_function
     return decorator
 
-
-def can_view_event(event, user):
-    """행사 조회 권한 체크"""
+# 행사 조회 권한 체크
+def can_view_event(event):
     # approved는 전체 공개
     if event.status == EventStatus.APPROVED:
         return True
     
     # 비로그인 사용자는 approved만 볼 수 있음
-    if not user:
+    if not current_user.is_authenticated:
         return False
     
     # pending/rejected는 작성자 + 관리자만
-    if user.id == event.host_id or user.role == UserRole.ADMIN:
+    if current_user.id == event.host_id or current_user.role == UserRole.ADMIN:
         return True
     
     return False
 
-
+# 태그 이름 리스트를 Tag 객체로 변환
 def process_tags(tag_names):
-    """태그 이름 리스트를 Tag 객체로 변환 (없으면 생성)"""
     tags = []
     for name in tag_names:
         tag = db.session.query(Tag).filter_by(name=name).first()
@@ -87,13 +62,12 @@ def process_tags(tag_names):
     return tags
 
 
-# ==================== 1. POST /api/events - 행사 신청 ====================
-
+### 행사 신청 API
+### POST /api/events
 @event_bp.route('/', methods=['POST'])
 @login_required
-@role_required([UserRole.HOST, UserRole.ADMIN])
+@role_required(UserRole.HOST, UserRole.ADMIN)
 def create_event():
-    """행사 신청 (HOST, ADMIN만 가능)"""
     data = request.get_json()
     
     # 필수 필드 검증
@@ -130,7 +104,7 @@ def create_event():
             description=data['description'],
             phone=data['phone'],
             image_urls=data.get('image_urls', []),
-            host_id=session['id'],
+            host_id=current_user.id,
             status=EventStatus.PENDING
         )
         
@@ -162,11 +136,10 @@ def create_event():
         }, 500
 
 
-# ==================== 2. GET /api/events - 행사 목록 조회 ====================
-
+### 행사 목록 조회 API
+### GET /api/events
 @event_bp.route('/', methods=['GET'])
 def get_events():
-    """행사 목록 조회 (페이징, 필터링, 정렬 지원)"""
     # 쿼리 파라미터
     page = request.args.get('page', 1, type=int)
     per_page = request.args.get('per_page', 12, type=int)
@@ -227,11 +200,10 @@ def get_events():
     }, 200
 
 
-# ==================== 3. GET /api/events/{id} - 행사 상세 조회 ====================
-
+### 행사 상세 조회 API
+### GET /api/events/<id>
 @event_bp.route('/<int:event_id>', methods=['GET'])
 def get_event(event_id):
-    """행사 상세 조회"""
     event = db.session.get(Event, event_id)
     
     if not event:
@@ -241,8 +213,7 @@ def get_event(event_id):
         }, 404
     
     # 권한 체크
-    user = get_current_user()
-    if not can_view_event(event, user):
+    if not can_view_event(event):
         return {
             "error_code": "PERMISSION_DENIED",
             "message": "이 행사를 조회할 권한이 없습니다."
@@ -256,12 +227,11 @@ def get_event(event_id):
     return event.to_dict(), 200
 
 
-# ==================== 4. PUT /api/events/{id} - 행사 수정 ====================
-
+### 행사 수정 API
+### PUT /api/events/<id>
 @event_bp.route('/<int:event_id>', methods=['PUT'])
 @login_required
 def update_event(event_id):
-    """행사 수정 (작성자만 가능)"""
     event = db.session.get(Event, event_id)
     
     if not event:
@@ -270,10 +240,8 @@ def update_event(event_id):
             "message": "행사를 찾을 수 없습니다."
         }, 404
     
-    user = get_current_user()
-    
     # 작성자 확인
-    if event.host_id != user.id:
+    if event.host_id != current_user.id:
         return {
             "error_code": "PERMISSION_DENIED",
             "message": "행사를 수정할 권한이 없습니다."
@@ -342,12 +310,11 @@ def update_event(event_id):
         }, 500
 
 
-# ==================== 5. DELETE /api/events/{id} - 행사 삭제 ====================
-
+### 행사 삭제 API
+### DELETE /api/events/<id>
 @event_bp.route('/<int:event_id>', methods=['DELETE'])
 @login_required
 def delete_event(event_id):
-    """행사 삭제 (작성자 + 관리자만 가능)"""
     event = db.session.get(Event, event_id)
     
     if not event:
@@ -356,10 +323,8 @@ def delete_event(event_id):
             "message": "행사를 찾을 수 없습니다."
         }, 404
     
-    user = get_current_user()
-    
     # 권한 체크 (작성자 또는 관리자)
-    if event.host_id != user.id and user.role != UserRole.ADMIN:
+    if event.host_id != current_user.id and current_user.role != UserRole.ADMIN:
         return {
             "error_code": "PERMISSION_DENIED",
             "message": "행사를 삭제할 권한이 없습니다."
@@ -381,13 +346,12 @@ def delete_event(event_id):
         }, 500
 
 
-# ==================== 6. PUT /api/events/{id}/status - 행사 승인/거절 ====================
-
+### 행사 승인/거절 API
+### PUT /api/events/<id>/status
 @event_bp.route('/<int:event_id>/status', methods=['PUT'])
 @login_required
-@role_required([UserRole.ADMIN])
+@role_required(UserRole.ADMIN)
 def update_event_status(event_id):
-    """행사 승인/거절 (관리자만 가능)"""
     event = db.session.get(Event, event_id)
     
     if not event:
@@ -437,11 +401,10 @@ def update_event_status(event_id):
         }, 500
 
 
-# ==================== 7. GET /api/events/search - 행사 검색 ====================
-
+### 행사 검색 API
+### GET /api/events/search
 @event_bp.route('/search', methods=['GET'])
 def search_events():
-    """행사 통합 검색"""
     query_string = request.args.get('q', '').strip()
     page = request.args.get('page', 1, type=int)
     per_page = request.args.get('per_page', 10, type=int)

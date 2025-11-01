@@ -1,4 +1,5 @@
-from flask import Blueprint, request, session
+from flask import Blueprint, request
+from flask_login import current_user, login_required
 from sqlalchemy import and_, extract
 from app.models import db
 from app.models.schedule import Schedule
@@ -9,36 +10,11 @@ from datetime import datetime, date
 
 schedule_bp = Blueprint('schedules', __name__)
 
-# ==================== Helper Functions ====================
-
-def get_current_user():
-    """현재 로그인한 사용자 조회"""
-    user_id = session.get('id')
-    if not user_id:
-        return None
-    return db.session.get(User, user_id)
-
-
-def login_required(f):
-    """로그인 필수 데코레이터"""
-    from functools import wraps
-    @wraps(f)
-    def decorated_function(*args, **kwargs):
-        if 'id' not in session:
-            return {
-                "error_code": "UNAUTHORIZED",
-                "message": "로그인이 필요합니다."
-            }, 401
-        return f(*args, **kwargs)
-    return decorated_function
-
-
-# ==================== 1. POST / - 일정 추가 ====================
-
+### 일정 추가 API
+### POST /api/schedules
 @schedule_bp.route('/', methods=['POST'])
 @login_required
 def create_schedule():
-    """일정 추가 (로그인 사용자만 가능)"""
     data = request.get_json()
     
     # 필수 필드 검증
@@ -49,7 +25,7 @@ def create_schedule():
         }, 400
     
     event_id = data['event_id']
-    user_id = session['id']
+    user_id = current_user.id
     
     # 행사 존재 확인
     event = db.session.get(Event, event_id)
@@ -98,20 +74,12 @@ def create_schedule():
         }, 500
 
 
-# ==================== 2. GET / - 일정 목록 조회 ====================
-
+### 일정 목록 조회 API
+### GET /api/schedules
 @schedule_bp.route('/', methods=['GET'])
 @login_required
 def get_schedules():
-    """
-    일정 목록 조회 (로그인 사용자만 가능)
-    
-    필터링 옵션:
-    - 전체: 파라미터 없음
-    - 월별: ?year=2025&month=10
-    - 일별: ?date=2025-10-15
-    """
-    user_id = session['id']
+    user_id = current_user.id
     
     # 기본 쿼리 (본인의 일정만)
     query = db.session.query(Schedule).filter_by(user_id=user_id)
@@ -137,7 +105,6 @@ def get_schedules():
         # 월별 필터
         elif year_param and month_param:
             # 해당 월에 겹치는 행사
-            # (행사 시작일이 해당 월 이전 또는 해당 월) AND (행사 종료일이 해당 월 이후 또는 해당 월)
             query = query.join(Event).filter(
                 and_(
                     extract('year', Event.start_date) == year_param,
@@ -171,12 +138,11 @@ def get_schedules():
         }, 500
 
 
-# ==================== 3. DELETE /<id> - 일정 삭제 ====================
-
+### 일정 삭제 API
+### DELETE /api/schedules/<id>
 @schedule_bp.route('/<int:schedule_id>', methods=['DELETE'])
 @login_required
 def delete_schedule(schedule_id):
-    """일정 삭제 (본인만 가능)"""
     schedule = db.session.get(Schedule, schedule_id)
     
     if not schedule:
@@ -185,10 +151,8 @@ def delete_schedule(schedule_id):
             "message": "일정을 찾을 수 없습니다."
         }, 404
     
-    user_id = session['id']
-    
     # 본인의 일정인지 확인
-    if schedule.user_id != user_id:
+    if schedule.user_id != current_user.id:
         return {
             "error_code": "PERMISSION_DENIED",
             "message": "본인의 일정만 삭제할 수 있습니다."

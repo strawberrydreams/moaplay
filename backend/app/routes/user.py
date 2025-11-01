@@ -1,6 +1,7 @@
-from flask import Blueprint, request, session
+from flask import Blueprint, request
+from flask_login import current_user, login_required, logout_user
 from ..models import db
-from ..models.user import User, return_user_401
+from ..models.user import User
 import re
 
 user_bp = Blueprint('users', __name__)
@@ -73,20 +74,14 @@ def create_user():
 
     return user.to_dict(me=True), 201
 
-### 내 정보 가져오기 api
+### 내 정보 조회 API
 ### GET /api/users/me
-# @loginRequired
 @user_bp.route("/me", methods=["GET"])
+@login_required
 def get_me():
-    if not "id" in session:
-        return return_user_401()
-    
-    id = session.get("id")
-    me: User = User.query.get(id)
+    return current_user.to_dict(me=True), 200
 
-    return me.to_dict(me=True), 200
-
-### 유저 정보 가져오기 api
+### 유저 정보 조회 API
 ### GET /api/users/<id>
 @user_bp.route("/<int:id>", methods=["GET"])
 def get_user(id):
@@ -99,15 +94,12 @@ def get_user(id):
 
     return user.to_dict(), 200
 
-### 내 정보 수정 api
+### 내 정보 수정 API
 ### PUT /api/users/me
-# @loginRequired
 @user_bp.route("/me", methods=["PUT"])
+@login_required
 def edit_me():
-    if not "id" in session:
-        return return_user_401()
-    
-    user: User = User.query.get_or_404(session["id"])
+    user = current_user
     data = request.get_json()
 
     if "nickname" in data:
@@ -150,18 +142,15 @@ def edit_me():
 
     return user.to_dict(me=True)
 
-### 비밀번호 변경 api
+### 비밀번호 변경 API
 ### PUT /api/users/me/password
-# @loginRequired
 @user_bp.route("/me/password", methods=["PUT"])
+@login_required
 def change_password():
-    if not "id" in session:
-        return return_user_401()
-
     password = request.get_json().get("password")
     new_password = request.get_json().get("new_password")
 
-    user: User = User.query.get(session["id"])
+    user = current_user
 
     if not user.check_password(password):
         return {
@@ -179,16 +168,12 @@ def change_password():
 
     return {"message": "비밀번호가 변경되었습니다."}, 200
 
-
-### 회원 탈퇴 api
+### 회원 탈퇴 API
 ### DELETE /api/users/me
-# @loginRequired
 @user_bp.route("/me", methods=["DELETE"])
+@login_required
 def delete_user():
-    if not "id" in session:
-        return return_user_401()
-    user: User = User.query.get_or_404(session["id"])
-
+    user = current_user
     data = request.get_json()
 
     if not data.get("confirm"):
@@ -207,10 +192,10 @@ def delete_user():
     db.session.delete(user)
     db.session.commit()
 
-    session.pop("id", None)
+    logout_user()
     return {"message": "회원 탈퇴가 완료되었습니다."}, 200
 
-### 회원가입 중복 확인 API (user_id, nickname, email)
+### 회원가입 중복 확인 API
 ### GET /api/users/check
 @user_bp.route("/check", methods=["GET"])
 def check_availability():

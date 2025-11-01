@@ -3,6 +3,10 @@ from flask import Flask
 from .models import db
 from flask_migrate import Migrate
 from flask_cors import CORS
+from flask_login import LoginManager
+
+# LoginManager 인스턴스 생성
+login_manager = LoginManager()
 
 
 def create_app(test_config=None):
@@ -24,18 +28,45 @@ def create_app(test_config=None):
     except OSError:
         pass
 
-    #db 연결
+    # db 연결
     db.init_app(app)
-    #migrate
+    
+    # Flask-Login 초기화
+    login_manager.init_app(app)
+    login_manager.session_protection = 'strong'
+    
+    # migrate
     migrate = Migrate(app, db)
+<<<<<<< HEAD
+    
+    # cors 설정
+    CORS(app)
+=======
     #cors 설정
     CORS(app, 
          resources={r"/api/*": {"origins": ["http://localhost:5173", "http://127.0.0.1:5173"]}}, 
          supports_credentials=True
     )
+>>>>>>> c18e99d736bae9483cadc84ce75f858c4b26ef75
 
-    #청사진 연결
+    # 청사진 연결
     from .routes import api_bp
     app.register_blueprint(api_bp, url_prefix="/api")
 
     return app
+
+
+# Flask-Login user_loader 콜백
+@login_manager.user_loader
+def load_user(user_id):
+    from .models.user import User
+    return db.session.get(User, int(user_id))
+
+
+# unauthorized 응답
+@login_manager.unauthorized_handler
+def unauthorized():
+    return {
+        "error_code": "UNAUTHORIZED",
+        "message": "로그인이 필요합니다."
+    }, 401
