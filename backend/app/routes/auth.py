@@ -1,6 +1,5 @@
 from flask import Blueprint, request
 from flask_login import login_user, logout_user, current_user, login_required
-from ..models import db
 from ..models.user import User
 
 auth_bp = Blueprint("auth", __name__)
@@ -12,7 +11,7 @@ def login():
     user_id = request.get_json().get("user_id")
     password = request.get_json().get("password")
 
-    user: User = User.query.filter_by(user_id=user_id).first()
+    user = User.query.filter_by(user_id=user_id).first()
     if (not user) or (not user.check_password(password)):
         return {
             "error": "아이디 또는 비밀번호가 올바르지 않습니다.",

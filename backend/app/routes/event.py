@@ -36,6 +36,7 @@ def role_required(*allowed_roles):
 
 # 행사 조회 권한 체크
 def can_view_event(event):
+
     # approved는 전체 공개
     if event.status == EventStatus.APPROVED:
         return True
@@ -50,7 +51,7 @@ def can_view_event(event):
     
     return False
 
-# 태그 이름 리스트를 Tag 객체로 변환
+# 태그 이름 리스트를 Tag 객체로 변환 (없으면 생성)
 def process_tags(tag_names):
     tags = []
     for name in tag_names:

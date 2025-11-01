@@ -4,7 +4,6 @@ from sqlalchemy import and_, extract
 from app.models import db
 from app.models.schedule import Schedule
 from app.models.event import Event
-from app.models.user import User
 from app.models.enums import EventStatus
 from datetime import datetime, date
 
