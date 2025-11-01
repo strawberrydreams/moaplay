@@ -2,8 +2,8 @@ import React, { useState, useEffect } from 'react';
 import styled from 'styled-components';
 import type { Event } from '../../types/events';
 import type { Pagination } from '../../types/index';
-import { deleteEvent } from "../../service/eventsApi";
-import { getApprovedEvents } from "../../service/adminApi";
+import { deleteEvent } from "../../services/eventsApi";
+import { getApprovedEvents } from "../../services/adminApi";
 
 // 승인된 행사 모달 Props
 interface ApprovedEventsModalProps {

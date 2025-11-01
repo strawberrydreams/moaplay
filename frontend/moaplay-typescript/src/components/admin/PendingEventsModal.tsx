@@ -2,8 +2,8 @@ import React, { useState, useEffect } from 'react';
 import styled from 'styled-components';
 import type { Event } from '../../types/events';
 import type { Pagination } from '../../types/index';
-import { getPendingEvents } from "../../service/adminApi";
-import { updateEventStatus } from "../../service/eventsApi";
+import { getPendingEvents } from "../../services/adminApi";
+import { updateEventStatus } from "../../services/eventsApi";
 
 // 승인 대기 행사 모달 Props
 interface PendingEventsModalProps {

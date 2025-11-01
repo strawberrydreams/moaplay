@@ -1,5 +1,5 @@
 import { useMemo } from 'react';
-import { useAuthContext } from '../context/AuthContext';
+import { useAuthContext } from '../contexts/AuthContext';
 import type * as E from '../types/events';
 
 // --- localStorage 색상 관리 로직 ---

@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { tagsApi } from "../../services/tagsApi";
 import type { Tag } from "../../types/tags";
-import { useAuthContext } from "../../context/AuthContext";
+import { useAuthContext } from "../../contexts/AuthContext";
 import {
   FormContainer,
   Title,
