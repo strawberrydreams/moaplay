@@ -17,6 +17,7 @@ const Footer: React.FC = () => {
           <FooterTitle>MOAPLAY</FooterTitle>
           <p>지역 이벤트 정보 플랫폼</p>
           <p>대표: 홍길동</p>
+          <p>문의: Moaplay@gamil.com</p>
         </FooterSection>
 
         {/* 2. 빠른 연결 */}
@@ -24,8 +25,8 @@ const Footer: React.FC = () => {
           <FooterTitle>바로가기</FooterTitle>
           <FooterList>
             <li><a href="/faq">자주 묻는 질문</a></li>
-            <li><a href="/contact">문의</a></li>
-            <li><a href="/sitemap">사이트맵</a></li>
+            {/* href="/sitemap" */}
+            <li><a>사이트맵</a></li>
           </FooterList>
         </FooterSection>
 
@@ -33,16 +34,17 @@ const Footer: React.FC = () => {
         <FooterSection>
           <FooterTitle>법적 고지</FooterTitle>
           <FooterList>
-            <li><a href="/terms">이용약관</a></li>
-            <li><a href="/privacy">개인정보처리방침</a></li>
-            <li><a href="/policy">운영 정책</a></li>
+            {/* href="/terms" */}
+            <li><a>이용약관</a></li>
+            {/* href="/privacy" */}
+            <li><a>개인정보처리방침</a></li>
+            {/* href="/policy" */}
+            <li><a>운영 정책</a></li>
           </FooterList>
         </FooterSection>
       </FooterContent>
 
       <FooterBottom>
-        <p>사업자등록번호: 123-45-67890</p>
-        <p>통신판매업신고: 제2025-서울강남-0000호</p>
         <p>&copy; {new Date().getFullYear()} Moaplay App. All rights reserved.</p>
       </FooterBottom>
     </StyledFooter>

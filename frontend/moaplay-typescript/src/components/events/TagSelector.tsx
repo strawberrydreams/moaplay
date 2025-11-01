@@ -276,7 +276,7 @@ export const TagSelector: React.FC<TagSelectorProps> = ({
 
 // 스타일 컴포넌트들
 const TagSelectorContainer = styled.div`
-    width: 100%;
+    width: 98.5%;
 `;
 
 const SelectedTagsContainer = styled.div`
@@ -301,7 +301,7 @@ const SelectedTag = styled.div`
     align-items: center;
     gap: 6px;
     padding: 6px 12px;
-    background: #007bff;
+    background: #7a5af8;
     color: white;
     border-radius: 16px;
     font-size: 14px;
@@ -356,10 +356,12 @@ const TagInput = styled.input.withConfig({
     border-radius: 8px;
     font-size: 16px;
     transition: border-color 0.2s ease;
+    background-color: #fafbfc;
+    color: #3e4150;
 
     &:focus {
         outline: none;
-        border-color: ${props => props.hasError ? '#dc3545' : '#007bff'};
+        border-color: ${props => props.hasError ? '#dc3545' : '#7a5af8'};
     }
 
     &::placeholder {
@@ -369,7 +371,7 @@ const TagInput = styled.input.withConfig({
 
 const AddButton = styled.button`
     padding: 12px 20px;
-    background: #007bff;
+    background: #7a5af8;
     color: white;
     border: none;
     border-radius: 8px;
@@ -379,7 +381,7 @@ const AddButton = styled.button`
     transition: background-color 0.2s ease;
 
     &:hover {
-        background: #0056b3;
+        background: #6345d8ff;
     }
 `;
 
@@ -452,9 +454,9 @@ const CategoryTabs = styled.div`
 
 const CategoryTab = styled.button<{ active: boolean }>`
     padding: 8px 16px;
-    border: 1px solid ${props => props.active ? '#007bff' : '#dee2e6'};
+    border: 1px solid ${props => props.active ? '#7a5af8' : '#dee2e6'};
     border-radius: 20px;
-    background: ${props => props.active ? '#007bff' : 'white'};
+    background: ${props => props.active ? '#7a5af8' : 'white'};
     color: ${props => props.active ? 'white' : '#6c757d'};
     font-size: 14px;
     cursor: pointer;
@@ -462,8 +464,8 @@ const CategoryTab = styled.button<{ active: boolean }>`
     white-space: nowrap;
 
     &:hover {
-        border-color: #007bff;
-        color: ${props => props.active ? 'white' : '#007bff'};
+        border-color: #7a5af8;
+        color: ${props => props.active ? 'white' : '#7a5af8'};
     }
 `;
 
@@ -485,8 +487,8 @@ const CategoryTag = styled.button<{ disabled?: boolean }>`
     opacity: ${props => props.disabled ? 0.5 : 1};
 
     &:hover:not(:disabled) {
-        border-color: #007bff;
-        color: #007bff;
+        border-color: #7a5af8;
+        color: #7a5af8;
         background: #f8f9fa;
     }
 
@@ -501,7 +503,7 @@ const TagHelp = styled.div`
     border-radius: 8px;
     font-size: 14px;
     color: #6c757d;
-    border-left: 4px solid #007bff;
+    border-left: 4px solid #7a5af8;
 `;
 
 export default TagSelector;

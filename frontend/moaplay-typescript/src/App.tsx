@@ -1,17 +1,21 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
-import Header from './components/Header'; // Header 컴포넌트 경로 확인!
+import Header from './components/Header'; // Header
+import Footer from './components/Footer'; // Footer
 import Modal from './components/common/Modal'; // 👈 Modal 임포트
 import LoginForm from './components/auth/LoginForm'; // 👈 LoginForm 임포트
 import SignupForm from './components/auth/SignupForm'; // 추후 회원가입 폼을 여기에 임포트
 import EventDetailPage from './pages/events/EventDetailPage';
 import SelectTagsForm from './components/auth/SelectTagsForm';
 import MainPage from './pages/MainPage';
-// import Footer from './components/layout/Footer'; // Footer도 필요하다면
+import FAQPage from './pages/FAQPage';
+import MyPage from './pages/Mypage';
+import HostApplyPage from './pages/HostApplyForm';
+
 
 // 전역 스타일 임포트 (Header.styles.js에서 정의했다면)
 import { GlobalStyle } from './styles/Header.styles';
-import Footer from './components/Footer';
+
 
 // Modal 제어 커스텀 Hook
 import { useModal } from './hooks/useModal';
@@ -19,12 +23,11 @@ import { AuthProvider } from './context/AuthContext';
 import PopularEventsPage from './pages/PopularEventsPage';
 import RegionalEventsPage from './pages/RegionPage';
 import RecommendedEventsPage from './pages/RecommendPage';
-import MyPage from './pages/Mypage';
+
 import { AdminDashboardPage } from "./pages/admin/AdminDashboardPage";
 import EventCreatePage from "./pages/events/EventCreatePage";
 import {EventUpdatePage} from "./pages/events/EventUpdatePage";
 import OtherUserPage from './pages/OtherUserPage';
-import ProfileUpdatePage from "./pages/users/ProfileUpdatePage";
 
 const App: React.FC = () => {
     const { 
@@ -54,8 +57,8 @@ const App: React.FC = () => {
                     <Route path='/recommend' element={<RecommendedEventsPage/>}/>
                     <Route path='/mypage' element={<MyPage/>}/>
                     <Route path='/users/:userId' element={<OtherUserPage/>}/>
-                    <Route path='/mypage/edit' element={<ProfileUpdatePage/>}/>
                     <Route path='/admin/dashboard' element={<AdminDashboardPage/>}/>
+                    <Route path="/faq" element={<FAQPage />} />
                 </Routes>
             </main>
             
@@ -82,7 +85,7 @@ const App: React.FC = () => {
             <Modal 
                 isOpen={isSelectTagsModalOpen}
                 onClose={closeAllModals} // 닫기 함수 연결
-                title="선호태그 선택"
+                title=""
             >
                 <SelectTagsForm onCloseModal={closeAllModals}/>
             </Modal>

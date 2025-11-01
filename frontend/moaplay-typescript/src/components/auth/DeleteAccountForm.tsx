@@ -1,6 +1,6 @@
 // src/components/DeleteAccountForm.tsx
 import React, { useState } from 'react';
-import * as UserApi from '../../service/userApi';
+import * as UserApi from '../../service/usersApi';
 import * as S from '../../styles/DeleteAccountForm.styles';
 
 interface DeleteAccountFormProps {

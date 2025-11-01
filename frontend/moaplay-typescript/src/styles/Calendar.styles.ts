@@ -5,7 +5,7 @@ export const StyledCalendarWrapper = styled.div`
   /* --- 1. CalendarContainer 스타일 (전체 래퍼) --- */
   background-color: #ffffff;
   width: 100%;
-  min-width: 50%;
+  max-width: 960px;
   border: 1px solid #ddd;
   border-radius: 12px;
   font-family: 'Pretendard', sans-serif;
@@ -90,11 +90,9 @@ export const StyledCalendarWrapper = styled.div`
     color: #0275d8; /* 토요일 헤더 글자색 */
   }
 
-  
-
   /* DayCell의 높이 적용 (내부 프레임에 적용) */
   .fc-daygrid-day-frame {
-    height: 100%;
+    height: auto;
     padding: 0.5rem;
   }
 

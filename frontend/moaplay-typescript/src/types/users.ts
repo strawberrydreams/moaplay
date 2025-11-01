@@ -2,7 +2,6 @@ export interface Users {
     id: number;
     user_id: string;
     nickname?: string;
-    profile_image?: string;
     created_at: string;
     statisctics: {
         events_count: number,
@@ -10,7 +9,8 @@ export interface Users {
     }
 
     email?: string,
-    phone?: string,
+    phone?: string | null;
+    profile_image?: string | null;
     role: string,
     updated_at: string,
 }
@@ -75,8 +75,9 @@ export interface ChangePasswordPayload {
 export interface ChangeUserPayload {
     nickname?: string,
     email?: string,
-    phone?: string,
+    phone?: string | null;
     password?: string;
     tags?: string[],
-    profile_image?: string
+    profile_image?: string | null;
+
 }

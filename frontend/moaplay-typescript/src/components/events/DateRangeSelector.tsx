@@ -112,8 +112,6 @@ export const DateRangeSelector: React.FC<DateRangeSelectorProps> = ({
                 {/* 날짜 연결선 */}
                 <DateConnector>
                     <ConnectorLine />
-                    <ConnectorText>~</ConnectorText>
-                    <ConnectorLine />
                 </DateConnector>
 
                 {/* 종료일 */}
@@ -213,6 +211,7 @@ export const DateRangeSelector: React.FC<DateRangeSelectorProps> = ({
 // 스타일 컴포넌트들
 const DateRangeContainer = styled.div`
     margin-bottom: 24px;
+    width: 98.5%;
 `;
 
 const DateRangeHeader = styled.div`
@@ -231,7 +230,7 @@ const SectionTitle = styled.h3`
 
 const DateSummary = styled.div`
     font-size: 14px;
-    color: #007bff;
+    color: #7a5af8;
     font-weight: 500;
 `;
 
@@ -272,10 +271,14 @@ const DateInput = styled.input.withConfig({
     border-radius: 8px;
     font-size: 16px;
     transition: border-color 0.2s ease;
+    background-color: #fafbfc;
+    color: #3e4150;
+    font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+
 
     &:focus {
         outline: none;
-        border-color: ${props => props.hasError ? '#dc3545' : '#007bff'};
+        border-color: ${props => props.hasError ? '#dc3545' : '#7a5af8'};
     }
 `;
 
@@ -307,6 +310,7 @@ const DateConnector = styled.div`
 const ConnectorLine = styled.div`
     width: 20px;
     height: 2px;
+    margin: 20px 0px;
     background: #dee2e6;
 
     @media (max-width: 768px) {
@@ -350,8 +354,8 @@ const QuickSelectButton = styled.button`
     transition: all 0.2s ease;
 
     &:hover {
-        border-color: #007bff;
-        color: #007bff;
+        border-color: #7a5af8;
+        color: #7a5af8;
         background: #f8f9fa;
     }
 
@@ -366,5 +370,5 @@ const DateHelp = styled.div`
     border-radius: 8px;
     font-size: 14px;
     color: #6c757d;
-    border-left: 4px solid #007bff;
+    border-left: 4px solid #7a5af8;
 `;

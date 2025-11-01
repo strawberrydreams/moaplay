@@ -83,7 +83,7 @@ const LoginForm: React.FC<LoginFormProps> = ({ onSwitchToSignUp, onCloseModal })
             </SubmitButton>
             
             <LinksContainer>
-                <a href="/find-pw">비밀번호 찾기</a> 
+                {/* <a href="/find-pw">비밀번호 찾기</a>  */}
                 <span onClick={onSwitchToSignUp}>회원가입</span> 
             </LinksContainer>
         </FormContainer>

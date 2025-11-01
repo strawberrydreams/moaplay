@@ -1,7 +1,7 @@
 import { useState, useCallback, useRef } from 'react';
 import * as E from '../types/events'; // 임포트 이름 바꿔서 DOM Event 충돌 회피 (Event 이름이 여러 곳에서 겹침)
-import { uploadImages } from '../services/uploadApi';
-import { createEvent as createEventApi, updateEvent as updateEventApi } from '../services/eventsApi';
+import { uploadImages } from '../service/uploadApi';
+import { createEvent as createEventApi, updateEvent as updateEventApi } from '../service/eventsApi';
 
 // 행사 생성 후크 타입
 interface UseEventCreateReturn {

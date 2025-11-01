@@ -91,7 +91,7 @@ const Calendar: React.FC<ICalendarProps> = ({ events = [], onEventClick, Calenda
   };
 
   return (
-    <StyledCalendarWrapper> 
+    <StyledCalendarWrapper  className="calendar-wrapper"> 
       <FullCalendar
         plugins={[dayGridPlugin, interactionPlugin]}
         initialView="dayGridMonth"

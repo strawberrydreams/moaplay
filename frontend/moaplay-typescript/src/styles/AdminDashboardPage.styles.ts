@@ -48,7 +48,7 @@ export const DashboardTitle = styled.h1`
 
 export const RefreshButton = styled.button`
     padding: 12px 16px;
-    background-color: #2563eb;
+    background-color: #7a5af8;
     color: #ffffff;
     border: none;
     border-radius: 8px;
@@ -59,13 +59,17 @@ export const RefreshButton = styled.button`
     box-shadow: 0 1px 2px rgba(0,0,0,0.06);
 
     &:hover {
-        background-color: #1e40af;
+        background-color: #6650d4;
         transform: translateY(-2px);
         box-shadow: 0 6px 18px rgba(0,0,0,0.12);
     }
 
     &:active {
         transform: translateY(0);
+    }
+
+    &:focus {
+        outline: none;
     }
 `;
 
@@ -78,13 +82,12 @@ export const StatsList = styled.div`
 
 export const StatItem = styled.div`
     background: #ffffff;
-    width: 100%;
+    width: 95%;
     padding: 20px 24px;
     border-radius: 12px;
     box-shadow: 0 8px 24px rgba(0,0,0,0.06);
     display: flex;
     align-items: center;
-    justify-content: space-between;
     gap: 12px;
     min-height: 88px; /* 가로로 긴 카드 느낌 */
     transition: box-shadow 0.15s ease-in-out, transform 0.15s ease-in-out;
@@ -94,12 +97,18 @@ export const StatItem = styled.div`
 `;
 
 export const StatTitle = styled.div`
+    display: flex;
+    align-items: center;
+    gap: 12px;
     color: #6b7280;
     font-size: 15px;
     letter-spacing: 0.3px;
 `;
 
 export const StatValue = styled.div`
+    display: absolute; 
+
+    gap: 12px;
     color: #111827;
     font-weight: 700;
     font-size: 28px;
@@ -127,7 +136,7 @@ export const ErrorMessage = styled.div`
 
 export const RetryButton = styled.button`
     padding: 12px 20px;
-    background-color: #2563eb;
+    background-color: #7a5af8;
     color: #ffffff;
     border: none;
     border-radius: 8px;
@@ -137,7 +146,7 @@ export const RetryButton = styled.button`
     transition: all 0.15s ease-in-out;
 
     &:hover {
-        background-color: #1e40af;
+        background-color: #6650d4;
         transform: translateY(-2px);
         box-shadow: 0 6px 18px rgba(0,0,0,0.12);
     }
@@ -145,4 +154,23 @@ export const RetryButton = styled.button`
     &:active {
         transform: translateY(0);
     }
+
+    &:focus {
+        outline: none;
+    }
+`;
+
+export const CardIconWrapper = styled.div<{ color: string }>`
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 48px;
+  height: 48px;
+  background-color: ${props => props.color}20; /* 색상 + 반투명 배경 */
+  border-radius: 50%;
+  margin-right: 16px;
+
+  svg {
+    color: ${props => props.color};
+  }
 `;

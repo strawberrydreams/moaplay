@@ -1,15 +1,15 @@
 import React, { useEffect, useState} from 'react';
 import { useParams } from 'react-router-dom';
-import * as UserApi from '../service/userApi';
+import * as UserApi from '../service/usersApi';
 import * as ReviewApi from '../service/reviewsApi';
-import type * as U from '../types/user';
+import type * as U from '../types/users';
 import type * as R from '../types/reviews';
 import ReviewCard from '../components/ReviewCard';
 import * as S from '../styles/Mypage.styles'; // 동일한 스타일 사용 가능
 
 
 const OtherUserPage: React.FC = () => {
-  const [userData, setUserData] = useState<U.User | null>(null);
+  const [userData, setUserData] = useState<U.Users | null>(null);
   const [userReviews, setUserReviews] = useState<R.Review[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const { userId } = useParams<{ userId: string }>();

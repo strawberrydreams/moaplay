@@ -1,82 +1,108 @@
 import styled from 'styled-components';
 
 export const FormContainer = styled.form`
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 12px;
+  width: 100%;
+  max-width: 400px;
+  background: #fff;
+  border-radius: 12px;
+  font-family: 'Pretendard', sans-serif;
 `;
 
-export const Title = styled.h3`
-  margin-top: 8px;
-  font-weight: 600;
+export const Title = styled.h2`
+  margin: 0 0 8px;
+  font-size: 1.3rem;
+  color: #333;
 `;
 
 export const Subtitle = styled.p`
-  color: #777;
-  font-size: 14px;
-  margin-bottom: 10px;
+  margin: 0 0 16px;
+  font-size: 0.9rem;
+  color: #666;
+`;
+
+export const SearchInput = styled.input`
+  width: 93%;
+  padding: 8px 10px;
+  margin-bottom: 16px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  background: #f0f0f0;
+  color: #333;
+  &:focus {
+    outline: none;
+    border-color: #7a5af8;
+  }
 `;
 
 export const TagList = styled.div`
   display: flex;
   flex-wrap: wrap;
-  gap: 10px;
-  justify-content: center;
+  gap: 8px;
+  margin-bottom: 24px;
 `;
 
-export const TagButton = styled.button<{ $selected: boolean }>`
-  border: 1px solid ${({ $selected }) => ($selected ? "#007bff" : "#ccc")};
-  background-color: ${({ $selected }) => ($selected ? "#007bff" : "transparent")};
-  color: ${({ $selected }) => ($selected ? "white" : "#333")};
-  border-radius: 20px;
-  padding: 8px 14px;
-  font-size: 14px;
+interface TagButtonProps { $selected: boolean; }
+export const TagButton = styled.button<TagButtonProps>`
+  padding: 6px 12px;
+  font-size: 0.85rem;
+  border: none;
+  border-radius: 8px;
   cursor: pointer;
-  transition: all 0.2s;
-
+  background: ${props => props.$selected ? '#7a5af8' : '#f0f0f0'};
+  color: ${props => props.$selected ? '#fff' : '#333'};
+  transition: background 0.2s, color 0.2s;
   &:hover {
-    background-color: ${({ $selected }) =>
-    $selected ? "#0056b3" : "rgba(0, 123, 255, 0.1)"};
+    background: ${props => props.$selected ? '#6650d4' : '#e0e0e0'};
+  }
+  &:focus {
+    outline: none;
   }
 `;
 
 export const ButtonRow = styled.div`
   display: flex;
+  justify-content: flex-end;
   gap: 12px;
-  margin-top: 20px;
 `;
 
 export const SubmitButton = styled.button`
-  background-color: #007bff;
-  color: white;
-  padding: 8px 16px;
-  border-radius: 6px;
+  padding: 10px 20px;
+  font-size: 0.95rem;
+  background: #7a5af8;
+  color: #fff;
   border: none;
+  border-radius: 8px;
   cursor: pointer;
   &:disabled {
-    opacity: 0.7;
+    background: #aaa;
     cursor: not-allowed;
   }
 `;
 
 export const BackButton = styled.button`
-  background-color: #ddd;
-  color: #333;
-  padding: 8px 16px;
-  border-radius: 6px;
+  padding: 10px 20px;
+  font-size: 0.95rem;
+  background: #f0f0f0;
+  color: #666;
   border: none;
+  border-radius: 8px;
   cursor: pointer;
+  &:hover {
+    background: #e0e0e0;
+  }
 `;
 
 export const LoadingBox = styled.div`
-  padding: 40px;
+  width: 100%;
   text-align: center;
-  font-weight: 500;
+  padding: 32px 0;
+  color: #888;
 `;
 
 export const ErrorBox = styled.div`
-  color: red;
+  width: 100%;
   text-align: center;
-  padding: 20px;
+  padding: 32px 0;
+  color: #d9534f;
 `;

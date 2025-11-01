@@ -376,3 +376,23 @@ export const ActionButton = styled.button<{ danger?: boolean }>` // 👈 danger 
     text-decoration: underline;
   }
 `;
+
+// 이미지 위 버튼들을 담는 그룹
+export const ImageActionGroup = styled.div`
+  margin-top: 12px;
+  display: flex;
+  gap: 3px;
+  justify-content: right;
+
+  button {
+    background: none;
+    border: none;
+    padding: 6px;
+    cursor: pointer;
+    transition: transform 0.15s;
+
+    &:hover {
+      transform: scale(1.1);
+    }
+  }
+`;

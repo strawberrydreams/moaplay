@@ -1,11 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import styled from 'styled-components';
-
-import { useAuth } from '../../context/AuthContext';
+import { useAuthContext } from '../../context/AuthContext';
 import type { MyUserResponse, OtherUserResponse, Users } from '../../types/users';
-import { getMe, getUser, updateMe, changePassword, checkDuplicate } from "../../services/usersApi";
-import { uploadImage } from "../../services/uploadApi";
+import { getMe, getUser, updateMe, changePassword, checkDuplicate } from "../../service/usersApi";
+import { uploadImage } from "../../service/uploadApi";
 
 // 프로필 수정 폼 타입
 interface ProfileUpdateFormData {
@@ -26,7 +25,7 @@ interface ChangePasswordFormData {
 export const ProfileUpdatePage: React.FC = () => {
     const navigate = useNavigate();
     const { userId } = useParams<{ userId?: string }>();
-    const authCtx = useAuth() as any;
+    const authCtx = useAuthContext() as any;
     const currentUser = authCtx.user ?? authCtx.me ?? null;
 
     // 프로필 정보 수정 대상 사용자 (userId가 있으면 다른 사용자, 없으면 본인)

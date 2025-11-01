@@ -20,14 +20,14 @@ import type {
 export const tagsApi = {
     /** 태그 전체 목록 */
     async list(): Promise<Tag[]> {
-        const { data } = await axiosInstance.get('/api/tags');
+        const { data } = await axiosInstance.get('/tags');
         // data: Tag[]
         return data;
     },
 
     /** 태그 생성 (관리자/운영툴에서 사용) */
     async create(name: string): Promise<Tag> {
-        const { data } = await axiosInstance.post('/api/tags', { name });
+        const { data } = await axiosInstance.post('/tags', { name });
         // data: Tag
         return data;
     },
@@ -37,14 +37,13 @@ export const tagsApi = {
      * - 최소 3개 보장은 프론트에서 1차 체크, 서버에서도 2차 체크 권장
      */
     async saveUserPreferredTags(
-        userId: number,
         payload: UserPreferredTagsPayload
     ): Promise<UserPreferredTagsResponse> {
-        if (!Array.isArray(payload.tag_ids) || payload.tag_ids.length < 3) {
+        if (!Array.isArray(payload.tags) || payload.tags.length < 3) {
             throw new Error('선호 태그는 최소 3개 이상 선택해야 해.');
         }
-        const { data } = await axiosInstance.post(
-            `/api/users/${userId}/preferences/tags`,
+        const { data } = await axiosInstance.put(
+            `/me/`,
             payload
         );
         // data: UserPreferredTagsResponse

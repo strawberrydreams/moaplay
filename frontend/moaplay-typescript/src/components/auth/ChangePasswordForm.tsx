@@ -1,7 +1,7 @@
 // src/components/auth/ChangePasswordForm.tsx
 import React, { useState } from 'react';
 import * as S from '../../styles/FieldEditForm.styles';
-import * as UserApi from '../../service/userApi';
+import * as UserApi from '../../service/usersApi';
 
 interface ChangePasswordFormProps {
   onClose: () => void;

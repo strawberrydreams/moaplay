@@ -4,10 +4,11 @@ import { useAdminDashboard } from "../../hooks/useAdminDashboard";
 import { ApprovedEventsModal } from "../../components/admin/ApprovedEventsModal";
 import { PendingEventsModal } from "../../components/admin/PendingEventsModal";
 import { UsersManagementModal } from "../../components/admin/UsersManagementModal";
-import { getApprovedEvents, getPendingEvents } from "../../services/adminApi";
-import { updateEventStatus } from "../../services/eventsApi";
+import { getApprovedEvents, getPendingEvents } from "../../service/adminApi";
+import { updateEventStatus } from "../../service/eventsApi";
 import { MenuItem } from "../../styles/ProfileDropdown.styles";
 import { useAuthContext } from "../../context/AuthContext";
+import { FaCheckCircle, FaClock, FaUsers, FaAngleRight } from 'react-icons/fa'; 
 import {
     PageContainer,
     MainContent,
@@ -19,7 +20,8 @@ import {
     StatTitle,
     StatValue,
     ErrorMessage,
-    RetryButton
+    RetryButton,
+    CardIconWrapper
 } from "../../styles/AdminDashboardPage.styles";
 
 // 관리자 대시보드 페이지 컴포넌트
@@ -164,27 +166,50 @@ export const AdminDashboardPage: React.FC = () => {
                 {stats && (
                     <StatsList>
                         <StatItem onClick={() => handleStatCardClick('approved-events')}>
+                            <CardIconWrapper color="#4C8DFF">
+                            <FaCheckCircle size={28} />
+                            </CardIconWrapper>
+
+                            <div style={{ display: 'flex', flexDirection: 'column', flex: 1 }}>
                             <StatTitle>전체 승인 행사</StatTitle>
                             <StatValue>{approvedCount.toLocaleString()}</StatValue>
+                            </div>
+
+                            <FaAngleRight size={28} color="#757575" style={{ marginLeft: 'auto' }} />
                         </StatItem>
 
                         <StatItem onClick={() => handleStatCardClick('pending-events')}>
+                            <CardIconWrapper color="#FFA726">
+                            <FaClock size={28} />
+                            </CardIconWrapper>
+
+                            <div style={{ display: 'flex', flexDirection: 'column', flex: 1 }}>
                             <StatTitle>요청된 행사</StatTitle>
                             <StatValue>{pendingCount.toLocaleString()}</StatValue>
+                            </div>
+
+                            <FaAngleRight size={28} color="#757575" style={{ marginLeft: 'auto' }} />
                         </StatItem>
 
                         <StatItem onClick={() => handleStatCardClick('users')}>
+                            <CardIconWrapper color="#2AC1BC">
+                            <FaUsers size={28} />
+                            </CardIconWrapper>
+
+                            <div style={{ display: 'flex', flexDirection: 'column', flex: 1 }}>
                             <StatTitle>회원 수</StatTitle>
                             <StatValue>{stats.totalUsers.toLocaleString()}</StatValue>
-                            {/* TODO: 전체 회원 수 받아와서 출력하는 부분 추가 */}
-                        </StatItem>
-                    </StatsList>
-                )}
+                            </div>
 
+                            <FaAngleRight size={28} color="#757575" style={{ marginLeft: 'auto' }} />
+                        </StatItem>
+                        </StatsList>
+                )}
+                <hr style={{margin: '20px 0px', border :'2px solid #e5e7eb'}}/>
                 {/* 하단 바 + 로그아웃 버튼 */}
-                <MenuItem onClick={handleLogout}>
+                <span onClick={handleLogout} style={{color: '#333'}}>
                     로그아웃
-                </MenuItem>
+                </span>
 
                 {/* 모달들 */}
                 <ApprovedEventsModal

@@ -50,7 +50,7 @@ function MainPage() {
     <MainPageContainer style={{padding: '50px'}}>
       <BannerImage src={Banner} style={{width: '1200px', height: '200px', objectFit: 'cover'}} alt='배너 이미지'/>
       <CalendarSection>
-        <CalendarWrapper>
+        <CalendarWrapper style={{zoom: '1'}}>
           <Calendar 
             events={calendarEvents} // 👈 훅에서 가져온 값
             onEventClick={handleCalendarEventSelect}

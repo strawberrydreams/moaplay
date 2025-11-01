@@ -1,9 +1,9 @@
-import React, { useEffect, useState, useRef, useCallback } from 'react'; // useRef 추가
-import * as UserApi from '../service/userApi';     // 사용자 정보 API
+import React, { useEffect, useState, useRef, useCallback, type CSSProperties } from 'react'; // useRef 추가
+import * as UserApi from '../service/usersApi';     // 사용자 정보 API
 import * as ReviewApi from '../service/reviewsApi';  // 리뷰 API
 import * as FavoriteApi from '../service/favoritesApi';// 찜 API
 import { useAuthContext } from '../context/AuthContext';
-import type * as U from '../types/user';        // User 타입
+import type * as U from '../types/users';        // User 타입
 import type * as R from '../types/reviews';       // Review 타입
 import type * as F from '../types/favorites';     // Favorite 타입 (찜 목록용)
 import type * as E from '../types/events';        // Event 타입 (찜 목록 내부용)
@@ -11,26 +11,50 @@ import EventCard from '../components/EventCard';   // EventCard 재사용
 import ReviewCard from '../components/ReviewCard'
 import { useModal } from '../hooks/useModal';
 import Modal from '../components/common/Modal';
+import { ProfileUploadModal } from '../components/ProfileUploadModal';
 import DeleteAccountForm from '../components/auth/DeleteAccountForm';
 import ChangePasswordForm from '../components/auth/ChangePasswordForm';
 import * as S from '../styles/Mypage.styles';    // 스타일 임포트
 import { FaPencilAlt, FaChevronLeft, FaChevronRight } from 'react-icons/fa'; // 아이콘
 import FieldEditForm from '../components/FieldEditForm';
+import HostApplyForm from './HostApplyForm';
+import defaultImage from '../assets/default-profile.png';
+import BeatLoader from "react-spinners/BeatLoader";
 
 type EditableUserField = 'nickname' | 'email' | 'phone' | 'password' | 'tags';
 
+const fieldLabels: Record<string, string> = {
+  nickname: '닉네임',
+  email: '이메일',
+  phone: '전화번호',
+};
+
+const override: CSSProperties = {
+  display: "flex",
+  justifyContent: "center",
+  alignItems: "center",
+  margin: "0 auto",
+  height: "100vh"
+};
+
 const MyPage: React.FC = () => {
-  const [userData, setUserData] = useState<U.User | null>(null);
+  const [userData, setUserData] = useState<U.Users | null>(null);
   const [myReviews, setMyReviews] = useState<R.Review[]>([]);
   const [myFavorites, setMyFavorites] = useState<F.Favorite[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [editingField, setEditingField] = useState<EditableUserField | null>(null);
   const favoriteListRef = useRef<HTMLDivElement>(null); // 찜 목록 스크롤용
-  const { user:currentUser } = useAuthContext()
+  const { user } = useAuthContext();
+  
 
   const { 
     isDeleteAccountModalOpen,
+    isProfileModalOpen,
+    isHostApplyModalOpen,
+    setIsProfileModalOpen,
+    setIsHostApplyModalOpen,
     openDeleteAccountModal,
+    openHostApplyModal,
     closeDeleteAccountModal,
     closeAllModals
   } = useModal();
@@ -69,12 +93,12 @@ const MyPage: React.FC = () => {
         loadMyPageData(); // 마운트 시 데이터 로딩 함수 호출
     }, [loadMyPageData]);
 
-  const handleFieldUpdate = async (field: keyof U.User, value: string) => {
+  const handleFieldUpdate = async (field: keyof U.Users, value: string) => {
     if (!userData) return;
     try {
       // API 호출 예: UserApi.changeUser({ [field]: value })
-      const payload = { [field]: value } as Partial<U.User>;
-      const updated = await UserApi.changeUser(payload);
+      const payload = { [field]: value } as Partial<U.Users>;
+      const updated = await UserApi.updateMe(payload);
       setUserData((prev) => prev ? { ...prev, ...updated } : prev);
       setEditingField(null);
     } catch (error) {
@@ -114,7 +138,14 @@ const MyPage: React.FC = () => {
   };
 
   if (isLoading) {
-    return <S.PageContainer>로딩 중...</S.PageContainer>;
+    return  <BeatLoader
+        color="#8b8b8bff"
+        loading={isLoading}
+        cssOverride={override}
+        size={15}
+        aria-label="Loading Spinner"
+        data-testid="loader"
+      />;
   }
   if (!userData) {
     return <S.PageContainer>사용자 정보를 불러올 수 없습니다.</S.PageContainer>; // 로그인 안 된 경우 등
@@ -124,12 +155,15 @@ const MyPage: React.FC = () => {
     <S.PageContainer>
       {/* --- 1. 프로필 섹션 --- */}
       <S.ProfileSection>
-        <S.ProfileAvatar src={userData.profile_image || '/default-profile.png'} alt="프로필 사진" />
+        <S.ProfileAvatar src={user?.profile_image || defaultImage} alt="프로필 사진" />
         <S.ProfileInfo>
           <S.ProfileName>{userData.nickname}</S.ProfileName>
           <S.ProfileUserId>{userData.user_id}</S.ProfileUserId>
         </S.ProfileInfo>
-        <S.EditProfileButton aria-label="프로필 수정">
+        <S.EditProfileButton 
+          aria-label="프로필 수정"
+          onClick={() => setIsProfileModalOpen(true)}
+        >
           <FaPencilAlt />
         </S.EditProfileButton>
       </S.ProfileSection>
@@ -223,7 +257,7 @@ const MyPage: React.FC = () => {
 
       {/* --- 5. 하단 링크 --- */}
       <S.ActionLinks>
-        <S.ActionLink href="/host-apply">행사 주최자 신청하기</S.ActionLink>
+        {/* <S.ActionLink onClick={openHostApplyModal}>행사 주최자 신청하기</S.ActionLink> */}
         <S.ActionLink onClick={openDeleteAccountModal}>회원탈퇴</S.ActionLink>
       </S.ActionLinks>
 
@@ -234,7 +268,7 @@ const MyPage: React.FC = () => {
         <Modal
           isOpen={true}
           onClose={() => setEditingField(null)}
-          title={`“${editingField}” 변경`}
+          title={`${fieldLabels[editingField]} 변경`}
         >
           <FieldEditForm
             field={editingField}
@@ -266,6 +300,16 @@ const MyPage: React.FC = () => {
         />
       </Modal>
 
+      <ProfileUploadModal
+        isOpen={isProfileModalOpen}
+        onClose={() => setIsProfileModalOpen(false)}
+        currentImageUrl={userData.profile_image ?? null} // 현재 프로필 이미지 URL
+      />
+
+      <HostApplyForm 
+        isOpen={isHostApplyModalOpen}
+        onClose={() => setIsHostApplyModalOpen(false)}
+      />
     </S.PageContainer>
   );
 };

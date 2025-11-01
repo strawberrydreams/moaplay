@@ -1,7 +1,8 @@
 import React, { useState, useCallback, type FocusEvent } from 'react'; // 1. FocusEvent 임포트
 import { useForm } from '../../hooks/useForm'; // 👈 제네릭 훅 임포트
-import * as UserApi from '../../service/userApi'; // 회원가입 API
-import type { RegisterPayload, DuplicateCheckPayload } from '../../types/user';
+import * as UserApi from '../../service/usersApi'; // 회원가입 API
+import type { RegisterPayload, DuplicateCheckPayload } from '../../types/users';
+import { useAuthContext } from '../../context/AuthContext';
 
 import {
     FormContainer,
@@ -98,12 +99,15 @@ const SignupForm: React.FC<SignupFormProps> = ({ onSwitchToLogin, onGoTags }) =>
     const [isDuplicate, setIsDuplicate] = useState({ user_id: false, nickname: false, email: false });
     const [successMessage, setSuccessMessage] = useState({ user_id: '', nickname: '', email: '' , password: '', confirmPassword: '', phone: ''});
 
+    const { login } = useAuthContext();
+
     // 4. useForm 훅 호출 (validate 함수에 isDuplicate를 반영한 새 함수 전달)
     const { values, errors, isSubmitting, handleChange: handleFormChange, handleSubmit } = useForm<SignupFormData>({
         initialValues: initialSignupValues,
         validate: validateSignup, // 👈 isDuplicate 상태가 반영된 유효성 함수 사용
         onSubmit: UserApi.registerUser,
         onSuccess: (response) => {
+            login(values);
             onGoTags(response as RegisterPayload);
         },
         onError: (error) => { 

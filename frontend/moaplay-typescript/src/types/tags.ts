@@ -12,12 +12,12 @@ export type SelectableTag = Tag & {
 
 // 사용자 선호 태그 저장 페이로드
 export type UserPreferredTagsPayload = {
-    tag_ids: number[]; // 최소 3개 이상 권장(프론트/서버에서 검증)
+    tags: number[]; // 최소 3개 이상 권장(프론트/서버에서 검증)
 };
 
 // 서버가 선호 태그 저장 후 돌려줄 때 쓸 수 있는 응답 타입(예시)
 export type UserPreferredTagsResponse = {
     user_id: number;
-    tag_ids: number[];
+    tags: number[];
     updated_at: string;
 };

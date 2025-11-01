@@ -3,6 +3,17 @@ import type { ImageUploadResponse, ImagesUploadResponse } from "../types/upload.
 
 // 이미지 업로드 API 처리 부분 (단일/다중)
 
+export const normalizeImageUrl = (url: string): string => {
+  if (!url) return '';
+  // 절대주소라도 localhost:5000/uploads 가 포함되어 있다면 변환
+  const uploadsPath = '/uploads/';
+  const idx = url.indexOf(uploadsPath);
+  if (idx !== -1) {
+    return url.replace('/uploads', '/api/upload');
+  }
+  return url;
+};
+
 // 단일 이미지 업로드 함수 (POST)
 export const uploadImage = async (imageFile: File): Promise<ImageUploadResponse> => {
   const formData = toFormDataSingle(imageFile);
@@ -13,7 +24,7 @@ export const uploadImage = async (imageFile: File): Promise<ImageUploadResponse>
       headers: { 'Content-Type': 'multipart/form-data' },
     }
   );
-  return data;
+  return {url: normalizeImageUrl(data.url)};
 };
 
 // 다중 이미지 업로드 함수 (POST)
@@ -26,7 +37,9 @@ export const uploadImages = async (imageFiles: File[]): Promise<ImagesUploadResp
       headers: { 'Content-Type': 'multipart/form-data' },
     }
   );
-  return data;
+  return {
+    urls: data.urls.map(normalizeImageUrl), // ✅ 각 URL 정규화
+  };
 };
 
 // 단일 이미지를 FormData로 포맷팅

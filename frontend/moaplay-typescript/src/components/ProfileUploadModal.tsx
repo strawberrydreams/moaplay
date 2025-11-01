@@ -3,8 +3,13 @@ import Modal from './common/Modal'; // 1. 기존 Modal 컴포넌트 임포트
 import * as S from '../styles/ProfileUploadModal.styles'; // 2. 스타일 임포트
 import { useAuthContext } from '../context/AuthContext'; // 3. AuthContext 임포트
 // 👇 4. UserApi 대신 (또는 추가로) ImageApi 임포트
-import * as UploadApi from '../service/uploadApi'; // (경로가 userApi와 동일하다고 가정)
-import defaultProfile from '../../assets/default-profile.png'; // 기본 이미지
+import * as UploadApi from '../service/uploadApi'; 
+import defaultProfile from '../assets/default-profile.png'; // 기본 이미지
+import { FaCamera } from 'react-icons/fa';
+import * as UserApi from '../service/usersApi';
+import { normalizeImageUrl } from '../utils/image';
+
+
 
 interface ProfileUploadModalProps {
   isOpen: boolean;
@@ -65,9 +70,10 @@ export const ProfileUploadModal: React.FC<ProfileUploadModalProps> = ({ isOpen, 
 
     try {
       // --- 👇 6. ImageApi.uploadImage 함수 호출 (selectedFile 전달) ---
-      // (주의: 이 API는 'image'라는 필드명으로 파일을 전송합니다)
-      await UploadApi.uploadImage(selectedFile); 
+      const response = await UploadApi.uploadImage(selectedFile); 
+      console.log("업로드 응답:", response);
       // --- 👆 ---
+      UserApi.updateMe({ profile_image: response.url })
       
       alert("프로필 이미지가 성공적으로 변경되었습니다.");
       
@@ -89,16 +95,15 @@ export const ProfileUploadModal: React.FC<ProfileUploadModalProps> = ({ isOpen, 
       <S.Container>
         {/* 이미지 미리보기 영역 */}
         <S.PreviewCircle onClick={triggerFileInput}>
-          <S.PreviewImage 
-            src={previewUrl || defaultProfile} // 미리보기 URL 또는 기본 이미지
-            alt="프로필 미리보기" 
-          />
+          <S.PreviewImage src={previewUrl || defaultProfile} alt="프로필 미리보기" />
+          <S.UploadIcon>
+            <FaCamera />
+          </S.UploadIcon>
         </S.PreviewCircle>
-        
-        {/* 숨겨진 파일 입력 */}
+
         <S.HiddenInput 
           ref={fileInputRef} 
-          accept="image/*" // 이미지 파일만
+          accept="image/*" // 이미지 파일만 
           onChange={handleFileSelect} 
         />
         

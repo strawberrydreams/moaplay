@@ -54,6 +54,7 @@ export const EditProfileButton = styled.button`
   font-size: 1.2rem; // 아이콘 크기
   padding: 5px;
   &:hover { color: #333; }
+  &:focus { outline: none; }
 `;
 
 // --- 2. 기본 정보 섹션 ---
@@ -159,31 +160,30 @@ export const ArrowButton = styled.button<{ direction: 'left' | 'right' }>`
   top: 50%;
   transform: translateY(-50%);
   ${props => props.direction === 'left' ? 'left: -15px;' : 'right: -15px;'} // 위치 조정
-  background-color: white;
-  border: 1px solid #eee;
+  background : none;
   border-radius: 50%;
-  width: 35px;
-  height: 35px;
-  font-size: 1.2rem;
+  border: none;
+  width: 40px;
+  height: 40px;
+  font-size: 1rem;
   color: #555;
   cursor: pointer;
   display: flex;
   justify-content: center;
   align-items: center;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
   z-index: 2;
-  opacity: 0.7;
-  transition: opacity 0.2s ease;
   padding: 0px;
 
-  &:hover { opacity: 1; }
+  &:hover {
+    color: #333;
+  }
   // 맨 처음/끝일 때 숨기거나 비활성화하는 로직 필요
 `;
 
 // --- 6. 하단 링크 섹션 ---
 export const ActionLinks = styled.div`
   display: flex;
-  justify-content: space-between;
+  justify-content: right;
   align-items: center;
   padding: 1.5rem 0;
   border-top: 1px solid #eee;

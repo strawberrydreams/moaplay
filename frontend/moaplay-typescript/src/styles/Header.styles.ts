@@ -1,5 +1,6 @@
 import styled, { createGlobalStyle } from 'styled-components'; // 👈 1. 'createGlobalStyle'을 반드시 임포트해야 합니다.
 
+
 export const StyledHeader = styled.header`
     display: flex;
     justify-content: space-between;
@@ -110,8 +111,20 @@ export const GlobalStyle = createGlobalStyle`
         width: 100%;
     }
 
-    body {
-        font-family: 'Noto Sans KR', sans-serif; 
-        background-color: #f8f8f8; 
-    }
+//     html:not(.calendar-wrapper){
+//     zoom: 0.7;
+
+//     /* Firefox 대응 */
+//     @-moz-document url-prefix() {
+//       zoom: initial;
+//     }
+//   }
+    
+
+  body {
+    font-family: 'Pretendard', sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: #f8f9fa;
+  }
 `;

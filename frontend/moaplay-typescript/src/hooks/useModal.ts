@@ -10,6 +10,9 @@ export function useModal() {
     const [isReviewModalOpen, setIsReviewModalOpen] = useState(false);
     const [isReviewDetailModalOpen, setReviewDetailModalOpen] = useState(false);
     const [isDeleteAccountModalOpen, setIsDeleteAccountModalOpen] = useState(false);
+    const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
+    const [isHostApplyModalOpen, setIsHostApplyModalOpen] = useState(false);
+
 
     // 2. 함수 이름을 컨텍스트와 맞추면 더 좋습니다 (옵션)
     const openLoginModal = () => setIsLoginModalOpen(true);
@@ -18,6 +21,7 @@ export function useModal() {
     const openReviewModal = () => setIsReviewModalOpen(true);
     const openReviewDetailModal = () => setReviewDetailModalOpen (true);
     const openDeleteAccountModal = () => setIsDeleteAccountModalOpen(true);
+    const openHostApplyModal = () => setIsHostApplyModalOpen(true);
 
     const closeReviewModal = () => setIsReviewModalOpen(false);
     const closeReviewDetailModal = () => setReviewDetailModalOpen(false);
@@ -29,6 +33,7 @@ export function useModal() {
         setisSelectTagsModalOpen(false);
         setIsReviewModalOpen(false);
         setIsDeleteAccountModalOpen(false);
+        setIsHostApplyModalOpen(false);
     };
     
     const loginToSignUp = () => {
@@ -48,12 +53,17 @@ export function useModal() {
 
     return { 
         setReviewDetailModalOpen,
+        setIsProfileModalOpen,
+        setIsHostApplyModalOpen,
         isLoginModalOpen,
         isSignupModalOpen,
         isSelectTagsModalOpen,
         isReviewModalOpen,
         isReviewDetailModalOpen,
         isDeleteAccountModalOpen,
+        isProfileModalOpen,
+        isHostApplyModalOpen,
+        openHostApplyModal,
         openLoginModal,
         openSignupModal,
         openSelectTagsModal,

@@ -31,18 +31,20 @@ export const getServerStatus = async (): Promise<boolean> => {
 // (GET) 아이디/이메일/닉네임 중복 확인
 // 성공 시 True (사용 가능), 실패 시 False 또는 오류 응답
 export const checkDuplicate = async (
-    payload: DuplicateCheckPayload
-): Promise<{available: boolean}> => {
-    // //users/check?type=user_id&value=testuser 형태로 요청
-    const { data } = await axiosInstance.get<{available: boolean}>('/users/check/', {
-        params: payload,
-    });
-    return data;
+  payload: DuplicateCheckPayload
+): Promise<{ available: boolean; message: string }> => {
+  const [type, value] = Object.entries(payload)[0];
+
+  const { data } = await axiosInstance.get('/users/check', {
+    params: { type, value },
+  });
+
+  return data;
 };
 
 // (POST) 최종 회원가입 요청
 export const registerUser = async (payload: RegisterPayload): Promise<{ success: boolean }> => {
-    const { data } = await axiosInstance.post<{ success: boolean }>('/users', payload);
+    const { data } = await axiosInstance.post<{ success: boolean }>('/users/', payload);
     return data;
 };
 

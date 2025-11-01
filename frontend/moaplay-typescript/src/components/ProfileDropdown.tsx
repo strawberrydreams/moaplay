@@ -1,21 +1,21 @@
+// src/components/ProfileDropdown.tsx
 import React, { useState, useRef, useEffect } from 'react';
-import { useAuthContext } from '../context/AuthContext' // Auth 컨텍스트
-import * as S from '../styles/ProfileDropdown.styles'; // 스타일 임포트
+import { useAuthContext } from '../context/AuthContext';
+import * as S from '../styles/ProfileDropdown.styles';
 import { FaChevronDown } from 'react-icons/fa';
 import defaultProfile from '../assets/default-profile.png';
-import { useNavigate } from 'react-router-dom'; // 마이페이지 이동 시 필요
+import { useNavigate } from 'react-router-dom';
 
 const ProfileDropdown: React.FC = () => {
   const navigate = useNavigate();
-  const { user, logout } = useAuthContext(); // 컨텍스트에서 user, logout 가져오기
-  // const navigate = useNavigate(); // 마이페이지 이동 시 필요
+  const { user, logout } = useAuthContext();
+  console.log(user?.role);
 
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
   const toggleDropdown = () => setIsDropdownOpen(prev => !prev);
 
-  // 드롭다운 외부 클릭 시 닫기
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
@@ -26,21 +26,28 @@ const ProfileDropdown: React.FC = () => {
     return () => {
       document.removeEventListener('mousedown', handleClickOutside);
     };
-  }, [dropdownRef]);
+  }, []);
 
-  // user 정보가 없으면 아무것도 렌더링하지 않음 (Header에서 이미 처리하므로 불필요할 수도 있음)
-  if (!user) {
-    return null;
-  }
+  if (!user) return null;
 
   const handleMyPageClick = () => {
-    navigate('/mypage'); // 마이페이지 경로로 이동
-    setIsDropdownOpen(false); // 메뉴 닫기
+    navigate('/mypage');
+    setIsDropdownOpen(false);
   };
 
   const handleLogoutClick = () => {
     logout();
-    setIsDropdownOpen(false); // 메뉴 닫기
+    setIsDropdownOpen(false);
+  };
+
+  const handleCreateEventClick = () => {
+    navigate('/events/new');
+    setIsDropdownOpen(false);
+  };
+
+  const handleAdminPageClick = () => {
+    navigate('/admin/dashboard');
+    setIsDropdownOpen(false);
   };
 
   return (
@@ -48,7 +55,7 @@ const ProfileDropdown: React.FC = () => {
       <S.ProfileImage
         src={user.profile_image || defaultProfile}
         alt="프로필 사진"
-        onClick={toggleDropdown} // 이미지 클릭 시에도 드롭다운 토글
+        onClick={toggleDropdown}
       />
       <S.DropdownArrowButton onClick={toggleDropdown}>
         <FaChevronDown />
@@ -56,12 +63,28 @@ const ProfileDropdown: React.FC = () => {
 
       {isDropdownOpen && (
         <S.DropdownMenu>
-          <S.MenuItem onClick={handleMyPageClick}>
-            마이페이지
-          </S.MenuItem>
-          <S.MenuItem onClick={handleLogoutClick}>
-            로그아웃
-          </S.MenuItem>
+          <S.MenuItem onClick={handleMyPageClick}>마이페이지</S.MenuItem>
+
+          {/* HOST 역할이면 행사 작성하기 메뉴 추가 */}
+          {user.role === 'host' && (
+            <S.MenuItem onClick={handleCreateEventClick}>
+              행사 작성하기
+            </S.MenuItem>
+          )}
+
+          {/* ADMIN 역할이면 행사 작성 + 관리자 페이지 메뉴 추가 */}
+          {user.role === 'admin' && (
+            <>
+              <S.MenuItem onClick={handleCreateEventClick}>
+                행사 작성하기
+              </S.MenuItem>
+              <S.MenuItem onClick={handleAdminPageClick}>
+                관리자 페이지
+              </S.MenuItem>
+            </>
+          )}
+
+          <S.MenuItem onClick={handleLogoutClick}>로그아웃</S.MenuItem>
         </S.DropdownMenu>
       )}
     </S.ProfileContainer>

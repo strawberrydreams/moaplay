@@ -9,6 +9,12 @@ interface FieldEditFormProps {
   onSave: (value: string) => void;
 }
 
+const fieldLabels: Record<string, string> = {
+  nickname: '닉네임',
+  email: '이메일',
+  phone: '전화번호',
+};
+
 const FieldEditForm: React.FC<FieldEditFormProps> = ({ field, initialValue, onCancel, onSave }) => {
   const [value, setValue] = useState(initialValue);
   const [error, setError] = useState<string | null>(null);
@@ -31,7 +37,7 @@ const FieldEditForm: React.FC<FieldEditFormProps> = ({ field, initialValue, onCa
 
   return (
     <form onSubmit={handleSubmit}>
-      <S.Label htmlFor="edit-input">{field}</S.Label>
+      <S.Label htmlFor="edit-input">{fieldLabels[field]}</S.Label>
       <S.Input
         id="edit-input"
         type="text"
