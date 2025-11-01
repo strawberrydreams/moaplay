@@ -2,7 +2,7 @@ import React, { useState, useCallback } from 'react';
 import Calendar from '../components/Calendar';
 import EventSearchPage from '../components/EventSearch';
 import CalendarEventDetail from '../components/CalendarEventDetail';
-import { useAuthContext } from '../context/AuthContext'; // 1. AuthContext 훅
+import { useAuthContext } from '../contexts/AuthContext'; // 1. AuthContext 훅
 import { useCalendarEvents } from '../hooks/useCalendarEvents'; // 2. 새로 만든 훅 임포트
 import type * as E from '../types/events';
 import type * as S from '../types/schedules';

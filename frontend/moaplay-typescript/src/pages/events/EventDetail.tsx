@@ -3,8 +3,8 @@ import MapComponent from '../../components/common/MapComponent';
 import ExpandableText from '../../components/common/ExpandableText';
 import * as E from '../../types/events';
 import * as R from '../../types/reviews';
-import * as ReviewApi from '../../service/reviewsApi';
-import * as EventApi from '../../service/eventsApi';
+import * as ReviewApi from '../../services/reviewsApi';
+import * as EventApi from '../../services/eventsApi';
 import * as S from '../../styles/EventDetail.styles.ts';
 import { useParams } from 'react-router-dom';
 import Modal from '../../components/common/Modal'
@@ -12,7 +12,7 @@ import {useModal} from '../../hooks/useModal';
 import ReviewForm from '../../components/ReviewForm.tsx';
 import ReviewDetail from '../../components/ReviewDetail';
 import { FaImage } from 'react-icons/fa';
-import {useAuthContext} from '../../context/AuthContext.tsx';
+import {useAuthContext} from '../../contexts/AuthContext.tsx';
 import LoginForm from '../../components/auth/LoginForm.tsx';
 
   // 리뷰 배열을 받아 평균 평점을 계산하는 함수

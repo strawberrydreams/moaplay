@@ -1,9 +1,9 @@
 import React, { useEffect, useState, useRef, useCallback } from 'react'; // useRef 추가
-import * as UserApi from '../service/userApi';     // 사용자 정보 API
-import * as ReviewApi from '../service/reviewsApi';  // 리뷰 API
-import * as FavoriteApi from '../service/favoritesApi';// 찜 API
-import { useAuthContext } from '../context/AuthContext';
-import type * as U from '../types/user';        // User 타입
+import * as UserApi from '../services/usersApi';     // 사용자 정보 API
+import * as ReviewApi from '../services/reviewsApi';  // 리뷰 API
+import * as FavoriteApi from '../services/favoritesApi';// 찜 API
+import { useAuthContext } from '../contexts/AuthContext';
+import type * as U from '../types/users';        // User 타입
 import type * as R from '../types/reviews';       // Review 타입
 import type * as F from '../types/favorites';     // Favorite 타입 (찜 목록용)
 import type * as E from '../types/events';        // Event 타입 (찜 목록 내부용)
@@ -20,7 +20,7 @@ import FieldEditForm from '../components/FieldEditForm';
 type EditableUserField = 'nickname' | 'email' | 'phone' | 'password' | 'tags';
 
 const MyPage: React.FC = () => {
-  const [userData, setUserData] = useState<U.User | null>(null);
+  const [userData, setUserData] = useState<U.Users | null>(null);
   const [myReviews, setMyReviews] = useState<R.Review[]>([]);
   const [myFavorites, setMyFavorites] = useState<F.Favorite[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -69,11 +69,11 @@ const MyPage: React.FC = () => {
         loadMyPageData(); // 마운트 시 데이터 로딩 함수 호출
     }, [loadMyPageData]);
 
-  const handleFieldUpdate = async (field: keyof U.User, value: string) => {
+  const handleFieldUpdate = async (field: keyof U.Users, value: string) => {
     if (!userData) return;
     try {
       // API 호출 예: UserApi.changeUser({ [field]: value })
-      const payload = { [field]: value } as Partial<U.User>;
+      const payload = { [field]: value } as Partial<U.Users>;
       const updated = await UserApi.changeUser(payload);
       setUserData((prev) => prev ? { ...prev, ...updated } : prev);
       setEditingField(null);

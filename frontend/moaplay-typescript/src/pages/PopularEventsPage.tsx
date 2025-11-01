@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import * as EventApi from '../service/eventsApi'; // 행사 API 경로 확인
+import * as EventApi from '../services/eventsApi'; // 행사 API 경로 확인
 import type * as E from '../types/events';      // Event 타입 경로 확인
 import EventCard from '../components/EventCard'; // EventCard 컴포넌트 경로 확인
 import { NoResultsMessage } from '../styles/EventSearch.styles'; // NoResultsMessage 재사용

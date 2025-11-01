@@ -7,7 +7,7 @@ import { UsersManagementModal } from "../../components/admin/UsersManagementModa
 import { getApprovedEvents, getPendingEvents } from "../../services/adminApi";
 import { updateEventStatus } from "../../services/eventsApi";
 import { MenuItem } from "../../styles/ProfileDropdown.styles";
-import { useAuthContext } from "../../context/AuthContext";
+import { useAuthContext } from "../../contexts/AuthContext";
 import {
     PageContainer,
     MainContent,

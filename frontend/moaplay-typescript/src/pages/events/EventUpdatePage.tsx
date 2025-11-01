@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 
-import { useAuthContext } from "../../context/AuthContext";
+import { useAuthContext } from "../../contexts/AuthContext";
 import { validateEventForm } from '../../utils/validation';
 import { useEventUpdate } from '../../hooks/useEventCreate';
 import type { EventFormData } from './EventCreatePage';

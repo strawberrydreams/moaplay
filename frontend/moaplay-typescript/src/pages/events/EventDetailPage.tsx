@@ -11,7 +11,7 @@ import {useModal} from '../../hooks/useModal';
 import ReviewForm from '../../components/ReviewForm.tsx';
 import ReviewDetail from '../../components/ReviewDetail';
 import { FaImage } from 'react-icons/fa';
-import {useAuth} from '../../context/AuthContext.tsx';
+import {useAuth} from '../../hooks/useAuth.ts';
 
 // 리뷰 배열을 받아 평균 평점을 계산하는 함수
 const calculateAverageRating = (reviews: R.Review[]): number => {
@@ -27,7 +27,7 @@ const calculateAverageRating = (reviews: R.Review[]): number => {
 
 
 const EventDetailPage: React.FC = () => {
-    const { currentUser } = useAuth(); // 2. 로그인 사용자 정보 가져오기
+    const { user } = useAuth(); // 2. 로그인 사용자 정보 가져오기
     const [currentImageIndex, setCurrentImageIndex] = useState<number>(0);
     const [eventDetail, setEventDetail] = useState<E.Event>();
     const [eventReview, setEventReview] = useState<R.Review[]>([]);
@@ -244,7 +244,7 @@ const EventDetailPage: React.FC = () => {
                                 <S.ReviewRating>{renderStars(review.rating)}</S.ReviewRating>
                             </S.ReviewFooter>
 
-                            {currentUser && currentUser.id === review.user.id && ( // 로그인했고 작성자와 ID가 같으면
+                            {user && user.id === review.user.id && ( // 로그인했고 작성자와 ID가 같으면
                                 <S.ReviewActions onClick={(e) => e.stopPropagation()}> {/* 카드 클릭 방지 */}
                                     <S.ActionButton onClick={() => handleEditReview(review.id)}>
                                         수정
