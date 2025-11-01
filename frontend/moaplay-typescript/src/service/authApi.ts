@@ -1,4 +1,4 @@
-import axiosInstance from './core';
+import axiosInstance from './core/axios';
 import type {LoginPayload, LoginResponse} from '../types/auth';
 // ----------------------------------------------------
 // TypeScript Type Definitions (백엔드와 통신을 위해 필요)

@@ -4,7 +4,7 @@ import Header from './components/Header'; // Header 컴포넌트 경로 확인!
 import Modal from './components/common/Modal'; // 👈 Modal 임포트
 import LoginForm from './components/auth/LoginForm'; // 👈 LoginForm 임포트
 import SignupForm from './components/auth/SignupForm'; // 추후 회원가입 폼을 여기에 임포트
-import EventDetail from './pages/events/EventDetail'; 
+import EventDetailPage from './pages/events/EventDetailPage';
 import SelectTagsForm from './components/auth/SelectTagsForm';
 import MainPage from './pages/MainPage';
 // import Footer from './components/layout/Footer'; // Footer도 필요하다면
@@ -24,6 +24,7 @@ import { AdminDashboardPage } from "./pages/admin/AdminDashboardPage";
 import EventCreatePage from "./pages/events/EventCreatePage";
 import {EventUpdatePage} from "./pages/events/EventUpdatePage";
 import OtherUserPage from './pages/OtherUserPage';
+import ProfileUpdatePage from "./pages/users/ProfileUpdatePage";
 
 const App: React.FC = () => {
     const { 
@@ -45,7 +46,7 @@ const App: React.FC = () => {
             <main style={{padding: '1rem', backgroundColor: '#f8f8f8' }}>
                 <Routes>
                     <Route path='/' element={<MainPage />} />
-                    <Route path='/events/:eventId' element={<EventDetail/>} />
+                    <Route path='/events/:eventId' element={<EventDetailPage/>} />
                     <Route path='/events/new' element={<EventCreatePage/>}/>
                     <Route path='/events/:eventId/edit' element={<EventUpdatePage/>}/>
                     <Route path='/popular' element={<PopularEventsPage/>}/>
@@ -53,6 +54,7 @@ const App: React.FC = () => {
                     <Route path='/recommend' element={<RecommendedEventsPage/>}/>
                     <Route path='/mypage' element={<MyPage/>}/>
                     <Route path='/users/:userId' element={<OtherUserPage/>}/>
+                    <Route path='/mypage/edit' element={<ProfileUpdatePage/>}/>
                     <Route path='/admin/dashboard' element={<AdminDashboardPage/>}/>
                 </Routes>
             </main>

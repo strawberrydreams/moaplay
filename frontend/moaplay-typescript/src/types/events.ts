@@ -84,7 +84,7 @@ export type UpdateEventPayload = CreateEventPayload & {id: number};
 // 관리자가 행사 상태를 변경하기 위한 데이터 타입 (Payload)
 // API: PUT /api/events/{id}/status (상태 변경 요청 Body)
 export interface UpdateEventStatusPayload {
-    status: 'approve' | 'reject';
+    status: 'approved' | 'rejected';
     message?: string; // 거절 시에만 필요한 값이므로 optional
 }
 
@@ -95,7 +95,7 @@ export interface EventStatusUpdateResponse {
 }
 
 // ===============================================================
-// ==Rsponse 타입들: 서버로부터 받는 데이터의 형태를 정의 ==
+// == Response 타입들: 서버로부터 받는 데이터의 형태를 정의 ==
 // ===============================================================
 
 // 행사 리스트 조회 응답 타입 (Response)

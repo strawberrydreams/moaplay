@@ -1,4 +1,4 @@
-import axiosInstance from './core';
+import axiosInstance from './core/axios';
 import type * as E from '../types/events';
 
 // eventApi.ts 전용 Response 타입을 추가 정의

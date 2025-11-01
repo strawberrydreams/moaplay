@@ -3,8 +3,8 @@ import { useState, useCallback } from 'react';
 import { type AdminDashboard } from '../types/admin';
 import type { Event } from '../types/events';
 import type { Pagination } from '../types/index';
-import { getAdminDashboard, getApprovedEvents, getPendingEvents } from "../service/adminApi";
-import {updateEventStatus} from "../service/eventsApi";
+import { getAdminDashboard, getApprovedEvents, getPendingEvents } from "../services/adminApi";
+import {updateEventStatus} from "../services/eventsApi";
 
 interface UseAdminDashboardReturn {
     // 대시보드 통계

@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import styled from 'styled-components';
 import type {Pagination} from '../../types/index';
-import type {DeleteUserPayload, User} from "../../types/user";
-import {deleteUser} from "../../service/userApi";
+import type {DeleteUserPayload, Users} from "../../types/users";
+import {deleteUser} from "../../service/usersApi";
 import {getUsers} from "../../service/adminApi";
 
 // 사용자 모달 관리 Props
@@ -16,7 +16,7 @@ export const UsersManagementModal: React.FC<UsersManagementModalProps> = ({
                                                                               isOpen,
                                                                               onClose,
                                                                           }) => {
-    const [users, setUsers] = useState<User[]>([]);
+    const [users, setUsers] = useState<Users[]>([]);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [pagination, setPagination] = useState<Pagination | null>(null);
@@ -32,7 +32,7 @@ export const UsersManagementModal: React.FC<UsersManagementModalProps> = ({
             const result = await getUsers();
 
             type UsersResponse = {
-                items?: User[];
+                items?: Users[];
                 pagination?: Pagination | null;
             };
 

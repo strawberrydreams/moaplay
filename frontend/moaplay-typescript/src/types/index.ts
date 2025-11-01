@@ -38,3 +38,15 @@ export interface ApiError {
     code: string;
     message: string;
 }
+
+// 폼 필드 에러
+export interface FieldError {
+    field: string;
+    message: string;
+}
+
+// 폼 검증 결과
+export interface ValidationResult {
+    isValid: boolean;
+    errors: FieldError[];
+}

@@ -1,4 +1,4 @@
-import axiosInstance from './core';
+import axiosInstance from './core/axios';
 import type { ImageUploadResponse, ImagesUploadResponse } from "../types/upload.ts";
 
 // 이미지 업로드 API 처리 부분 (단일/다중)
