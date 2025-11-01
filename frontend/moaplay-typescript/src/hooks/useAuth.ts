@@ -1,9 +1,9 @@
 import { useState, useEffect, useCallback } from 'react';
-import * as AuthApi from '../service/authApi'; // authApi.ts 경로 확인
-import * as SchedulesApi from '../service/schedulesApi'; // schedulesApi.ts 경로 확인
+import * as AuthApi from '../services/authApi'; // authApi.ts 경로 확인
+import * as SchedulesApi from '../services/schedulesApi'; // schedulesApi.ts 경로 확인
 import type { LoginPayload, LoginResponse } from '../types/auth'; // API 타입
 import type { Users } from '../types/users'; // API 타입
-import * as UserApi from '../service/usersApi'; // userApi.ts 경로 확인
+import * as UserApi from '../services/usersApi'; // userApi.ts 경로 확인
 import type { Schedule } from '../types/schedules'; // Schedule 타입
 
 // 훅이 관리할 사용자 타입 (UserResponse와 동일)

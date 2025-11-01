@@ -1,5 +1,5 @@
 import axiosInstance from './core/axios';
-import type { Favorite, FavoriteCreationResponse, FavoriteResponse, FavoriteStatus } from '../types/favorites';
+import type { FavoriteCreationResponse, FavoriteResponse, FavoriteStatus } from '../types/favorites';
 
 // (GET) 사용자의 모든 찜 목록 조회
 export const getFavorites = async (): Promise<FavoriteResponse> => {

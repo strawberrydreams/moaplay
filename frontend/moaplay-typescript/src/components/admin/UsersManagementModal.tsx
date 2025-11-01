@@ -2,8 +2,8 @@ import React, { useState, useEffect } from 'react';
 import styled from 'styled-components';
 import type {Pagination} from '../../types/index';
 import type {DeleteUserPayload, Users} from "../../types/users";
-import {deleteUser} from "../../service/usersApi";
-import {getUsers} from "../../service/adminApi";
+import {deleteUser} from "../../services/usersApi";
+import {getUsers} from "../../services/adminApi";
 
 // 사용자 모달 관리 Props
 interface UsersManagementModalProps {

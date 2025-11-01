@@ -1,10 +1,10 @@
-import React, { useState, useEffect } from 'react';
+import React, {useEffect, useState} from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import styled from 'styled-components';
-import { useAuthContext } from '../../context/AuthContext';
+import { useAuthContext } from '../../contexts/AuthContext';
 import type { MyUserResponse, OtherUserResponse, Users } from '../../types/users';
-import { getMe, getUser, updateMe, changePassword, checkDuplicate } from "../../service/usersApi";
-import { uploadImage } from "../../service/uploadApi";
+import { getMe, getUser, updateMe, changePassword, checkDuplicate } from "../../services/usersApi";
+import { uploadImage } from "../../services/uploadApi";
 
 // 프로필 수정 폼 타입
 interface ProfileUpdateFormData {
@@ -165,8 +165,7 @@ export const ProfileUpdatePage: React.FC = () => {
     // 폼 필드 변경 처리
     const handleFieldChange = (field: keyof ProfileUpdateFormData, value: string | string[]) => {
         setFormData(prev => {
-            const next = { ...prev, [field]: value };
-            return next;
+            return {...prev, [field]: value};
         });
         if (field === 'nickname') {
             setNicknameAvailable(null);

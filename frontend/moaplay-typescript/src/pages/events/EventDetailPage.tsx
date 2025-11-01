@@ -5,10 +5,10 @@ import ExpandableText from '../../components/common/ExpandableText';
 import * as E from '../../types/events';
 import * as R from '../../types/reviews';
 
-import * as ReviewApi from '../../service/reviewsApi';
-import * as EventApi from '../../service/eventsApi';
-import * as ScheduleApi from '../../service/schedulesApi';
-import * as FavoriteApi from '../../service/favoritesApi'
+import * as ReviewApi from '../../services/reviewsApi';
+import * as EventApi from '../../services/eventsApi';
+import * as ScheduleApi from '../../services/schedulesApi';
+import * as FavoriteApi from '../../services/favoritesApi'
 
 import * as S from '../../styles/EventDetail.styles';
 import { FaImage, FaHeart, FaRegHeart, FaRegCalendarPlus, FaEdit, FaTrash } from 'react-icons/fa';
@@ -18,7 +18,7 @@ import {useModal} from '../../hooks/useModal';
 import ReviewForm from '../../components/ReviewForm';
 import ReviewDetail from '../../components/ReviewDetail';
 
-import {useAuthContext} from '../../context/AuthContext';
+import {useAuthContext} from '../../contexts/AuthContext';
 import LoginForm from '../../components/auth/LoginForm';
 
 
@@ -38,7 +38,6 @@ const calculateAverageRating = (reviews: R.Review[]): number => {
 
 const EventDetailPage: React.FC = () => {
   const { user } = useAuthContext(); // 2. 로그인 사용자 정보 가져오기
-
   const [currentImageIndex, setCurrentImageIndex] = useState<number>(0);
   const [eventDetail, setEventDetail] = useState<E.Event>();
   const [eventReview, setEventReview] = useState<R.Review[]>([]);
@@ -231,7 +230,6 @@ const EventDetailPage: React.FC = () => {
           )}
         </S.ImageActionGroup>
       </S.EventHeader>
-
       {/* 2. 이미지 캐러셀 */}
       <S.ImageCarousel>
         <S.CarouselButton $direction="left" onClick={prevImage} aria-label="previous image">

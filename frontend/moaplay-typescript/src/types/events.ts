@@ -100,7 +100,7 @@ export interface EventStatusUpdateResponse {
 
 // 행사 리스트 조회 응답 타입 (Response)
 // API: GET /api/events
-interface EventReadListResponse {
+export interface EventReadListResponse {
     events: Event[];
     pagination: {
         total: number;

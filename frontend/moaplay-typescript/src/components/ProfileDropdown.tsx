@@ -1,6 +1,6 @@
 // src/components/ProfileDropdown.tsx
 import React, { useState, useRef, useEffect } from 'react';
-import { useAuthContext } from '../context/AuthContext';
+import { useAuthContext } from '../contexts/AuthContext';
 import * as S from '../styles/ProfileDropdown.styles';
 import { FaChevronDown } from 'react-icons/fa';
 import defaultProfile from '../assets/default-profile.png';

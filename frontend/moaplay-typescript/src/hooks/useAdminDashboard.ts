@@ -3,8 +3,8 @@ import { useState, useCallback } from 'react';
 import { type AdminDashboard } from '../types/admin';
 import type { Event } from '../types/events';
 import type { Pagination } from '../types/index';
-import { getAdminDashboard, getApprovedEvents, getPendingEvents } from "../service/adminApi";
-import {updateEventStatus} from "../service/eventsApi";
+import { getAdminDashboard, getApprovedEvents, getPendingEvents } from "../services/adminApi";
+import { updateEventStatus } from "../services/eventsApi";
 
 interface UseAdminDashboardReturn {
     // 대시보드 통계
@@ -132,7 +132,7 @@ export const useAdminDashboard = (): UseAdminDashboardReturn => {
     // 행사 승인
     const approveEvent = useCallback(async (eventId: number) => {
         try {
-            await updateEventStatus(eventId, { status: 'approve' });
+            await updateEventStatus(eventId, { status: 'approved' });
 
             // 승인 후 목록 새로고침
             await Promise.all([
@@ -151,7 +151,7 @@ export const useAdminDashboard = (): UseAdminDashboardReturn => {
     // 행사 거절
     const rejectEvent = useCallback(async (eventId: number) => {
         try {
-            await updateEventStatus(eventId, { status: 'reject' });
+            await updateEventStatus(eventId, { status: 'rejected' });
 
             // 거절 후 목록 새로고침
             await Promise.all([refreshStats(), loadPendingEvents()]);

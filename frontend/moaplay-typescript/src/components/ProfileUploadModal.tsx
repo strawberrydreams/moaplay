@@ -1,15 +1,12 @@
 import React, { useState, useEffect, useRef } from 'react';
 import Modal from './common/Modal'; // 1. 기존 Modal 컴포넌트 임포트
 import * as S from '../styles/ProfileUploadModal.styles'; // 2. 스타일 임포트
-import { useAuthContext } from '../context/AuthContext'; // 3. AuthContext 임포트
+import { useAuthContext } from '../contexts/AuthContext'; // 3. AuthContext 임포트
 // 👇 4. UserApi 대신 (또는 추가로) ImageApi 임포트
-import * as UploadApi from '../service/uploadApi'; 
+import * as UploadApi from '../services/uploadApi'; 
 import defaultProfile from '../assets/default-profile.png'; // 기본 이미지
 import { FaCamera } from 'react-icons/fa';
-import * as UserApi from '../service/usersApi';
-import { normalizeImageUrl } from '../utils/image';
-
-
+import * as UserApi from '../services/usersApi';
 
 interface ProfileUploadModalProps {
   isOpen: boolean;

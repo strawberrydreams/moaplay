@@ -1,11 +1,11 @@
 import React, { useEffect, useState, useCallback } from 'react';
-import * as EventApi from '../service/eventsApi';   // 행사 API 경로 확인
-import * as UserApi from '../service/usersApi';     // 사용자 API 경로 확인 (선호 태그 가져오기용)
+import * as EventApi from '../services/eventsApi';   // 행사 API 경로 확인
+import * as UserApi from '../services/usersApi';     // 사용자 API 경로 확인 (선호 태그 가져오기용)
 import type * as E from '../types/events';          // Event 타입 경로 확인
 import EventCard from '../components/EventCard';               // EventCard 컴포넌트 경로 확인
 import { EventGrid, NoResultsMessage } from '../styles/EventSearch.styles'; // EventGrid 스타일 경로 확인
 import styled from 'styled-components';            // styled-components 임포트
-import { useAuthContext } from '../context/AuthContext'; // 사용자 로그인 상태 확인용
+import { useAuthContext } from '../contexts/AuthContext'; // 사용자 로그인 상태 확인용
 
 // --- 페이지 스타일 (다른 추천 페이지와 유사하게) ---
 const PageContainer = styled.div`

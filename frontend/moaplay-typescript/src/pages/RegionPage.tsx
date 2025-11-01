@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useCallback, useRef } from 'react'; // useRef 추가
-import * as EventApi from '../service/eventsApi'; // 행사 API 경로 확인
+import * as EventApi from '../services/eventsApi'; // 행사 API 경로 확인
 import type * as E from '../types/events';      // Event 타입 경로 확인
 import EventCard from '../components/EventCard'; // EventCard 경로 확인
 import { EventGrid, NoResultsMessage } from '../styles/EventSearch.styles'; // EventGrid 스타일 재사용

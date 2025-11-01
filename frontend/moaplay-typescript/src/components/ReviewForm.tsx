@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import * as S from '../styles/ReviewForm.styles';
 import { FaPlus } from 'react-icons/fa';
-import * as UploadApi from '../service/uploadApi';
-import * as ReviewApi from '../service/reviewsApi';
+import * as UploadApi from '../services/uploadApi';
+import * as ReviewApi from '../services/reviewsApi';
 import type * as R from '../types/reviews';
 
 interface ReviewFormProps {

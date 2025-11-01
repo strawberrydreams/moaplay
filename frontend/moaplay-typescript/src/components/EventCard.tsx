@@ -1,13 +1,13 @@
 // src/components/EventCard.tsx
 import React, { useState } from 'react';
-import { replace, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import * as E from '../types/events'; // 행사 타입
 import { FaImage, FaHeart, FaRegHeart } from 'react-icons/fa';
 import * as S from '../styles/EventCard.styles';
-import * as FavoriteApi from '../service/favoritesApi';
-import { useAuthContext } from '../context/AuthContext';
+import * as FavoriteApi from '../services/favoritesApi';
+import { useAuthContext } from '../contexts/AuthContext';
 import type {FavoriteStatus } from '../types/favorites';
-import * as CalendarApi from '../service/schedulesApi';
+import * as CalendarApi from '../services/schedulesApi';
 
 const favorite: FavoriteStatus = {
   is_favorite: false,
@@ -16,7 +16,7 @@ const favorite: FavoriteStatus = {
 
 const EventCard: React.FC<{ event: E.Event }> = ({ event }) => {
   const [isLiked, setIsLiked] = useState(false);
-  let navigate = useNavigate();
+  const navigate = useNavigate();
   
   const { user: currentUser} = useAuthContext();
   const checkFavorite = async () => {

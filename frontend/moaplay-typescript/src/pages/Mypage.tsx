@@ -1,8 +1,8 @@
 import React, { useEffect, useState, useRef, useCallback, type CSSProperties } from 'react'; // useRef 추가
-import * as UserApi from '../service/usersApi';     // 사용자 정보 API
-import * as ReviewApi from '../service/reviewsApi';  // 리뷰 API
-import * as FavoriteApi from '../service/favoritesApi';// 찜 API
-import { useAuthContext } from '../context/AuthContext';
+import * as UserApi from '../services/usersApi';     // 사용자 정보 API
+import * as ReviewApi from '../services/reviewsApi';  // 리뷰 API
+import * as FavoriteApi from '../services/favoritesApi';// 찜 API
+import { useAuthContext } from '../contexts/AuthContext';
 import type * as U from '../types/users';        // User 타입
 import type * as R from '../types/reviews';       // Review 타입
 import type * as F from '../types/favorites';     // Favorite 타입 (찜 목록용)

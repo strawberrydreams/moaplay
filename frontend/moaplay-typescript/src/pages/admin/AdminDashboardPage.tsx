@@ -4,10 +4,10 @@ import { useAdminDashboard } from "../../hooks/useAdminDashboard";
 import { ApprovedEventsModal } from "../../components/admin/ApprovedEventsModal";
 import { PendingEventsModal } from "../../components/admin/PendingEventsModal";
 import { UsersManagementModal } from "../../components/admin/UsersManagementModal";
-import { getApprovedEvents, getPendingEvents } from "../../service/adminApi";
-import { updateEventStatus } from "../../service/eventsApi";
+import { getApprovedEvents, getPendingEvents } from "../../services/adminApi";
+import { updateEventStatus } from "../../services/eventsApi";
 import { MenuItem } from "../../styles/ProfileDropdown.styles";
-import { useAuthContext } from "../../context/AuthContext";
+import { useAuthContext } from "../../contexts/AuthContext";
 import { FaCheckCircle, FaClock, FaUsers, FaAngleRight } from 'react-icons/fa'; 
 import {
     PageContainer,

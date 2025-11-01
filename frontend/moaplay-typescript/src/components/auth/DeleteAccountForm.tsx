@@ -1,6 +1,6 @@
 // src/components/DeleteAccountForm.tsx
 import React, { useState } from 'react';
-import * as UserApi from '../../service/usersApi';
+import * as UserApi from '../../services/usersApi';
 import * as S from '../../styles/DeleteAccountForm.styles';
 
 interface DeleteAccountFormProps {
@@ -10,8 +10,8 @@ interface DeleteAccountFormProps {
 
 const DeleteAccountForm: React.FC<DeleteAccountFormProps> = ({ onClose, onDeleted }) => {
   const [password, setPassword] = useState('');
-  const [confirmDeletion, setConfirmDeletion] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [confirmDeletion] = useState(false);
+  const [, setError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {

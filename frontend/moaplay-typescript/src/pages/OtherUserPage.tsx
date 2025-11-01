@@ -1,7 +1,7 @@
 import React, { useEffect, useState} from 'react';
 import { useParams } from 'react-router-dom';
-import * as UserApi from '../service/usersApi';
-import * as ReviewApi from '../service/reviewsApi';
+import * as UserApi from '../services/usersApi';
+import * as ReviewApi from '../services/reviewsApi';
 import type * as U from '../types/users';
 import type * as R from '../types/reviews';
 import ReviewCard from '../components/ReviewCard';
