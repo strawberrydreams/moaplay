@@ -257,7 +257,7 @@ def update_event(event_id):
         }, 404
     
     # 작성자 확인
-    if event.host_id != current_user.id:
+    if (event.host_id != current_user.id) or (current_user.role == UserRole.ADMIN):
         return {
             "error_code": "PERMISSION_DENIED",
             "message": "행사를 수정할 권한이 없습니다."
