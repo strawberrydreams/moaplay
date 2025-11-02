@@ -39,7 +39,8 @@ def create_app(test_config=None):
     migrate = Migrate(app, db)
     
     # cors 설정
-    CORS(app)
+    CORS(app, 
+     resources={r"/api/*": {"origins": ["http://localhost:5173/", "http://127.0.0.1:5173"]}}, supports_credentials=True)
 
     # 청사진 연결
     from .routes import api_bp
