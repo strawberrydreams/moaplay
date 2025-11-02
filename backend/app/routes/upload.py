@@ -179,7 +179,7 @@ def serve_image(filename):
     full_path = os.path.join(abs_folder, filename)
     
     try:
-        return send_from_directory(full_path, filename)
+        return send_from_directory(abs_folder, filename)
     except FileNotFoundError:
         return {
             "error_code": "FILE_NOT_FOUND",
