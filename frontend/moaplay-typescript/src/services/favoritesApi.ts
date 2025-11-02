@@ -3,7 +3,7 @@ import type { FavoriteCreationResponse, FavoriteResponse, FavoriteStatus } from 
 
 // (GET) 사용자의 모든 찜 목록 조회
 export const getFavorites = async (): Promise<FavoriteResponse> => {
-    const { data } = await axiosInstance.get<FavoriteResponse>('/favorites');
+    const { data } = await axiosInstance.get<FavoriteResponse>('/favorites/');
     return data;
 };
 
@@ -15,7 +15,7 @@ export const getFavoriteById = async (event_id: number): Promise<FavoriteStatus>
 
 // (POST) 새로운 행사를 찜 목록에 추가
 export const addFavorite = async (event_id: number): Promise<FavoriteCreationResponse> => {
-    const { data } = await axiosInstance.post<FavoriteCreationResponse>('/favorites', { event_id });
+    const { data } = await axiosInstance.post<FavoriteCreationResponse>('/favorites/', { event_id });
     return data;
 };
 

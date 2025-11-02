@@ -38,7 +38,7 @@ export const uploadImages = async (imageFiles: File[]): Promise<ImagesUploadResp
     }
   );
   return {
-    urls: data.urls.map(normalizeImageUrl), // ✅ 각 URL 정규화
+    urls: data.urls.map(normalizeImageUrl), // 각 URL 정규화
   };
 };
 

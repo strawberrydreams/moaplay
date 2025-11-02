@@ -8,6 +8,7 @@ import * as FavoriteApi from '../services/favoritesApi';
 import { useAuthContext } from '../contexts/AuthContext';
 import type {FavoriteStatus } from '../types/favorites';
 import * as CalendarApi from '../services/schedulesApi';
+import type { FavoriteGrid } from '../styles/Mypage.styles';
 
 const favorite: FavoriteStatus = {
   is_favorite: false,
@@ -21,8 +22,10 @@ const EventCard: React.FC<{ event: E.Event }> = ({ event }) => {
   const { user: currentUser} = useAuthContext();
   const checkFavorite = async () => {
     if (!currentUser) return;
-    const favorite = await FavoriteApi.getFavoriteById(event.id);
-    setIsLiked(!!favorite.is_favorite);
+    const favorite = await FavoriteApi.getFavorites();
+    const fav = favorite.favorites.find(f => f.event?.id === event.id); 
+    console.log("찜하기 결과: ", fav);
+    setIsLiked(!!fav); // fav가 존재하면 true, undefined이면 false로 설정
   };
 
   React.useEffect(() => {
@@ -32,9 +35,8 @@ const EventCard: React.FC<{ event: E.Event }> = ({ event }) => {
   const handleFavorite = async () => {
     if (isLiked) {
       try {
-        const fav = await FavoriteApi.getFavoriteById(event.id);
-        if (fav && typeof fav.favorite_id === 'number') {
-          await FavoriteApi.deleteFavorite(fav.favorite_id);
+        if (isLiked) {
+          await FavoriteApi.deleteFavorite(event.id);
         } else {
           console.warn("삭제할 찜 ID가 없습니다. event id:", event.id);
         }
