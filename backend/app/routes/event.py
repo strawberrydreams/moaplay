@@ -115,22 +115,33 @@ def create_event():
         # 태그 처리
         tag_names = data.get('tag_names', [])
         if tag_names:
-            tags = process_tags(tag_names)
-            for tag in tags:
+            for tag_name in tag_names:  # 수정: 직접 처리
+                # 태그 찾기 또는 생성
+                tag = db.session.query(Tag).filter_by(name=tag_name).first()
+                if not tag:
+                    tag = Tag(name=tag_name)
+                    db.session.add(tag)
+                    db.session.flush()  # tag.id 생성
+                
+                # EventTag 생성
                 event_tag = EventTag(event_id=event.id, tag_id=tag.id)
                 db.session.add(event_tag)
         
         db.session.commit()
         
+        # 관계 로드 후 반환
+        db.session.refresh(event)
         return event.to_dict(), 201
         
     except ValueError as e:
+        db.session.rollback()
         return {
             "error_code": "INVALID_DATE_FORMAT",
             "message": "날짜 형식이 올바르지 않습니다. (YYYY-MM-DD)"
         }, 400
     except Exception as e:
         db.session.rollback()
+        print(f"Error creating event: {str(e)}")  # 디버깅용
         return {
             "error_code": "INTERNAL_SERVER_ERROR",
             "message": "행사 생성 중 오류가 발생했습니다."
@@ -146,6 +157,7 @@ def get_events():
     per_page = request.args.get('per_page', 12, type=int)
     status = request.args.get('status', 'approved')
     location = request.args.get('location')
+    title = request.args.get('title')
     sort = request.args.get('sort', 'created_at')  # created_at, view_count, start_date
     order = request.args.get('order', 'desc')  # asc, desc
     
@@ -171,6 +183,9 @@ def get_events():
     # 지역 필터
     if location:
         query = query.filter(Event.location.contains(location))
+
+    if title:
+        query = query.filter(Event.title.contains(title))
     
     # 정렬
     if sort == 'view_count':

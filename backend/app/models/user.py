@@ -12,6 +12,7 @@ if TYPE_CHECKING:
     from .review import Review
     from .schedule import Schedule
     from .favorite import Favorite
+    from .user_tag import UserTag
 
 class User(UserMixin, db.Model):
     __tablename__ = 'users'
@@ -23,7 +24,7 @@ class User(UserMixin, db.Model):
     email: Mapped[str] = mapped_column(String(255), nullable=False, unique=True)
     phone: Mapped[str] = mapped_column(String(20), nullable=True)
     password_hash: Mapped[str] = mapped_column(String(255), nullable=False)
-    profile_image: Mapped[str] = mapped_column(String(500), nullable=True)
+    profile_image: Mapped[str] = mapped_column(String(500), nullable=True, default="default_profile_image.jpg")
     
     # 권한
     role: Mapped[UserRole] = mapped_column(Enum(UserRole), default=UserRole.USER)
@@ -37,6 +38,7 @@ class User(UserMixin, db.Model):
     reviews: Mapped[List["Review"]] = relationship("Review", back_populates="user", cascade="all, delete-orphan")
     schedules: Mapped[List["Schedule"]] = relationship("Schedule", back_populates="user", cascade="all, delete-orphan")
     favorites: Mapped[List["Favorite"]] = relationship("Favorite", back_populates="user", cascade="all, delete-orphan")
+    preferred_tags: Mapped[List["UserTag"]] = relationship("UserTag", back_populates="user", cascade="all, delete-orphan")
 
     def set_password(self, password):
         self.password_hash = generate_password_hash(password)
@@ -46,6 +48,10 @@ class User(UserMixin, db.Model):
             return False
         return check_password_hash(self.password_hash, password)
     
+    def get_preferred_tags(self) -> List[str]:
+        # 선호 태그 이름 리스트 반환
+        return [rel.tag.name for rel in self.preferred_tags if rel.tag]
+    
     def to_dict(self, me=False) -> dict:
         data = {
             "id": self.id,
@@ -53,6 +59,7 @@ class User(UserMixin, db.Model):
             "nickname": self.nickname,
             "profile_image": self.profile_image,
             "created_at": self.created_at,
+            'preferred_tags': self.get_preferred_tags(),
             "statistics": {
                 "events_count": len(self.hosted_events),
                 "reviews": len(self.reviews)

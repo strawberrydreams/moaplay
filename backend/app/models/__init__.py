@@ -20,3 +20,4 @@ from app.models.schedule import Schedule
 from app.models.favorite import Favorite
 from app.models.tag import Tag
 from app.models.event_tag import EventTag
+from app.models.user_tag import UserTag

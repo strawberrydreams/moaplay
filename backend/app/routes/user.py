@@ -2,7 +2,10 @@ from flask import Blueprint, request
 from flask_login import current_user, login_required, logout_user
 from ..models import db
 from ..models.user import User
+from ..models.user_tag import UserTag
+from ..models.tag import Tag
 import re
+from datetime import datetime
 
 user_bp = Blueprint('users', __name__)
 
@@ -85,7 +88,7 @@ def get_me():
 ### GET /api/users/<id>
 @user_bp.route("/<int:id>", methods=["GET"])
 def get_user(id):
-    user = User.query.get(id)
+    user: User = User.query.get(id)
     if user is None:
         return {
             "error_code": "USER_NOT_FOUND",
@@ -96,51 +99,71 @@ def get_user(id):
 
 ### 내 정보 수정 API
 ### PUT /api/users/me
-@user_bp.route("/me", methods=["PUT"])
+@user_bp.route('/me', methods=['PUT'])
 @login_required
-def edit_me():
-    user = current_user
+def update_me():
     data = request.get_json()
-
-    if "nickname" in data:
-        nickname = data.get("nickname")
-        if User.query.filter_by(nickname=nickname).first():
-            return {
-                "error_code": "DUPLICATE_NICKNAME",
-                "message": "이미 사용 중인 닉네임입니다."
-            }, 409
-        if len(nickname) < 2 or len(nickname) > 100:
-            return {
-                "error_code": "VALIDATION_ERROR",
-                "message": "입력값이 유효하지 않습니다.",
-                'field': 'nickname'
-        }, 422
-
-        user.nickname = nickname
-    elif "email" in data:
-        email = data.get("email")
-        if User.query.filter_by(email=email).first():
-            return {
-                "error_code": "DUPLICATE_EMAIL",
-                "message": "이미 사용 중인 이메일입니다."
-            }, 409
-        email_pattern = r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$'
-        if not re.match(email_pattern, email):
-            return {
-                "error_code": "VALIDATION_ERROR",
-                "message": "입력값이 유효하지 않습니다.",
-                'field': 'email'
-            }, 422
+    
+    try:
+        # 수정 가능한 필드
+        if 'nickname' in data:
+            # 중복 확인 (자신 제외)
+            existing = User.query.filter(
+                User.nickname == data['nickname'],
+                User.id != current_user.id
+            ).first()
+            if existing:
+                return {
+                    "error_code": "DUPLICATE_NICKNAME",
+                    "message": "이미 사용 중인 닉네임입니다."
+                }, 409
+            current_user.nickname = data['nickname']
         
-        user.email = data.get("email")
-    elif "phone" in data:
-        user.phone = data.get("phone")
-    elif "profile_image" in data:
-        user.profile_image = data.get("profile_image")
-
-    db.session.commit()
-
-    return user.to_dict(me=True)
+        if 'phone' in data:
+            current_user.phone = data['phone']
+        
+        if 'profile_image' in data:
+            current_user.profile_image = data['profile_image']
+        
+        # 선호 태그 수정
+        if 'preferred_tags' in data:
+            tag_names = data['preferred_tags']
+            if not isinstance(tag_names, list):
+                return {
+                    "error_code": "INVALID_FORMAT",
+                    "message": "preferred_tags는 배열이어야 합니다."
+                }, 400
+            
+            # 기존 선호 태그 모두 삭제
+            db.session.query(UserTag).filter_by(user_id=current_user.id).delete()  # 수정: UserPreferredTag → UserTag
+            
+            # 새 선호 태그 추가
+            for tag_name in tag_names:
+                # 태그 찾기 또는 생성
+                tag = db.session.query(Tag).filter_by(name=tag_name).first()
+                if not tag:
+                    tag = Tag(name=tag_name)
+                    db.session.add(tag)
+                    db.session.flush()
+                
+                # 선호 태그 관계 생성
+                user_tag = UserTag(
+                    user_id=current_user.id,
+                    tag_id=tag.id
+                )
+                db.session.add(user_tag)
+        
+        current_user.updated_at = datetime.now()
+        db.session.commit()
+        
+        return current_user.to_dict(me=True), 200
+        
+    except Exception as e:
+        db.session.rollback()
+        return {
+            "error_code": "INTERNAL_SERVER_ERROR",
+            "message": "정보 수정 중 오류가 발생했습니다."
+        }, 500
 
 ### 비밀번호 변경 API
 ### PUT /api/users/me/password
@@ -217,3 +240,87 @@ def check_availability():
         "available": not exists,
         "message": f"이미 사용중인 {field_type}입니다." if exists else f"사용 가능한 {field_type} 입니다."
     }
+
+### 선호 태그 추가 API
+### POST /api/users/me/preferred-tags
+@user_bp.route('/me/preferred-tags', methods=['POST'])
+@login_required
+def add_preferred_tag():
+    data = request.get_json()
+    
+    if 'tag_name' not in data:
+        return {
+            "error_code": "MISSING_FIELDS",
+            "message": "tag_name 필드가 필요합니다."
+        }, 400
+    
+    tag_name = data['tag_name']
+    
+    try:
+        # 태그 찾기 또는 생성
+        tag = db.session.query(Tag).filter_by(name=tag_name).first()
+        if not tag:
+            tag = Tag(name=tag_name)
+            db.session.add(tag)
+            db.session.flush()
+        
+        # 중복 확인
+        existing = db.session.query(UserTag).filter_by(
+            user_id=current_user.id,
+            tag_id=tag.id
+        ).first()
+        
+        if existing:
+            return {
+                "error_code": "DUPLICATE_TAG",
+                "message": "이미 선호 태그에 추가되어 있습니다."
+            }, 409
+        
+        # 선호 태그 추가
+        user_tag = UserTag(
+            user_id=current_user.id,
+            tag_id=tag.id
+        )
+        db.session.add(user_tag)
+        db.session.commit()
+        
+        return user_tag.to_dict(), 201
+        
+    except Exception as e:
+        db.session.rollback()
+        return {
+            "error_code": "INTERNAL_SERVER_ERROR",
+            "message": "선호 태그 추가 중 오류가 발생했습니다."
+        }, 500
+
+
+### 선호 태그 삭제 API
+### DELETE /api/users/me/preferred-tags/{tag_id}
+@user_bp.route('/me/preferred-tags/<int:tag_id>', methods=['DELETE'])
+@login_required
+def delete_preferred_tag(tag_id):
+    user_tag = db.session.query(UserTag).filter_by(
+        user_id=current_user.id,
+        tag_id=tag_id
+    ).first()
+    
+    if not user_tag:
+        return {
+            "error_code": "TAG_NOT_FOUND",
+            "message": "선호 태그를 찾을 수 없습니다."
+        }, 404
+    
+    try:
+        db.session.delete(user_tag)
+        db.session.commit()
+        
+        return {
+            "message": "선호 태그가 삭제되었습니다."
+        }, 200
+        
+    except Exception as e:
+        db.session.rollback()
+        return {
+            "error_code": "INTERNAL_SERVER_ERROR",
+            "message": "선호 태그 삭제 중 오류가 발생했습니다."
+        }, 500

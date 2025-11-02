@@ -254,3 +254,43 @@ def delete_review(review_id):
             "error_code": "INTERNAL_SERVER_ERROR",
             "message": "리뷰 삭제 중 오류가 발생했습니다."
         }, 500
+    
+### 내가 쓴 리뷰 목록 조회 API
+### GET /api/reviews/me
+@review_bp.route('/me', methods=['GET'])
+@login_required
+def get_my_reviews():
+    # 쿼리 파라미터
+    page = request.args.get('page', 1, type=int)
+    per_page = request.args.get('per_page', 10, type=int)
+    
+    # 페이지 유효성 검증
+    if page < 1:
+        page = 1
+    if per_page < 1 or per_page > 100:
+        per_page = 10
+    
+    try:
+        # 내가 쓴 리뷰 조회 (최신순)
+        query = db.session.query(Review).filter_by(user_id=current_user.id).order_by(Review.created_at.desc())
+        
+        # 페이징
+        pagination = query.paginate(page=page, per_page=per_page, error_out=False)
+        
+        reviews = [review.to_dict() for review in pagination.items]
+        
+        return {
+            "reviews": reviews,
+            "pagination": {
+                "page": pagination.page,
+                "per_page": pagination.per_page,
+                "total": pagination.total,
+                "pages": pagination.pages
+            }
+        }, 200
+        
+    except Exception as e:
+        return {
+            "error_code": "INTERNAL_SERVER_ERROR",
+            "message": "리뷰 목록 조회 중 오류가 발생했습니다."
+        }, 500

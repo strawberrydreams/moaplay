@@ -6,6 +6,7 @@ from typing import TYPE_CHECKING, List
 
 if TYPE_CHECKING:
     from .event_tag import EventTag
+    from .user_tag import UserTag
 
 class Tag(db.Model):
     __tablename__ = 'tags'
@@ -19,3 +20,11 @@ class Tag(db.Model):
     
     # 관계 설정
     events: Mapped[List["EventTag"]] = relationship("EventTag", back_populates="tag", cascade="all, delete-orphan")
+    preferring_users: Mapped[List["UserTag"]] = relationship("UserTag", back_populates="tag", cascade="all, delete-orphan")
+    
+    def to_dict(self):
+        return {
+            'id': self.id,
+            'name': self.name,
+            'created_at': self.created_at.isoformat() if self.created_at else None
+        }
