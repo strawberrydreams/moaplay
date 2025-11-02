@@ -37,6 +37,16 @@ export interface GetReviewApiResponse {
     }
 }
 
+export interface GetMyReviewResponse {
+    reviews: Review[];
+    pagenation: {
+        page: number;
+        per_page: number;
+        total: number;
+        pages: number;
+    }
+}
+
 // ===============================================================
 // == Request (요청) 타입들
 // ===============================================================

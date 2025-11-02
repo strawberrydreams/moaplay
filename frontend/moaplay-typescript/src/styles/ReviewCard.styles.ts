@@ -131,12 +131,6 @@ export const Actions = styled.div`
   background-color: rgba(255, 255, 255, 0.8); // 배경 약간 추가 (선택 사항)
   padding: 3px 5px; // 배경 패딩 (선택 사항)
   border-radius: 4px; // 배경 둥글게 (선택 사항)
-  opacity: 0; // 평소엔 숨김
-  transition: opacity 0.2s ease;
-
-  ${Card}:hover & { // 카드가 호버될 때 보이도록
-    opacity: 1;
-  }
 `;
 
 export const ActionButton = styled.button<{ danger?: boolean }>`

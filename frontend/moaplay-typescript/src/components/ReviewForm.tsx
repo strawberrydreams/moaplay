@@ -27,7 +27,7 @@ const ReviewForm: React.FC<ReviewFormProps> = ({
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  // ✅ 수정 모드일 경우 기존 값으로 초기화
+  // 수정 모드일 경우 기존 값으로 초기화
   useEffect(() => {
     if (review) {
       setTitle(review.title || '');
@@ -58,7 +58,7 @@ const ReviewForm: React.FC<ReviewFormProps> = ({
       const uploadRes = await UploadApi.uploadImage(file);
       // uploadRes.url가 반환된다고 가정
       setImageUrls(prev => [...prev, file]);
-      setImagePreviews(prev => [...prev, uploadRes.url]); // 미리보기가 아닌 실제 URL로도 저장 가능
+      // setImagePreviews(prev => [...prev, uploadRes.url]); // 미리보기가 아닌 실제 URL로도 저장 가능
     } catch (uploadError) {
       console.error('이미지 업로드 실패:', uploadError);
       setError('이미지 업로드에 실패했습니다.');
@@ -100,6 +100,7 @@ const ReviewForm: React.FC<ReviewFormProps> = ({
         // 신규 작성 API 호출
         await ReviewApi.createReview(payload);
         alert('리뷰가 작성되었습니다.');
+        window.location.reload();
       }
 
       onReviewSubmitSuccess?.();

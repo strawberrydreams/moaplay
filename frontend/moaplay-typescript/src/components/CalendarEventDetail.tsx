@@ -7,6 +7,7 @@ import { useModal } from '../hooks/useModal'; // 1. AuthModalContext 훅 임포�
 import * as SchedulesApi from '../services/schedulesApi'; // 일정 삭제 API
 import type { Schedule } from '../types/schedules'; // Schedule 타입 임포트
 import { useAuthContext } from '../contexts/AuthContext';
+import { useNavigate } from 'react-router-dom';
 
 
 // --- Props 타입 정의 ---
@@ -30,6 +31,8 @@ const CalendarEventDetail: React.FC<IDetailProps> = ({ events = [],
     const { openLoginModal } = useModal();  // 로그인 모달 열기 함수 가져오기
     const { user } = useAuthContext(); // 2. 로그인 사용자 정보 가져오기
     // --- 👆 로그인 관련 로직 끝 ---
+
+    const navigate = useNavigate();
 
 
     // 상세 보기 상태 (E.Event 타입 사용)
@@ -118,7 +121,7 @@ const CalendarEventDetail: React.FC<IDetailProps> = ({ events = [],
                 </S.DetailTagList>
                 {/* ... (DetailDescription - displayEvent 사용) ... */}
                 <S.ButtonGroup>
-                    <S.DetailButton>상세보기</S.DetailButton>
+                    <S.DetailButton onClick={()=>{navigate(`events/${displayEvent.id}`)}}>상세보기</S.DetailButton>
                     <S.DetailButton danger onClick={handleDeleteSchedule}>삭제하기</S.DetailButton>
                 </S.ButtonGroup>
             </S.DetailCardWrapper>

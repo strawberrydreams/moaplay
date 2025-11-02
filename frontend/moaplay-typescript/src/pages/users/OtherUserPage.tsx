@@ -1,11 +1,12 @@
 import React, { useEffect, useState} from 'react';
 import { useParams } from 'react-router-dom';
-import * as UserApi from '../services/usersApi';
-import * as ReviewApi from '../services/reviewsApi';
-import type * as U from '../types/users';
-import type * as R from '../types/reviews';
-import ReviewCard from '../components/ReviewCard';
-import * as S from '../styles/Mypage.styles'; // 동일한 스타일 사용 가능
+import * as UserApi from '../../services/usersApi';
+import * as ReviewApi from '../../services/reviewsApi';
+import type * as U from '../../types/users';
+import type * as R from '../../types/reviews';
+import ReviewCard from '../../components/ReviewCard';
+import defaultImage from '../../assets/default-profile.png';
+import * as S from '../../styles/Mypage.styles'; // 동일한 스타일 사용 가능
 
 
 const OtherUserPage: React.FC = () => {
@@ -53,7 +54,7 @@ const OtherUserPage: React.FC = () => {
     <S.PageContainer>
       {/* 프로필 섹션 */}
       <S.ProfileSection>
-        <S.ProfileAvatar src={userData.profile_image || '/default-profile.png'} alt="프로필 사진" />
+        <S.ProfileAvatar src={userData.profile_image || defaultImage} alt="프로필 사진" />
         <S.ProfileInfo>
           <S.ProfileName>{userData.nickname}</S.ProfileName>
           <S.ProfileUserId>{userData.user_id}</S.ProfileUserId>

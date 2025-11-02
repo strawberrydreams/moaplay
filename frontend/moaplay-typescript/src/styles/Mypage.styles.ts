@@ -125,7 +125,6 @@ export const ViewMoreButton = styled.button`
 // --- 4. 내 리뷰 섹션 ---
 export const ReviewGrid = styled.div`
   display: grid;
-  // EventDetail의 ReviewGrid 스타일 재사용 또는 여기에 정의
   grid-template-columns: repeat(3, 1fr); // 3열
   gap: 1.5rem;
   margin-bottom: 3rem;
@@ -152,7 +151,7 @@ export const FavoriteGrid = styled.div`
   &::-webkit-scrollbar { display: none; }
   -ms-overflow-style: none; 
   scrollbar-width: none; 
-  width: 300px;
+  
 `;
 
 export const ArrowButton = styled.button<{ direction: 'left' | 'right' }>`
@@ -163,9 +162,9 @@ export const ArrowButton = styled.button<{ direction: 'left' | 'right' }>`
   background : none;
   border-radius: 50%;
   border: none;
-  width: 40px;
-  height: 40px;
-  font-size: 1rem;
+  width: 45px;
+  height: 45px;
+  font-size: 1.5rem;
   color: #555;
   cursor: pointer;
   display: flex;
@@ -177,7 +176,10 @@ export const ArrowButton = styled.button<{ direction: 'left' | 'right' }>`
   &:hover {
     color: #333;
   }
-  // 맨 처음/끝일 때 숨기거나 비활성화하는 로직 필요
+  
+  &:focus {
+    outline: none;
+  }
 `;
 
 // --- 6. 하단 링크 섹션 ---
@@ -197,3 +199,11 @@ export const ActionLink = styled.a` // 또는 button
   cursor: pointer;
   &:hover { color: #333; text-decoration: underline; }
 `;
+
+export const NoResultsMessage = styled.p `
+  color: #888;
+  align-items: center;
+  justify-content: center;
+  margin: auto ;
+  padding: 100px 20px;
+`

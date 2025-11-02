@@ -96,3 +96,32 @@ export const RatingDisplay = styled.div`
   font-size: 1.2rem; // 별 크기
   color: #FFC107; // 별 색상
 `;
+
+
+export const Actions = styled.div`
+  position: absolute;
+  bottom: 10px; // 위치 조정
+  right: 15px; // 위치 조정
+  display: flex;
+  gap: 8px;
+  background-color: rgba(255, 255, 255, 0.8); // 배경 약간 추가 (선택 사항)
+  padding: 3px 5px; // 배경 패딩 (선택 사항)
+  border-radius: 4px; // 배경 둥글게 (선택 사항)
+`;
+
+export const ActionButton = styled.button<{ danger?: boolean }>`
+  background: none;
+  border: none;
+  padding: 0;
+  margin: 0;
+  font-size: 0.8rem;
+  color: ${props => props.danger ? '#ff4d4f' : '#888'};
+  cursor: pointer;
+
+  &:hover {
+    color: ${props => props.danger ? '#d9363e' : '#333'};
+    text-decoration: underline;
+  }
+
+  outline: none;
+`;

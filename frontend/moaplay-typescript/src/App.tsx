@@ -9,7 +9,7 @@ import EventDetailPage from './pages/events/EventDetailPage';
 import SelectTagsForm from './components/auth/SelectTagsForm';
 import MainPage from './pages/MainPage';
 import FAQPage from './pages/FAQPage';
-import MyPage from './pages/Mypage';
+import MyPage from './pages/users/Mypage';
 import HostApplyPage from './pages/HostApplyForm';
 
 
@@ -27,7 +27,7 @@ import RecommendedEventsPage from './pages/RecommendPage';
 import { AdminDashboardPage } from "./pages/admin/AdminDashboardPage";
 import EventCreatePage from "./pages/events/EventCreatePage";
 import {EventUpdatePage} from "./pages/events/EventUpdatePage";
-import OtherUserPage from './pages/OtherUserPage';
+import OtherUserPage from './pages/users/OtherUserPage';
 
 const App: React.FC = () => {
     const { 

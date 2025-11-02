@@ -1,57 +1,38 @@
 // src/components/EventCard.tsx
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import * as E from '../types/events'; // 행사 타입
 import { FaImage, FaHeart, FaRegHeart } from 'react-icons/fa';
 import * as S from '../styles/EventCard.styles';
 import * as FavoriteApi from '../services/favoritesApi';
 import { useAuthContext } from '../contexts/AuthContext';
-import type {FavoriteStatus } from '../types/favorites';
 import * as CalendarApi from '../services/schedulesApi';
-import type { FavoriteGrid } from '../styles/Mypage.styles';
+import { useFavorite } from '../hooks/useFavorite';
 
-const favorite: FavoriteStatus = {
-  is_favorite: false,
-  favorite_id: 0
-};
 
 const EventCard: React.FC<{ event: E.Event }> = ({ event }) => {
-  const [isLiked, setIsLiked] = useState(false);
-  const navigate = useNavigate();
+   const navigate = useNavigate();
+  const { favorites, toggleFavorite, loadFavorites } = useFavorite();
+  const { user } = useAuthContext();
+
+  const favoriteItem = favorites.find(fav => fav.event?.id === event.id);
+  const isFavorited = !!favoriteItem
+  console.log("찜 확인: ", favoriteItem );
+
+  useEffect(() => {
+    loadFavorites();
+  }, [loadFavorites]);
   
-  const { user: currentUser} = useAuthContext();
-  const checkFavorite = async () => {
-    if (!currentUser) return;
-    const favorite = await FavoriteApi.getFavorites();
-    const fav = favorite.favorites.find(f => f.event?.id === event.id); 
-    console.log("찜하기 결과: ", fav);
-    setIsLiked(!!fav); // fav가 존재하면 true, undefined이면 false로 설정
-  };
 
-  React.useEffect(() => {
-    checkFavorite();
-  }, [currentUser, event.id]);
-
-  const handleFavorite = async () => {
-    if (isLiked) {
-      try {
-        if (isLiked) {
-          await FavoriteApi.deleteFavorite(event.id);
-        } else {
-          console.warn("삭제할 찜 ID가 없습니다. event id:", event.id);
-        }
-      } catch (error) {
-        console.error("찜 삭제 중 오류 발생:", error);
-      }
-    } else {
-      try {
-        await FavoriteApi.addFavorite(event.id);
-      } catch (error) {
-        console.error("찜 추가 중 오류 발생:", error);
-      }
+  const handleFavoriteClick = () => {
+    if (!user) {
+      alert("로그인이 필요합니다.");
+      return;
     }
-    setIsLiked(!isLiked);
+
+    toggleFavorite(event.id, isFavorited, favoriteItem?.id);
   };
+
 
   const handleAddToSchedule = async () => {
     // 일정 추가 기능
@@ -70,8 +51,8 @@ const EventCard: React.FC<{ event: E.Event }> = ({ event }) => {
         ) : (
           <FaImage className="placeholder-icon" />
         )}
-        <S.LikeButton $isLiked={isLiked} onClick={handleFavorite}>
-          {isLiked ? <FaHeart /> : <FaRegHeart />}
+        <S.LikeButton $isLiked={isFavorited} onClick={handleFavoriteClick}>
+          {isFavorited ? <FaHeart /> : <FaRegHeart />}
         </S.LikeButton>
       </S.CardImage>
       <S.CardContent onClick={() =>{navigate(`/events/${event.id}`)}}>

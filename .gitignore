@@ -3,7 +3,7 @@
 venv
 __pycache__/
 instance/
-uploads/
+upload
 
 # frontend gitignore
 # macOS Finder가 파일별 특징을 기억하기 위해 자동으로 생성하는 파일

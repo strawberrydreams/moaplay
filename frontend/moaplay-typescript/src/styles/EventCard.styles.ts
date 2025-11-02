@@ -19,6 +19,9 @@ const pop = keyframes`
 `;
 
 export const Card = styled.div`
+  width: 100%; /* 고정 너비 또는 최소값 설정 */
+  min-width: 260px;
+  flex: 0 0 260px;
   border: 1px solid #E0E0E0;
   border-radius: 8px;
   overflow: hidden;

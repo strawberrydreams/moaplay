@@ -1,25 +1,36 @@
 import React, { useEffect, useState, useRef, useCallback, type CSSProperties } from 'react'; // useRef 추가
-import * as UserApi from '../services/usersApi';     // 사용자 정보 API
-import * as ReviewApi from '../services/reviewsApi';  // 리뷰 API
-import * as FavoriteApi from '../services/favoritesApi';// 찜 API
-import { useAuthContext } from '../contexts/AuthContext';
-import type * as U from '../types/users';        // User 타입
-import type * as R from '../types/reviews';       // Review 타입
-import type * as F from '../types/favorites';     // Favorite 타입 (찜 목록용)
-import type * as E from '../types/events';        // Event 타입 (찜 목록 내부용)
-import EventCard from '../components/EventCard';   // EventCard 재사용
-import ReviewCard from '../components/ReviewCard'
-import { useModal } from '../hooks/useModal';
-import Modal from '../components/common/Modal';
-import { ProfileUploadModal } from '../components/ProfileUploadModal';
-import DeleteAccountForm from '../components/auth/DeleteAccountForm';
-import ChangePasswordForm from '../components/auth/ChangePasswordForm';
-import * as S from '../styles/Mypage.styles';    // 스타일 임포트
-import { FaPencilAlt, FaChevronLeft, FaChevronRight } from 'react-icons/fa'; // 아이콘
-import FieldEditForm from '../components/FieldEditForm';
-import HostApplyForm from './HostApplyForm';
-import defaultImage from '../assets/default-profile.png';
+import { useNavigate } from 'react-router-dom';
+
+import * as UserApi from '../../services/usersApi';     // 사용자 정보 API
+import * as ReviewApi from '../../services/reviewsApi';  // 리뷰 API
+import * as FavoriteApi from '../../services/favoritesApi';// 찜 API
+import { useAuthContext } from '../../contexts/AuthContext';
+import { useModal } from '../../hooks/useModal';
+import { useReview } from '../../hooks/useReview';
+import { useFavorite } from '../../hooks/useFavorite';
+
+import type * as U from '../../types/users';        // User 타입
+import type * as R from '../../types/reviews';       // Review 타입
+import type * as F from '../../types/favorites';     // Favorite 타입 (찜 목록용)
+import type * as E from '../../types/events';        // Event 타입 (찜 목록 내부용)
+
+import EventCard from '../../components/EventCard';   // EventCard 재사용
+import ReviewCard from '../../components/ReviewCard'
+import Modal from '../../components/common/Modal';
+import { ProfileUploadModal } from '../../components/ProfileUploadModal';
+import DeleteAccountForm from '../../components/auth/DeleteAccountForm';
+import ChangePasswordForm from '../../components/auth/ChangePasswordForm';
+import FieldEditForm from '../../components/FieldEditForm';
+import HostApplyForm from '../HostApplyForm';
+import defaultImage from '../../assets/default-profile.png';
 import BeatLoader from "react-spinners/BeatLoader";
+import ReviewDetail from '../../components/ReviewDetail';
+import ReviewForm from '../../components/ReviewForm';
+
+import * as S from '../../styles/Mypage.styles';    // 스타일 임포트
+import { FaPencilAlt, FaChevronLeft, FaChevronRight } from 'react-icons/fa'; // 아이콘
+import { number } from 'yup';
+
 
 type EditableUserField = 'nickname' | 'email' | 'phone' | 'password' | 'tags';
 
@@ -39,25 +50,56 @@ const override: CSSProperties = {
 
 const MyPage: React.FC = () => {
   const [userData, setUserData] = useState<U.Users | null>(null);
-  const [myReviews, setMyReviews] = useState<R.Review[]>([]);
   const [myFavorites, setMyFavorites] = useState<F.Favorite[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [editingField, setEditingField] = useState<EditableUserField | null>(null);
+  const [selectedReview, setSelectedReview] = useState<R.Review | null>(null);
   const favoriteListRef = useRef<HTMLDivElement>(null); // 찜 목록 스크롤용
   const { user } = useAuthContext();
+  const navigate = useNavigate();
   
 
   const { 
+    isReviewModalOpen,
     isDeleteAccountModalOpen,
     isProfileModalOpen,
+    isReviewDetailModalOpen,
     isHostApplyModalOpen,
     setIsProfileModalOpen,
     setIsHostApplyModalOpen,
+    setReviewDetailModalOpen,
     openDeleteAccountModal,
+    openReviewDetailModal,
+    openReviewModal,
     openHostApplyModal,
     closeDeleteAccountModal,
+    closeReviewModal,
+    closeReviewDetailModal,
     closeAllModals
   } = useModal();
+
+  const {
+    myReviews,
+    editingReview,
+    setEditingReview,
+    loadMyReviews,
+    handleEditReview,
+    handleDeleteReview,
+  } = useReview(openReviewModal);
+
+  const {
+    favorites,
+    loadFavorites
+  } = useFavorite();
+
+   useEffect(() => {
+    loadMyReviews();
+  }, [loadMyReviews]);
+
+  useEffect(() => {
+    loadFavorites();
+  }, [loadFavorites]);
+  
 
   // 데이터 로딩
   const loadMyPageData = useCallback(async () => {
@@ -66,17 +108,12 @@ const MyPage: React.FC = () => {
         // API 호출 로직 (이전과 동일)
         const [userRes, favoritesRes] = await Promise.all([
             UserApi.getMe(), // 내 정보 가져오기
-            //reviewsRes,
-            // ReviewApi.getMyReview(currentUser?.id || 0), // 내 리뷰 3개
             FavoriteApi.getFavorites(), // 내 찜 8개
         ]);
         
         // 가상 데이터 사용 (이전과 동일)
         await new Promise(resolve => setTimeout(resolve, 500)); 
         setUserData(userRes);
-        // setMyReviews(reviewsRes.review || []);
-        // console.log('리뷰 응답:', reviewsRes);
-        // console.log('리뷰 응답:', myReviews);
         setMyFavorites(favoritesRes.favorites || []);
 
     } catch (error) {
@@ -116,25 +153,13 @@ const MyPage: React.FC = () => {
           });
       }
   };
-
-  const handleEditReview = (reviewId: number) => {
-      console.log(`MyPage에서 리뷰 수정: ${reviewId}`);
-      // TODO: 리뷰 수정 로직 (예: 수정 폼 모달 열기)
-  };
-  const handleDeleteReview = (reviewId: number) => {
-      console.log(`MyPage에서 리뷰 삭제: ${reviewId}`);
-      // TODO: 리뷰 삭제 API 호출 및 목록 새로고침 로직
-      if (window.confirm("정말로 리뷰를 삭제하시겠습니까?")) {
-        ReviewApi.deleteReview(reviewId).then(() => loadMyPageData()); // 예시
-      }
-  };
   
 
   const handleAccountDeleted = () => {
     // 예: 로그아웃 처리, 홈으로 이동 등
     alert('회원탈퇴가 완료되었습니다.');
     // 로그아웃 로직
-    // navigate('/');
+    navigate('/');
   };
 
   if (isLoading) {
@@ -148,8 +173,20 @@ const MyPage: React.FC = () => {
       />;
   }
   if (!userData) {
-    return <S.PageContainer>사용자 정보를 불러올 수 없습니다.</S.PageContainer>; // 로그인 안 된 경우 등
+    // 로그인 안 된 경우 등
+    alert("사용자 정보를 불러올 수 없습니다.");
+    navigate('/');
   }
+
+  const onClose = () => {
+    closeReviewModal();
+    setEditingReview(null);
+  }
+
+  const openDetailModal = (review: R.Review) => {
+    setSelectedReview(review);
+    setReviewDetailModalOpen(true);
+  };
 
   return (
     <S.PageContainer>
@@ -157,8 +194,8 @@ const MyPage: React.FC = () => {
       <S.ProfileSection>
         <S.ProfileAvatar src={user?.profile_image || defaultImage} alt="프로필 사진" />
         <S.ProfileInfo>
-          <S.ProfileName>{userData.nickname}</S.ProfileName>
-          <S.ProfileUserId>{userData.user_id}</S.ProfileUserId>
+          <S.ProfileName>{userData?.nickname}</S.ProfileName>
+          <S.ProfileUserId>{userData?.user_id}</S.ProfileUserId>
         </S.ProfileInfo>
         <S.EditProfileButton 
           aria-label="프로필 수정"
@@ -173,12 +210,12 @@ const MyPage: React.FC = () => {
         <S.SectionTitle>기본 정보</S.SectionTitle>
         <S.InfoRow>
           <S.InfoLabel>닉네임</S.InfoLabel>
-          <S.InfoValue>{userData.nickname}</S.InfoValue>
+          <S.InfoValue>{userData?.nickname}</S.InfoValue>
           <S.ChangeButton onClick={() => setEditingField('nickname')}>변경</S.ChangeButton>
         </S.InfoRow>
         <S.InfoRow>
           <S.InfoLabel>아이디</S.InfoLabel>
-          <S.InfoValue>{userData.user_id}</S.InfoValue>
+          <S.InfoValue>{userData?.user_id}</S.InfoValue>
           {/* 아이디는 변경 불가하므로 버튼 없음 */}
         </S.InfoRow>
         <S.InfoRow>
@@ -188,12 +225,12 @@ const MyPage: React.FC = () => {
         </S.InfoRow>
         <S.InfoRow>
           <S.InfoLabel>이메일</S.InfoLabel>
-          <S.InfoValue>{userData.email}</S.InfoValue>
+          <S.InfoValue>{userData?.email}</S.InfoValue>
           <S.ChangeButton onClick={() => setEditingField('email')}>변경</S.ChangeButton>
         </S.InfoRow>
         <S.InfoRow>
           <S.InfoLabel>전화번호</S.InfoLabel>
-          <S.InfoValue>{userData.phone || '-'}</S.InfoValue>
+          <S.InfoValue>{userData?.phone || '-'}</S.InfoValue>
           <S.ChangeButton onClick={() => setEditingField('phone')}>변경</S.ChangeButton>
         </S.InfoRow>
         <S.InfoRow>
@@ -211,16 +248,15 @@ const MyPage: React.FC = () => {
         </S.ListHeader>
         <S.ReviewGrid>
           {myReviews.length === 0 ? (
-            <p>작성한 리뷰가 없습니다.</p> 
+            <S.NoResultsMessage>작성한 리뷰가 없습니다.</S.NoResultsMessage> 
           ) : (
             // 👇 ReviewCard 컴포넌트 사용
             myReviews.map(review => (
-              <ReviewCard 
-                key={review.id} 
-                review={review} 
-                // onClick={() => openReviewDetailModal(review)} // 상세 모달 열기 함수 전달 (필요 시)
-                onEdit={handleEditReview} // 수정 함수 전달
-                onDelete={handleDeleteReview} // 삭제 함수 전달
+              <ReviewCard
+                review={review}
+                onClick={() => openDetailModal(review)} 
+                onEdit={() => handleEditReview(review)} 
+                onDelete={() => handleDeleteReview(review.id)} // 삭제
               />
             ))
             // 👆 ReviewCard 컴포넌트 사용
@@ -239,10 +275,10 @@ const MyPage: React.FC = () => {
             <FaChevronLeft />
           </S.ArrowButton>
           <S.FavoriteGrid ref={favoriteListRef}>
-            {myFavorites.length === 0 ? (
-              <p>찜한 행사가 없습니다.</p> // NoResultsMessage 재사용 가능
+            {favorites.length === 0 ? (
+              <S.NoResultsMessage>찜한 행사가 없습니다.</S.NoResultsMessage> // NoResultsMessage 재사용 가능
             ) : (
-              myFavorites.map(favorite => (
+              favorites.map(favorite => (
                 // 찜 목록의 favorite 객체 안에 event 객체가 포함되어야 함
                 favorite.event && <EventCard key={favorite.id} event={favorite.event as E.Event} /> 
               ))
@@ -303,13 +339,41 @@ const MyPage: React.FC = () => {
       <ProfileUploadModal
         isOpen={isProfileModalOpen}
         onClose={() => setIsProfileModalOpen(false)}
-        currentImageUrl={userData.profile_image ?? null} // 현재 프로필 이미지 URL
+        currentImageUrl={userData?.profile_image ?? null} // 현재 프로필 이미지 URL
       />
 
       <HostApplyForm 
         isOpen={isHostApplyModalOpen}
         onClose={() => setIsHostApplyModalOpen(false)}
       />
+
+      <Modal 
+          isOpen={isReviewModalOpen} 
+          onClose={onClose} 
+          title=""
+        >
+          <ReviewForm 
+            event_id={Number(editingReview?.event_id)}
+            onClose={onClose}
+            onReviewSubmitSuccess={loadMyReviews}
+            review={editingReview || undefined} // 수정용 데이터 전달
+          />
+        </Modal>
+  
+        <ReviewDetail
+          isOpen={isReviewDetailModalOpen}
+          onClose={closeReviewDetailModal}
+          review={selectedReview}
+          onEdit={(review) => {
+            handleEditReview(review);
+            closeReviewDetailModal();
+          }}
+          onDelete={(reviewId) => {
+            handleDeleteReview(reviewId);
+            closeReviewDetailModal();
+          }}
+        />
+  
     </S.PageContainer>
   );
 };

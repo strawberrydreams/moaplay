@@ -11,13 +11,15 @@ interface ReviewDetailModalProps {
   isOpen: boolean;
   onClose: () => void;
   review: R.Review | null; // 선택된 리뷰 데이터 (없으면 null)
+  onEdit?: (review: R.Review) => void;     // 추가
+  onDelete?: (reviewId: number) => void;   // 추가
 }
 
-const ReviewDetail: React.FC<ReviewDetailModalProps> = ({ isOpen, onClose, review }) => {
-  if (!isOpen || !review) return null; // 모달이 닫혀있거나 리뷰 데이터 없으면 렌더링 안 함
+const ReviewDetail: React.FC<ReviewDetailModalProps> = ({ isOpen, onClose, review, onEdit, onDelete }) => {
   const navigate = useNavigate();
   const { user: currentUser } = useAuthContext();
 
+  if (!isOpen || !review) return null; // 모달이 닫혀있거나 리뷰 데이터 없으면 렌더링 안 함
   // 별점 렌더링 함수
   const renderStars = (rating: number): string => {
     const r = Math.max(0, Math.min(5, Math.floor(rating)));
@@ -44,10 +46,7 @@ const ReviewDetail: React.FC<ReviewDetailModalProps> = ({ isOpen, onClose, revie
   return (
     <Modal isOpen={isOpen} onClose={onClose} title=""> {/* 제목은 비우거나 review.title 사용 */}
       <S.DetailContainer>
-        {/* 리뷰 제목 (Review 타입에 title이 있다면) */}
-        {/* <S.ReviewTitle>{review.title || '리뷰 상세'}</S.ReviewTitle> */}
-        {/* 여기서는 이미지처럼 제목 필드가 없으므로 생략 */}
-
+        <S.ReviewTitle>{review.title || '리뷰 상세'}</S.ReviewTitle>
         {/* 리뷰 내용 */}
         <S.ReviewContent>{review.content}</S.ReviewContent>
 
@@ -55,11 +54,8 @@ const ReviewDetail: React.FC<ReviewDetailModalProps> = ({ isOpen, onClose, revie
         {images.length > 0 && (
           <S.ImageGrid>
             {images.map((url, index) => (
-              url ? <S.ReviewImage key={index} src={url} alt={`리뷰 이미지 ${index + 1}`} /> 
-                  : <S.ImagePlaceholder key={index}><FaImage /></S.ImagePlaceholder>
+              <S.ReviewImage key={index} src={url} alt={`리뷰 이미지 ${index + 1}`} /> 
             ))}
-            {/* 이미지 개수가 2개 미만일 때 빈 플레이스홀더 추가 (선택 사항) */}
-            {images.length < 2 && <S.ImagePlaceholder><FaImage /></S.ImagePlaceholder>}
           </S.ImageGrid>
         )}
 
@@ -79,6 +75,13 @@ const ReviewDetail: React.FC<ReviewDetailModalProps> = ({ isOpen, onClose, revie
           </S.UserInfo>
           <S.RatingDisplay>{renderStars(review.rating)}</S.RatingDisplay>
         </S.Footer>
+
+        {currentUser && review.user?.id === currentUser.id && (
+          <S.Actions>
+            <S.ActionButton onClick={() => onEdit?.(review)}>수정</S.ActionButton>
+            <S.ActionButton danger onClick={() => onDelete?.(review.id)}>삭제</S.ActionButton>
+          </S.Actions>
+        )}
 
       </S.DetailContainer>
     </Modal>

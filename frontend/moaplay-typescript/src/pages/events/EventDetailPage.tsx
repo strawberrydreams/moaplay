@@ -15,8 +15,10 @@ import { FaImage, FaHeart, FaRegHeart, FaRegCalendarPlus, FaEdit, FaTrash } from
 
 import Modal from '../../components/common/Modal'
 import {useModal} from '../../hooks/useModal';
+import {useReview} from '../../hooks/useReview';
 import ReviewForm from '../../components/ReviewForm';
 import ReviewDetail from '../../components/ReviewDetail';
+import ReviewCard from '../../components/ReviewCard';
 
 import {useAuthContext} from '../../contexts/AuthContext';
 import LoginForm from '../../components/auth/LoginForm';
@@ -44,8 +46,6 @@ const EventDetailPage: React.FC = () => {
   const [selectedReview, setSelectedReview] = useState<R.Review | null>(null);
   const { eventId } = useParams<{ eventId: string }>();
   const numericEventId = Number(eventId); // 숫자로 변환
-
-  const [editingReview, setEditingReview] = useState<R.Review | null>(null);
   const [isFavorited, setIsFavorited] = useState(false);
 
   const navigate = useNavigate();
@@ -62,6 +62,13 @@ const EventDetailPage: React.FC = () => {
       loginToSignUp,
       closeAllModals
   } = useModal();
+
+  const {
+      editingReview,
+      setEditingReview,
+      handleEditReview,
+      handleDeleteReview,
+    } = useReview(openReviewModal);
 
   const openDetailModal = (review: R.Review) => {
     setSelectedReview(review);
@@ -130,21 +137,6 @@ const EventDetailPage: React.FC = () => {
       setEventReview([]);
     }
   }
-
-  // --- (리뷰 수정/삭제 핸들러 - 임시) ---
-  const handleEditReview = (review: R.Review) => {
-    setEditingReview(review);
-    openReviewModal(); // 기존 모달 재활용
-  };
-
-  const handleDeleteReview = (reviewId: number) => {
-      console.log(`리뷰 삭제: ${reviewId}`);
-      // TODO: 리뷰 삭제 API 호출 및 목록 새로고침 로직
-      if (window.confirm("정말로 리뷰를 삭제하시겠습니까?")) {
-          ReviewApi.deleteReview(reviewId);
-          window.location.reload();
-      }
-  };
 
   const onClose = () => {
     closeReviewModal();
@@ -314,51 +306,12 @@ const EventDetailPage: React.FC = () => {
           <p>아직 작성된 리뷰가 없습니다.</p>
         ) : (
           eventReview.map((review) => (
-            <S.ReviewCard
-              key={review.id}
-              onClick={() => openDetailModal(review)}
-            >
-              <S.ReviewTitle>{review.title}</S.ReviewTitle> {/* 제목 추가 */}
-              <S.ReviewText>{review.content}</S.ReviewText>
-              
-              {review.image_urls && review.image_urls.length > 0 ? (
-                <S.ReviewImageGrid>
-                  {/* 최대 2개의 썸네일 또는 이미지 플레이스홀더 */}
-                  {review.image_urls.slice(0, 2).map((url, index) => (
-                    url ? <S.ReviewThumbnail key={index} src={url} alt={`리뷰 이미지 ${index + 1}`} />
-                        : <S.ReviewImagePlaceholder key={index}><FaImage /></S.ReviewImagePlaceholder>
-                  ))}
-                  {/* 이미지가 1개일 경우 두 번째 플레이스홀더 추가 (선택 사항) */}
-                  {review.image_urls.length === 1 && <S.ReviewImagePlaceholder><FaImage /></S.ReviewImagePlaceholder>}
-                </S.ReviewImageGrid>
-              ) : (
-                <S.ReviewImageGrid> 
-                </S.ReviewImageGrid>
-              )}
-
-              <S.ReviewFooter> {/* 하단 푸터로 묶음 */}
-                <S.UserInfoWrapper>
-                  <S.UserProfileImage src={review.user.profile_image || '/default-profile.png'} alt={review.user.nickname} />
-                  <S.UserDetails>
-                    <S.ReviewUser>{review.user.nickname}</S.ReviewUser>
-                    <S.ReviewDate>{new Date(review.created_at).toLocaleDateString()}</S.ReviewDate>
-                  </S.UserDetails>
-                </S.UserInfoWrapper>
-                <S.ReviewRating>{renderStars(review.rating)}</S.ReviewRating>
-              </S.ReviewFooter>
-
-              {user && user.id === review.user.id && ( // 로그인했고 작성자와 ID가 같으면
-                <S.ReviewActions onClick={(e) => e.stopPropagation()}> {/* 카드 클릭 방지 */}
-                  <S.ActionButton onClick={() => handleEditReview(review)}>
-                    수정
-                  </S.ActionButton>
-                  <S.ActionButton danger onClick={() => handleDeleteReview(review.id)}>
-                    삭제
-                  </S.ActionButton>
-                </S.ReviewActions>
-              )}
-
-            </S.ReviewCard>
+            <ReviewCard
+              review = {review}
+               onClick = {() => openDetailModal(review)}
+               onEdit = {()=>{handleEditReview(review)}}
+               onDelete = {()=>{handleDeleteReview(review.id)}}
+            />
           ))
         )}
       </S.ReviewGrid>
@@ -376,10 +329,18 @@ const EventDetailPage: React.FC = () => {
         />
       </Modal>
 
-      <ReviewDetail 
-        isOpen={isReviewDetailModalOpen} 
-        onClose={closeReviewDetailModal} 
-        review={selectedReview} 
+      <ReviewDetail
+          isOpen={isReviewDetailModalOpen}
+          onClose={closeReviewDetailModal}
+          review={selectedReview}
+          onEdit={(review) => {
+            handleEditReview(review);
+            closeReviewDetailModal();
+          }}
+          onDelete={(reviewId) => {
+            handleDeleteReview(reviewId);
+            closeReviewDetailModal();
+          }}
       />
 
     </S.DetailContainer>

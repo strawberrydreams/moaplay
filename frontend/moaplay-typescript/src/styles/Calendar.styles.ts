@@ -55,6 +55,7 @@ export const StyledCalendarWrapper = styled.div`
   .fc-daygrid-day {
     border-right: 1px solid #f3f4f6;
     border-bottom: 1px solid #f3f4f6;
+    background: #ffffffff;
 
     &:nth-child(7n) {
       border-right: none !important;
@@ -64,6 +65,12 @@ export const StyledCalendarWrapper = styled.div`
     &.fc-daygrid-day-other {
       background-color: #fafafb;
       color: #9ca3af;
+    }
+
+    &:hover{
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
+      filter: brightness(95%);
+      transition: all 0.2s ease-in-out;
     }
   }
 
@@ -92,8 +99,7 @@ export const StyledCalendarWrapper = styled.div`
 
   /* DayCell의 높이 적용 (내부 프레임에 적용) */
   .fc-daygrid-day-frame {
-    height: auto;
-    padding: 0.5rem;
+    height: 106px;
   }
 
   /* 날짜 숫자 스타일 (DayNumber) */
@@ -126,8 +132,7 @@ export const StyledCalendarWrapper = styled.div`
     font-size: 0.8rem;
     font-weight: 600;
     cursor: pointer;
-    transition: transform 0.15s ease, box-shadow 0.15s ease, background-color 0.15s ease;
-
+   
     /* EventTag의 텍스트 스타일 */
     .fc-event-title {
       color: #0056b3; /* (기본값) */
@@ -136,13 +141,23 @@ export const StyledCalendarWrapper = styled.div`
       overflow: hidden;
       text-overflow: ellipsis;
     }
-    
-    &:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
-      background-color: #cff4ff;
-    }
   }
+
+  
+    /* 이벤트 호버 시 스타일 */
+  .fc-event.event-hovered {
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
+    filter: brightness(80%);
+    transition: all 0.2s ease-in-out;
+  }
+
+  /* 이벤트 클릭 시 스타일 */
+  .fc-event.event-clicked {
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
+    filter: brightness(80%);
+    transition: all 0.2s ease-in-out;
+  }
+
 
   /* --- 6. 기타 스타일 정리 --- */
   

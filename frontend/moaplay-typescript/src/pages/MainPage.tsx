@@ -36,7 +36,7 @@ function MainPage() {
   const handleCalendarEventSelect = useCallback((on: boolean, event?: E.Event) => {
     if (on && event) {
       setSelectedCalendarEvent(event);
-    } else if (!on) {
+    } else {
       setSelectedCalendarEvent(null);
     }
   }, []);
