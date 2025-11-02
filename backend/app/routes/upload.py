@@ -170,13 +170,16 @@ def upload_image():
 
 
 ### 이미지 제공 API
-### GET /api/upload/uploads/<filename>
-@upload_bp.route('/uploads/<filename>', methods=['GET'])
+### GET /api/upload/<filename>
+@upload_bp.route('/<filename>', methods=['GET'])
 def serve_image(filename):
     from flask import send_from_directory
+
+    abs_folder = os.path.abspath(UPLOAD_FOLDER)
+    full_path = os.path.join(abs_folder, filename)
     
     try:
-        return send_from_directory(UPLOAD_FOLDER, filename)
+        return send_from_directory(full_path, filename)
     except FileNotFoundError:
         return {
             "error_code": "FILE_NOT_FOUND",
