@@ -2,8 +2,10 @@ from flask import Blueprint, request
 from flask_login import current_user, login_required, logout_user
 from ..models import db
 from ..models.user import User
+from ..models.event import Event
 from ..models.user_tag import UserTag
 from ..models.tag import Tag
+from ..models.enums import UserRole, EventStatus
 import re
 from datetime import datetime
 
@@ -324,3 +326,70 @@ def delete_preferred_tag(tag_id):
             "error_code": "INTERNAL_SERVER_ERROR",
             "message": "선호 태그 삭제 중 오류가 발생했습니다."
         }, 500
+    
+### 특정 사용자의 행사 목록 조회 API
+### GET /api/users/{user_id}/events
+@user_bp.route('/<int:user_id>/events/', methods=['GET'])
+def get_user_events(user_id):
+    # 쿼리 파라미터
+    page = request.args.get('page', 1, type=int)
+    per_page = request.args.get('per_page', 12, type=int)
+    sort = request.args.get('sort', 'created_at')
+    order = request.args.get('order', 'desc')
+    
+    # 페이지 유효성 검증
+    if page < 1:
+        page = 1
+    if per_page < 1 or per_page > 100:
+        per_page = 12
+    
+    # 사용자 존재 확인
+    user = db.session.get(User, user_id)
+    if not user:
+        return {
+            "error_code": "USER_NOT_FOUND",
+            "message": "사용자를 찾을 수 없습니다."
+        }, 404
+    
+    # 사용자가 HOST가 아니면 빈 목록 반환
+    if user.role != UserRole.HOST:
+        return {
+            "events": [],
+            "pagination": {
+                "page": page,
+                "per_page": per_page,
+                "total": 0,
+                "pages": 0
+            }
+        }, 200
+    
+    # 기본 쿼리 (해당 사용자의 행사만)
+    query = db.session.query(Event).filter(Event.host_id == user_id)
+    
+    # 정렬
+    if sort == 'view_count':
+        order_column = Event.view_count
+    elif sort == 'start_date':
+        order_column = Event.start_date
+    else:
+        order_column = Event.created_at
+    
+    if order == 'asc':
+        query = query.order_by(order_column.asc())
+    else:
+        query = query.order_by(order_column.desc())
+    
+    # 페이징
+    pagination = query.paginate(page=page, per_page=per_page, error_out=False)
+    
+    events = [event.to_dict() for event in pagination.items]
+    
+    return {
+        "events": events,
+        "pagination": {
+            "page": pagination.page,
+            "per_page": pagination.per_page,
+            "total": pagination.total,
+            "pages": pagination.pages
+        }
+    }, 200

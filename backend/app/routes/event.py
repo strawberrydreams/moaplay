@@ -158,6 +158,7 @@ def get_events():
     status = request.args.get('status', 'approved')
     location = request.args.get('location')
     title = request.args.get('title')
+    tag = request.args.get('tag') 
     sort = request.args.get('sort', 'created_at')  # created_at, view_count, start_date
     order = request.args.get('order', 'desc')  # asc, desc
     
@@ -184,8 +185,19 @@ def get_events():
     if location:
         query = query.filter(Event.location.contains(location))
 
+    # 제목
     if title:
         query = query.filter(Event.title.contains(title))
+
+    # 태그
+    if tag:
+        tag_subquery = (
+            db.session.query(EventTag.event_id)
+            .join(Tag, EventTag.tag_id == Tag.id)
+            .filter(Tag.name.contains(tag))
+            .subquery()
+        )
+        query = query.filter(Event.id.in_(db.select(tag_subquery)))
     
     # 정렬
     if sort == 'view_count':
