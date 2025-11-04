@@ -115,6 +115,43 @@ def get_favorites():
         }, 500
 
 
+### 찜 단일 조회 API
+### GET /api/favorites/event/<int:event_id>
+
+@favorite_bp.route('/event/<int:event_id>', methods=['GET'])
+@login_required
+def get_favorite_by_event(event_id):
+    """
+    현재 로그인한 사용자가 특정 행사(event_id)를 찜했는지 확인합니다.
+    """
+    user_id = current_user.id
+
+    try:
+        favorite = (
+            db.session.query(Favorite)
+            .filter_by(user_id=user_id, event_id=event_id)
+            .first()
+        )
+
+        if favorite:
+            return {
+                "is_favorited": True,
+                "favorite": favorite.to_dict()
+            }, 200
+        else:
+            return {
+                "is_favorited": False,
+                "message": "이 행사는 찜 목록에 없습니다."
+            }, 200
+
+    except Exception as e:
+        print(f"[ERROR][get_favorite_by_event] {e}")
+        return {
+            "error_code": "INTERNAL_SERVER_ERROR",
+            "message": "찜 상태 조회 중 오류가 발생했습니다."
+        }, 500
+
+
 ### 찜 삭제 API
 ### DELETE /api/favorites/<id>
 @favorite_bp.route('/<int:favorite_id>', methods=['DELETE'])

@@ -1,8 +1,6 @@
 import styled from 'styled-components';
 
 export const StyledCalendarWrapper = styled.div`
-  
-  /* --- 1. CalendarContainer 스타일 (전체 래퍼) --- */
   background-color: #ffffff;
   width: 100%;
   max-width: 960px;
@@ -11,11 +9,22 @@ export const StyledCalendarWrapper = styled.div`
   font-family: 'Pretendard', sans-serif;
   color: #131313;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
-  overflow: hidden; /* border-radius 적용을 위해 */
+  overflow: hidden;
+  margin: 0 auto;
+  transition: all 0.3s ease;
 
-  /* --- 2. CalendarHeader 스타일 --- */
+  /* 반응형: 모바일에서는 좌우 여백을 줄임 */
+  @media (max-width: 768px) {
+    max-width: 100%;
+  }
+
+  @media (max-width: 480px) {
+    max-width: 100%;
+  }
+
+
+  /* --- 1. Toolbar 스타일 --- */
   .fc-header-toolbar {
-    /* CalendarHeader 스타일 적용 */
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -23,18 +32,30 @@ export const StyledCalendarWrapper = styled.div`
     background-color: #ffffff;
     border-bottom: 1px solid #e5e7eb;
     margin-bottom: 0 !important;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+
+    @media (max-width: 768px) {
+      flex-direction: column;
+      align-items: center;
+      padding: 0.75rem 1rem;
+      gap: 0.75rem;
+    }
   }
 
   .fc-toolbar-title {
-    /* HeaderTitle 스타일 적용 */
     margin: 0;
     font-size: 1.4rem;
     font-weight: 700;
     color: #1f2937;
+
+    @media (max-width: 768px) {
+      font-size: 1.1rem;
+    }
   }
 
-  .fc-prev-button, .fc-next-button {
-    /* NavButton 스타일 적용 */
+  .fc-prev-button,
+  .fc-next-button {
     background: none !important;
     border: 1px solid #d1d5db !important;
     box-shadow: none !important;
@@ -49,74 +70,140 @@ export const StyledCalendarWrapper = styled.div`
       background-color: #f3f4f6 !important;
       color: #111;
     }
+
+    @media (max-width: 768px) {
+      padding: 0.4rem 0.6rem;
+      font-size: 0.9rem;
+    }
   }
 
-  /* --- 3. DayCell / DayNumber 스타일 --- */
+  /* --- 2. 날짜 셀 --- */
   .fc-daygrid-day {
     border-right: 1px solid #f3f4f6;
     border-bottom: 1px solid #f3f4f6;
+    background: #ffffff;
 
     &:nth-child(7n) {
       border-right: none !important;
     }
 
-    /* 날짜가 없는 칸은 흐린 표시 */
     &.fc-daygrid-day-other {
       background-color: #fafafb;
       color: #9ca3af;
     }
+
+    &:hover {
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
+      filter: brightness(95%);
+      transition: all 0.2s ease-in-out;
+    }
+
+        
   }
 
-/* --- 3. 요일 헤더 스타일 (월화수목금토일) --- */
+  /* --- 3. 요일 헤더 --- */
+  /* --- 3. 요일 헤더 (크기 줄이기 & 간격 압축) --- */
   .fc-col-header-cell {
-    background-color: #f8f9fa; /* 헤더 배경색 변경 */
-    border-bottom: 1px solid #ddd; /* 헤더 하단 테두리 */
-    font-size: 0.9rem;
+    background-color: #f8f9fa;
+    border-bottom: 1px solid #ddd;
+    font-size: 0.8rem; /* ✅ 기존 0.9rem → 더 작게 */
     font-weight: 600;
-  
+    padding: 0 !important; /* ✅ 전체 여백 제거 */
+
+    @media (max-width: 768px) {
+      font-size: 0.7rem; /* ✅ 모바일에선 더 작게 */
+    }
+
+
   }
 
-  /* 요일 헤더 글자 (예: "월") */
   .fc-col-header-cell-cushion {
-    color: #555; /* 글자색 변경 */
-    padding: 12px 6px;
+    color: #555;
+    padding: 6px 0 !important; /* ✅ 위아래 여백 축소 */
+    display: block;
+    text-align: center;
   }
 
-  /* --- 4. (참고) 주말 요일 헤더 색상 변경 --- */
+  /* ✅ 요일 색상 유지 */
   .fc-col-header-cell.fc-day-sun .fc-col-header-cell-cushion {
-    color: #d9534f; /* 일요일 헤더 글자색 */
+    color: #d9534f;
   }
   .fc-col-header-cell.fc-day-sat .fc-col-header-cell-cushion {
-    color: #0275d8; /* 토요일 헤더 글자색 */
+    color: #0275d8;
   }
 
-  /* DayCell의 높이 적용 (내부 프레임에 적용) */
+    /* --- 4. 날짜 셀 내부 프레임 --- */
   .fc-daygrid-day-frame {
-    height: auto;
-    padding: 0.5rem;
+    height: auto !important; /* ✅ 고정 높이 제거 */
+    min-height: 107px; /* ✅ 기본 최소 높이만 설정 */
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    overflow: visible !important; /* ✅ 내부 콘텐츠 잘림 방지 */
+    padding: 0px 4px;
+    box-sizing: border-box;
+
+    @media (max-width: 768px) {
+      min-height: 80px;
+    }
+
+    @media (max-width: 480px) {
+      max-height: 60px;
+      min-height: 30px;
+    }
   }
 
-  /* 날짜 숫자 스타일 (DayNumber) */
+  .fc-daygrid-day {
+  padding: 0 !important;
+
+  }
+
+
+  /* 이벤트가 여러 개일 때 자동 줄바꿈 허용 */
+  .fc-daygrid-day-events {
+    overflow: visible !important;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  /* 이벤트 텍스트가 줄바꿈되도록 */
+  .fc-event-title {
+    white-space: normal !important;
+    overflow: visible !important;
+    line-height: 1.3;
+  }
+
+  /* 날짜 숫자와 이벤트 간 여백 정리 */
+  .fc-daygrid-day-top {
+    margin-bottom: 0px;
+  }
+
+
   .fc-daygrid-day-number {
     font-weight: 500;
     margin-bottom: 0.25rem;
     padding: 6px;
-    color: #131313; /* DayCell의 color */
+    color: #131313;
 
     .fc-daygrid-day-other & {
       color: #9ca3af !important;
     }
+
+    @media (max-width: 768px) {
+      font-size: 0.8rem;
+      padding: 4px;
+    }
   }
 
-  /* --- 4. 주말 색상 적용 --- */
   .fc-day-sun .fc-daygrid-day-number {
-    color: #d9534f !important; /* FullCalendar 기본 스타일 덮어쓰기 */
+    color: #d9534f !important;
   }
   .fc-day-sat .fc-daygrid-day-number {
     color: #0275d8 !important;
   }
 
-  /* --- 5. EventTag 스타일 --- */
+  /* --- 5. 이벤트 태그 --- */
   .fc-event {
     background-color: #e0f2ff;
     border: 1px solid #a3d8ff;
@@ -126,29 +213,42 @@ export const StyledCalendarWrapper = styled.div`
     font-size: 0.8rem;
     font-weight: 600;
     cursor: pointer;
-    transition: transform 0.15s ease, box-shadow 0.15s ease, background-color 0.15s ease;
+    overflow: hidden;
+    text-overflow: ellipsis;
 
-    /* EventTag의 텍스트 스타일 */
+    @media (max-width: 768px) {
+      font-size: 0.7rem;
+      padding: 3px 6px;
+      border-radius: 6px;
+    }
+
     .fc-event-title {
-      color: #0056b3; /* (기본값) */
+      color: #0056b3;
       font-weight: 600;
-      /* white-space: nowrap; */
       overflow: hidden;
       text-overflow: ellipsis;
-    }
-    
-    &:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
-      background-color: #cff4ff;
+      white-space: nowrap;
     }
   }
 
-  /* --- 6. 기타 스타일 정리 --- */
-  
-  /* 캘린더의 기본 테두리 제거 (Wrapper 테두리 사용) */
-  .fc-scrollgrid, .fc-view {
+  .fc-event.event-hovered,
+  .fc-event.event-clicked {
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
+    filter: brightness(90%);
+    transition: all 0.2s ease-in-out;
+  }
+
+  /* --- 6. FullCalendar 기본 테두리 제거 --- */
+  .fc-scrollgrid,
+  .fc-view {
     border: none;
   }
 
+  /* ✅ 모바일에서 캘린더 전체를 스크롤 가능하게 */
+  @media (max-width: 480px) {
+    .fc-daygrid {
+      overflow-x: auto;
+      min-width: 450px;
+    }
+  }
 `;

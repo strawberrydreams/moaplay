@@ -1,5 +1,5 @@
 import axiosInstance from './core/axios';
-import type { Review, GetReviewApiResponse, CreateReviewPayload, UpdateReviewPayload } from '../types/reviews';
+import type { Review, GetMyReviewResponse, GetReviewApiResponse, CreateReviewPayload, UpdateReviewPayload } from '../types/reviews';
 
 // (GET) 특정 행사의 리뷰 목록 조회
 export const getReviews = async (params: {
@@ -32,4 +32,15 @@ export const updateReview = async (id: number, payload: UpdateReviewPayload): Pr
 // (DELETE) 특정 ID의 리뷰 삭제
 export const deleteReview = async (id: number): Promise<void> => {
     await axiosInstance.delete(`/reviews/${id}`);
+};
+
+
+// (GET) 내가 쓴 리뷰 목록 조회 API
+export const getMyReview = async (
+  params?: { page?: number; per_page?: number }
+): Promise<GetMyReviewResponse> => {
+  const { data } = await axiosInstance.get<GetMyReviewResponse>('/reviews/me', {
+    params,
+  });
+  return data;
 };

@@ -3,7 +3,7 @@ import React, {useState} from 'react';
 import FullCalendar from '@fullcalendar/react';
 import dayGridPlugin from '@fullcalendar/daygrid';
 import interactionPlugin from '@fullcalendar/interaction';
-import type { DayCellContentArg, EventClickArg, EventMountArg } from '@fullcalendar/core';
+import type { DayCellContentArg, EventClickArg, EventMountArg, EventHoveringArg } from '@fullcalendar/core'
 import type { DateClickArg } from '@fullcalendar/interaction';
 import { StyledCalendarWrapper } from '../styles/Calendar.styles';
 import type * as E from '../types/events'; // Event 타입 임포트
@@ -15,8 +15,9 @@ interface ICalendarProps {
 }
 
 const Calendar: React.FC<ICalendarProps> = ({ events = [], onEventClick, CalendarEvent }) => {
-  console.log('CalendarEventDetail 렌더링, event prop:', events);
+  // console.log('CalendarEventDetail 렌더링, event prop:', events);
   const [clickedEventId, setClickedEventId] = useState<string | null>(null);
+  const [hoveredEventId, setHoveredEventId] = useState<string | null>(null);
 
   const handleDayCellContent = (arg: DayCellContentArg) => {
     return arg.dayNumberText.replace("일", "");
@@ -42,22 +43,28 @@ const Calendar: React.FC<ICalendarProps> = ({ events = [], onEventClick, Calenda
     };
   });
 
-  const handleCalendarClick = (clickInfo: EventClickArg) => {
-    setClickedEventId(clickInfo.event.id);
-    
-    // 원본 'events' 배열에서 id로 원본 데이터를 찾습니다.
-    const originalEvent = events.find(e => String(e.id) === clickedEventId); 
-
-    if (!CalendarEvent) {
-      if (originalEvent) {
-      // 부모에게 E.Event 타입 객체 전달
-        onEventClick(true, originalEvent); 
-      } 
-    } else {
-      onEventClick(false, originalEvent);
-    }
-
+  const handleEventMouseEnter = (mouseEnterInfo: EventHoveringArg) => {
+    setHoveredEventId(mouseEnterInfo.event.id);
   };
+
+  const handleEventMouseLeave = () => {
+    setHoveredEventId(null);
+  };
+
+
+  const handleCalendarClick = (clickInfo: EventClickArg) => {
+  const id = clickInfo.event.id;
+  setClickedEventId(id); // 상태 업데이트는 하되
+
+  const originalEvent = events.find(e => String(e.id) === id); // 지역 변수 사용
+
+  if (!CalendarEvent) {
+    onEventClick(true, originalEvent);
+  } else {
+    onEventClick(false, originalEvent);
+    setClickedEventId(null);
+  }
+};
 
   const handleEventMount = (mountInfo: EventMountArg) => {
     const color = mountInfo.event.extendedProps.color;
@@ -74,20 +81,27 @@ const Calendar: React.FC<ICalendarProps> = ({ events = [], onEventClick, Calenda
         (titleEl as HTMLElement).style.color = color;
       }
     }
-    console.log(`Mounting event ${mountInfo.event.id}, Clicked ID: ${clickedEventId}`); // 로그 추가
-    if (mountInfo.event.id === clickedEventId) {
-      console.log(`Adding event-clicked to ${mountInfo.event.id}`); // 로그 추가
-      mountInfo.el.classList.add('event-clicked');
-    } else {
-      mountInfo.el.classList.remove('event-clicked'); // 다른 이벤트 클래스 제거
+    
+  };
+
+  const handleEventClassNames = (arg: { event: any; }) => {
+    const classNames = [];
+    if (arg.event.id === clickedEventId) {
+      classNames.push('event-clicked');
+
     }
+    if (arg.event.id === hoveredEventId) {
+      classNames.push('event-hovered');
+    }
+    return classNames;
   };
 
   const handleDateClick = (arg: DateClickArg) => {
-    console.log('빈 날짜 클릭됨:', arg.dateStr);
+    // console.log('빈 날짜 클릭됨:', arg.dateStr);
     const originalEvent = events.find(e => String(e.id) === clickedEventId); 
-
+    
     onEventClick(false, originalEvent);
+    setClickedEventId(null);
   };
 
   return (
@@ -98,6 +112,9 @@ const Calendar: React.FC<ICalendarProps> = ({ events = [], onEventClick, Calenda
         events={formattedEvents}
         eventClick={handleCalendarClick} 
         eventDidMount={handleEventMount} 
+        eventMouseEnter={handleEventMouseEnter}
+        eventMouseLeave={handleEventMouseLeave}
+        eventClassNames={handleEventClassNames}
         dayCellContent={handleDayCellContent}
         dateClick={handleDateClick}
         headerToolbar={{

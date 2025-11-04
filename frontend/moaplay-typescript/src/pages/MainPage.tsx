@@ -13,7 +13,8 @@ import {
   CalendarSection, 
   CalendarWrapper, 
   CalendarDetailWrapper,
-  BannerImage
+  BannerImage,
+  BannerWrapper
 } from '../styles/MainPage.styles';
 
 // --- MainPage 컴포넌트 ---
@@ -36,7 +37,7 @@ function MainPage() {
   const handleCalendarEventSelect = useCallback((on: boolean, event?: E.Event) => {
     if (on && event) {
       setSelectedCalendarEvent(event);
-    } else if (!on) {
+    } else {
       setSelectedCalendarEvent(null);
     }
   }, []);
@@ -48,7 +49,9 @@ function MainPage() {
 
   return (
     <MainPageContainer style={{padding: '50px'}}>
-      <BannerImage src={Banner} style={{width: '1200px', height: '200px', objectFit: 'cover'}} alt='배너 이미지'/>
+      <BannerWrapper>
+        <BannerImage src={Banner} alt="배너 이미지" />
+      </BannerWrapper>
       <CalendarSection>
         <CalendarWrapper style={{zoom: '1'}}>
           <Calendar 

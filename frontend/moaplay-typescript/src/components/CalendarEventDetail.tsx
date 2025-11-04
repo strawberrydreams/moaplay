@@ -7,6 +7,7 @@ import { useModal } from '../hooks/useModal'; // 1. AuthModalContext 훅 임포�
 import * as SchedulesApi from '../services/schedulesApi'; // 일정 삭제 API
 import type { Schedule } from '../types/schedules'; // Schedule 타입 임포트
 import { useAuthContext } from '../contexts/AuthContext';
+import { useNavigate } from 'react-router-dom';
 
 
 // --- Props 타입 정의 ---
@@ -30,6 +31,8 @@ const CalendarEventDetail: React.FC<IDetailProps> = ({ events = [],
     const { openLoginModal } = useModal();  // 로그인 모달 열기 함수 가져오기
     const { user } = useAuthContext(); // 2. 로그인 사용자 정보 가져오기
     // --- 👆 로그인 관련 로직 끝 ---
+
+    const navigate = useNavigate();
 
 
     // 상세 보기 상태 (E.Event 타입 사용)
@@ -108,17 +111,19 @@ const CalendarEventDetail: React.FC<IDetailProps> = ({ events = [],
                 {/* ... (DetailTitle, DetailInfoGrid - displayEvent 사용) ... */}
                 <S.DetailInfoGrid>
                     <p>날짜: <span>{displayEvent.start_date}</span> ~ <span>{displayEvent.end_date}</span></p>
-                    <p>주최자: <span>{displayEvent.host?.nickname || '정보 없음'}</span></p>
+                    <p>주관: <span>{displayEvent.organizer || '정보 없음'}</span></p>
+                    <p>주최: <span>{displayEvent.hosted_by || '정보 없음'}</span></p>
                     <p>장소: <span>{displayEvent.location}</span></p>
                     <p>연락처: <span>{displayEvent.phone || '정보 없음'}</span></p>
                 </S.DetailInfoGrid>
                 <S.DetailTagList>
-                    <h4>태그</h4> <br />
+                    <h4 style={{padding: '0px'}}>태그</h4>
+                    <br />
                     {tagsArray.map((tag, index) => ( <S.DetailTag key={index}>{tag}</S.DetailTag> ))}
                 </S.DetailTagList>
                 {/* ... (DetailDescription - displayEvent 사용) ... */}
                 <S.ButtonGroup>
-                    <S.DetailButton>상세보기</S.DetailButton>
+                    <S.DetailButton onClick={()=>{navigate(`events/${displayEvent.id}`)}}>상세보기</S.DetailButton>
                     <S.DetailButton danger onClick={handleDeleteSchedule}>삭제하기</S.DetailButton>
                 </S.ButtonGroup>
             </S.DetailCardWrapper>

@@ -15,11 +15,15 @@ import { FaImage, FaHeart, FaRegHeart, FaRegCalendarPlus, FaEdit, FaTrash } from
 
 import Modal from '../../components/common/Modal'
 import {useModal} from '../../hooks/useModal';
+import {useReview} from '../../hooks/useReview';
+import { useFavorite } from '../../hooks/useFavorite';
 import ReviewForm from '../../components/ReviewForm';
 import ReviewDetail from '../../components/ReviewDetail';
+import ReviewCard from '../../components/ReviewCard';
 
 import {useAuthContext} from '../../contexts/AuthContext';
 import LoginForm from '../../components/auth/LoginForm';
+import { NotificationFormDropdown } from '../../components/NotificationFormDropdown';
 
 
 
@@ -37,7 +41,7 @@ const calculateAverageRating = (reviews: R.Review[]): number => {
 
 
 const EventDetailPage: React.FC = () => {
-  const { user } = useAuthContext(); // 2. 로그인 사용자 정보 가져오기
+  const { user, schedules } = useAuthContext(); // 2. 로그인 사용자 정보 가져오기
   const [currentImageIndex, setCurrentImageIndex] = useState<number>(0);
   const [eventDetail, setEventDetail] = useState<E.Event>();
   const [eventReview, setEventReview] = useState<R.Review[]>([]);
@@ -45,11 +49,12 @@ const EventDetailPage: React.FC = () => {
   const { eventId } = useParams<{ eventId: string }>();
   const numericEventId = Number(eventId); // 숫자로 변환
 
-  const [editingReview, setEditingReview] = useState<R.Review | null>(null);
-  const [isFavorited, setIsFavorited] = useState(false);
-
   const navigate = useNavigate();
 
+  const { favorites, loadFavorites, toggleFavorite, isLoading } = useFavorite();
+
+  const favoriteItem = favorites.find(fav => fav.event?.id === numericEventId);
+  const isFavorited = !!favoriteItem
 
   const { 
       setReviewDetailModalOpen,
@@ -63,46 +68,42 @@ const EventDetailPage: React.FC = () => {
       closeAllModals
   } = useModal();
 
+  const {
+      editingReview,
+      setEditingReview,
+      handleEditReview,
+      handleDeleteReview,
+    } = useReview(openReviewModal);
+
   const openDetailModal = (review: R.Review) => {
     setSelectedReview(review);
     setReviewDetailModalOpen(true);
   };
 
   useEffect(() => {
-    const fetchEventDetail = async () => {
-      if (eventId) {
-        try {
-          if (!isNaN(numericEventId)) {
-            const responseEvent = await EventApi.getEventById(numericEventId);
-            setEventDetail(responseEvent || []);
+  const fetchEventDetail = async () => {
+    if (!eventId) return;
+    try {
+      const responseEvent = await EventApi.getEventById(numericEventId);
+      setEventDetail(responseEvent);
 
-            const responseReview = await ReviewApi.getReviews({ event_id: numericEventId });
-            setEventReview(responseReview.reviews || []);
-
-            const responseFavorite = await FavoriteApi.getFavoriteById(numericEventId);
-            if(responseFavorite.is_favorite) {
-              setIsFavorited(true);
-            } else {
-              setIsFavorited(false);
-            }
-          } else {
-            console.error("Invalid event Id format:", eventId)
-          }
-        } catch (error) {
-            console.error("API 실패", eventId)
-        }
-      } else {
-        console.error("eventId가 없습니다.")
-      }
-      
-    };
-    fetchEventDetail();
-  }, [eventId]); 
+      const responseReview = await ReviewApi.getReviews({ event_id: numericEventId });
+      setEventReview(responseReview.reviews || []);
+      } catch (error) {
+      console.error("API 실패", eventId);
+    }
+  };
+  fetchEventDetail();
+}, [eventId]);
 
   const averageRating = useMemo(() => 
     calculateAverageRating(eventReview), 
     [eventReview] // eventReviews 배열이 변경될 때만 재계산
   );
+
+  useEffect(() => {
+    loadFavorites();
+  },[loadFavorites])
 
   // 이미지 배열 (가드)
   const images: string[] = Array.isArray(eventDetail?.image_urls) ? eventDetail.image_urls : [];
@@ -131,42 +132,19 @@ const EventDetailPage: React.FC = () => {
     }
   }
 
-  // --- (리뷰 수정/삭제 핸들러 - 임시) ---
-  const handleEditReview = (review: R.Review) => {
-    setEditingReview(review);
-    openReviewModal(); // 기존 모달 재활용
-  };
-
-  const handleDeleteReview = (reviewId: number) => {
-      console.log(`리뷰 삭제: ${reviewId}`);
-      // TODO: 리뷰 삭제 API 호출 및 목록 새로고침 로직
-      if (window.confirm("정말로 리뷰를 삭제하시겠습니까?")) {
-          ReviewApi.deleteReview(reviewId);
-          window.location.reload();
-      }
-  };
-
   const onClose = () => {
     closeReviewModal();
     setEditingReview(null);
   }
 
-  const handleFavoriteToggle = async () => {
+    const handleFavoriteClick = () => {
     if (!user) {
-      openLoginModal(); // 로그인 필요
+      alert("로그인이 필요합니다.");
       return;
     }
-    try {
-      if (isFavorited) {
-        await FavoriteApi.deleteFavorite(numericEventId);
-      } else {
-        await FavoriteApi.addFavorite(numericEventId);
-      }
-      setIsFavorited(prev => !prev);
-    } catch (error) {
-      console.error("찜하기 처리 중 오류 발생", error);
-    }
-  };
+
+    toggleFavorite(numericEventId, isFavorited, favoriteItem?.id);
+    };
 
   const handleAddSchedule = async() => {
     if (!user) {
@@ -174,8 +152,12 @@ const EventDetailPage: React.FC = () => {
       return;
     }
 
-    await ScheduleApi.addSchedule(numericEventId);
-    alert("캘린더에 일정이 추가되었습니다!"); // 실제 캘린더 연동은 별도 구현 필요
+    if (schedules.some((s) => s.event?.id === numericEventId)) {
+      alert("이미 캘린더에 들어가있는 행사입니다!")
+    } else {
+      await ScheduleApi.addSchedule(numericEventId);
+      alert("캘린더에 일정이 추가되었습니다!"); // 실제 캘린더 연동은 별도 구현 필요
+    }
   };
 
   const handleEditEvent = () => {
@@ -212,22 +194,46 @@ const EventDetailPage: React.FC = () => {
 
         {/* 버튼 그룹 */}
         <S.ImageActionGroup>
-          <button onClick={handleFavoriteToggle} title="찜하기">
-            {isFavorited ? <FaHeart color="#e25555" size={20} /> : <FaRegHeart color="#1E1E1E" size={20} />}
+          <button onClick={handleFavoriteClick}  disabled={isLoading} title="찜하기">
+            {isFavorited ? 
+            <FaHeart color="#e25555" size={20} /> 
+            : 
+            <FaRegHeart color="#1E1E1E" size={20} />}
           </button>
           <button onClick={handleAddSchedule} title="일정 추가">
             <FaRegCalendarPlus color="#1E1E1E" size={20} />
           </button>
-          {(user?.role === 'host' || user?.role === 'admin') && (
-            <>
-              <button onClick={handleEditEvent} title="행사 수정">
-                <FaEdit color="#4C8DFF" size={20} />
-              </button>
-              <button onClick={handleDeleteEvent} title="행사 삭제">
-                <FaTrash color="#e25555" size={20} />
-              </button>
-            </>
-          )}
+            {user && (
+              (user.role === 'admin' || (user.role === 'host' && user.id === eventDetail?.host.id))
+            ) && (
+              <>
+              {/* 알림 드롭다운 */}
+               <NotificationFormDropdown
+                  eventId={eventDetail?.id}
+                  onSend={async () => {
+                    // { title, content }
+                    // try {
+                    //   // 실제 알림 전송 API 연결
+                    //   await NotificationApi.sendNotification({
+                    //     event_id: eventDetail?.id,
+                    //     title,
+                    //     content,
+                    //   });
+                      alert('알림이 전송되었습니다!');
+                    // } catch (error) {
+                    //   console.error('알림 전송 실패:', error);
+                    //   alert('알림 전송에 실패했습니다.');
+                    // }
+                  }}
+                />
+                <button onClick={handleEditEvent} title="행사 수정">
+                  <FaEdit color="#4C8DFF" size={20} />
+                </button>
+                <button onClick={handleDeleteEvent} title="행사 삭제">
+                  <FaTrash color="#e25555" size={20} />
+                </button>
+              </>
+            )}
         </S.ImageActionGroup>
       </S.EventHeader>
       {/* 2. 이미지 캐러셀 */}
@@ -274,15 +280,15 @@ const EventDetailPage: React.FC = () => {
           {/* [좌측 열 정보] */}
           <S.InfoList>
             <li><span>시작일 {eventDetail?.start_date}</span></li>
-            <li><span>전화번호 {eventDetail?.phone}</span></li>
             <li><span>주소 {eventDetail?.location}</span></li>
+            <li><span>주관 {eventDetail?.hosted_by}</span></li>
           </S.InfoList>
 
           {/* [우측 열 정보] */}
           <S.InfoList>
             <li><span>종료일 {eventDetail?.start_date}</span></li>
-            <li><span>홈페이지 {eventDetail?.phone}</span></li>
-            <li><span>주최 {eventDetail?.host.nickname}</span></li>
+            <li><span>전화번호 {eventDetail?.phone}</span></li>
+            <li><span>주최 {eventDetail?.organizer}</span></li>
           </S.InfoList>
         </S.InfoGridContainer>
       </S.MapInfoSection>
@@ -314,51 +320,12 @@ const EventDetailPage: React.FC = () => {
           <p>아직 작성된 리뷰가 없습니다.</p>
         ) : (
           eventReview.map((review) => (
-            <S.ReviewCard
-              key={review.id}
-              onClick={() => openDetailModal(review)}
-            >
-              <S.ReviewTitle>{review.title}</S.ReviewTitle> {/* 제목 추가 */}
-              <S.ReviewText>{review.content}</S.ReviewText>
-              
-              {review.image_urls && review.image_urls.length > 0 ? (
-                <S.ReviewImageGrid>
-                  {/* 최대 2개의 썸네일 또는 이미지 플레이스홀더 */}
-                  {review.image_urls.slice(0, 2).map((url, index) => (
-                    url ? <S.ReviewThumbnail key={index} src={url} alt={`리뷰 이미지 ${index + 1}`} />
-                        : <S.ReviewImagePlaceholder key={index}><FaImage /></S.ReviewImagePlaceholder>
-                  ))}
-                  {/* 이미지가 1개일 경우 두 번째 플레이스홀더 추가 (선택 사항) */}
-                  {review.image_urls.length === 1 && <S.ReviewImagePlaceholder><FaImage /></S.ReviewImagePlaceholder>}
-                </S.ReviewImageGrid>
-              ) : (
-                <S.ReviewImageGrid> 
-                </S.ReviewImageGrid>
-              )}
-
-              <S.ReviewFooter> {/* 하단 푸터로 묶음 */}
-                <S.UserInfoWrapper>
-                  <S.UserProfileImage src={review.user.profile_image || '/default-profile.png'} alt={review.user.nickname} />
-                  <S.UserDetails>
-                    <S.ReviewUser>{review.user.nickname}</S.ReviewUser>
-                    <S.ReviewDate>{new Date(review.created_at).toLocaleDateString()}</S.ReviewDate>
-                  </S.UserDetails>
-                </S.UserInfoWrapper>
-                <S.ReviewRating>{renderStars(review.rating)}</S.ReviewRating>
-              </S.ReviewFooter>
-
-              {user && user.id === review.user.id && ( // 로그인했고 작성자와 ID가 같으면
-                <S.ReviewActions onClick={(e) => e.stopPropagation()}> {/* 카드 클릭 방지 */}
-                  <S.ActionButton onClick={() => handleEditReview(review)}>
-                    수정
-                  </S.ActionButton>
-                  <S.ActionButton danger onClick={() => handleDeleteReview(review.id)}>
-                    삭제
-                  </S.ActionButton>
-                </S.ReviewActions>
-              )}
-
-            </S.ReviewCard>
+            <ReviewCard
+              review = {review}
+               onClick = {() => openDetailModal(review)}
+               onEdit = {()=>{handleEditReview(review)}}
+               onDelete = {()=>{handleDeleteReview(review.id)}}
+            />
           ))
         )}
       </S.ReviewGrid>
@@ -376,10 +343,18 @@ const EventDetailPage: React.FC = () => {
         />
       </Modal>
 
-      <ReviewDetail 
-        isOpen={isReviewDetailModalOpen} 
-        onClose={closeReviewDetailModal} 
-        review={selectedReview} 
+      <ReviewDetail
+          isOpen={isReviewDetailModalOpen}
+          onClose={closeReviewDetailModal}
+          review={selectedReview}
+          onEdit={(review) => {
+            handleEditReview(review);
+            closeReviewDetailModal();
+          }}
+          onDelete={(reviewId) => {
+            handleDeleteReview(reviewId);
+            closeReviewDetailModal();
+          }}
       />
 
     </S.DetailContainer>

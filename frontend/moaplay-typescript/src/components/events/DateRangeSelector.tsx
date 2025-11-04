@@ -283,92 +283,177 @@ const DateInput = styled.input.withConfig({
 `;
 
 const ErrorMessage = styled.div`
-    margin-top: 8px;
-    font-size: 14px;
-    color: #dc3545;
+  margin-top: 8px;
+  font-size: 14px;
+  color: #dc3545;
+
+  @media (max-width: 480px) {
+    font-size: 13px;
+  }
 `;
 
 const DateDisplay = styled.div`
-    margin-top: 8px;
-    font-size: 14px;
-    color: #6c757d;
-    font-weight: 500;
+  margin-top: 8px;
+  font-size: 14px;
+  color: #6c757d;
+  font-weight: 500;
+
+  @media (max-width: 480px) {
+    font-size: 13px;
+  }
 `;
 
 const DateConnector = styled.div`
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    margin-top: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-top: 32px;
 
-    @media (max-width: 768px) {
-        margin-top: 0;
-        transform: rotate(90deg);
-    }
+  @media (max-width: 1024px) {
+    margin-top: 34px;
+  }
+
+  @media (max-width: 768px) {
+    display: none;
+  }
+
+  @media (max-width: 480px) {
+    display: none;
+  }
 `;
 
 const ConnectorLine = styled.div`
-    width: 20px;
-    height: 2px;
-    margin: 20px 0px;
-    background: #dee2e6;
+  width: 20px;
+  height: 2px;
+  margin: 20px 0;
+  background: #dee2e6;
 
-    @media (max-width: 768px) {
-        width: 2px;
-        height: 20px;
-    }
+  @media (max-width: 768px) {
+    width: 2px;
+    height: 20px;
+    margin: 12px 0;
+  }
+
+  @media (max-width: 480px) {
+    height: 16px;
+  }
 `;
 
 const ConnectorText = styled.div`
-    margin: 0 8px;
-    font-size: 18px;
-    font-weight: bold;
-    color: #6c757d;
+  margin: 0 8px;
+  font-size: 18px;
+  font-weight: bold;
+  color: #6c757d;
+
+  @media (max-width: 1024px) {
+    font-size: 17px;
+  }
+
+  @media (max-width: 768px) {
+    font-size: 16px;
+    margin: 0 6px;
+  }
+
+  @media (max-width: 480px) {
+    font-size: 15px;
+  }
 `;
 
 const QuickSelectContainer = styled.div`
-    margin-bottom: 16px;
+  margin-bottom: 16px;
+
+  @media (max-width: 768px) {
+    margin-bottom: 12px;
+  }
+
+  @media (max-width: 480px) {
+    margin-bottom: 10px;
+  }
 `;
 
 const QuickSelectTitle = styled.div`
-    margin-bottom: 12px;
-    font-size: 14px;
-    font-weight: 600;
-    color: #333;
+  margin-bottom: 12px;
+  font-size: 14px;
+  font-weight: 600;
+  color: #333;
+
+  @media (max-width: 768px) {
+    font-size: 13px;
+    margin-bottom: 10px;
+  }
+
+  @media (max-width: 480px) {
+    font-size: 12.5px;
+  }
 `;
 
 const QuickSelectButtons = styled.div`
-    display: flex;
-    gap: 8px;
-    flex-wrap: wrap;
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+
+  @media (max-width: 768px) {
+    gap: 6px;
+  }
+
+  @media (max-width: 480px) {
+    gap: 4px;
+    justify-content: center;
+  }
 `;
 
 const QuickSelectButton = styled.button`
-    padding: 8px 16px;
-    border: 1px solid #dee2e6;
-    border-radius: 20px;
-    background: white;
-    color: #6c757d;
-    font-size: 14px;
-    cursor: pointer;
-    transition: all 0.2s ease;
+  padding: 8px 16px;
+  border: 1px solid #dee2e6;
+  border-radius: 20px;
+  background: white;
+  color: #6c757d;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.2s ease;
 
-    &:hover {
-        border-color: #7a5af8;
-        color: #7a5af8;
-        background: #f8f9fa;
-    }
+  &:hover {
+    border-color: #7a5af8;
+    color: #7a5af8;
+    background: #f8f9fa;
+  }
 
-    &:active {
-        background: #e9ecef;
-    }
+
+  &: focus {
+    background: #7a5af8;
+    color: #f8f9fa;
+    outline: none;
+  }
+
+  @media (max-width: 768px) {
+    font-size: 13.5px;
+    padding: 7px 14px;
+  }
+
+  @media (max-width: 480px) {
+    font-size: 13px;
+    padding: 6px 12px;
+    border-radius: 16px;
+  }
 `;
 
 const DateHelp = styled.div`
-    padding: 12px 16px;
-    background: #f8f9fa;
-    border-radius: 8px;
-    font-size: 14px;
-    color: #6c757d;
-    border-left: 4px solid #7a5af8;
+  padding: 12px 16px;
+  background: #f8f9fa;
+  border-radius: 8px;
+  font-size: 14px;
+  color: #6c757d;
+  border-left: 4px solid #7a5af8;
+  line-height: 1.5;
+
+  @media (max-width: 768px) {
+    padding: 10px 14px;
+    font-size: 13.5px;
+  }
+
+  @media (max-width: 480px) {
+    padding: 8px 12px;
+    font-size: 13px;
+    border-left-width: 3px;
+  }
 `;

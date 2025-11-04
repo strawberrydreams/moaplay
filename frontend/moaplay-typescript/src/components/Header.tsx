@@ -4,8 +4,9 @@ import logoImage from '../assets/logo.png';
 import { FaSignInAlt } from 'react-icons/fa';
 import { useAuthContext } from '../contexts/AuthContext';
 
-import { StyledHeader, LogoContainer, Nav, AuthSection, LoginButton } from '../styles/Header.styles';
+import { StyledHeader, LogoContainer, Nav, AuthSection, LoginButton, HeaderInner } from '../styles/Header.styles';
 import ProfileDropdown from './ProfileDropdown.tsx';
+import { NotificationDropdown } from './NotificationDropdown';
 
 interface HeaderProps {
     onLoginClick: () => void;
@@ -17,50 +18,51 @@ const Header: React.FC<HeaderProps> = ({ onLoginClick }) => {
    
     return (
         <StyledHeader>
-            <LogoContainer>
-                <Link to="/">
-                    {/* 이미지 경로가 로컬 import로 수정되었으므로 그대로 둡니다. */}
+            <HeaderInner>
+                <LogoContainer onClick={()=>{window.location.href = "/";}}>
                     <img src={logoImage} alt="MOAPLAY" style={{ height: '30px' }} />
-                </Link>
-            </LogoContainer>
+                </LogoContainer>
 
-            <Nav>
-                {/* Link 컴포넌트로 페이지 이동 및 active 클래스 적용 */}
-                <Link
-                    to="/region"
-                    className={location.pathname === '/region' ? 'active' : ''}
-                >
-                    지역별
-                </Link>
-                <Link
-                    to="/recommend"
-                    className={location.pathname === '/recommend' ? 'active' : ''}
-                >
-                    추천
-                </Link>
-                <Link
-                    to="/popular"
-                    className={location.pathname === '/popular' ? 'active' : ''}
-                >
-                    인기
-                </Link>
-            </Nav>
-
-            <AuthSection>
-                {user ? (
-                    <div>
-                        <ProfileDropdown />
-                    </div>
-                ) : (
-                    <LoginButton
-                        style={{ display: 'flex', alignItems: 'center' }}
-                        onClick={onLoginClick}
+                <Nav>
+                    {/* Link 컴포넌트로 페이지 이동 및 active 클래스 적용 */}
+                    <Link
+                        to="/region"
+                        className={location.pathname === '/region' ? 'active' : ''}
                     >
-                        <FaSignInAlt />
-                        로그인
-                    </LoginButton>
-                )}
-            </AuthSection>
+                        지역별
+                    </Link>
+                    <Link
+                        to="/recommend"
+                        className={location.pathname === '/recommend' ? 'active' : ''}
+                    >
+                        추천
+                    </Link>
+                    <Link
+                        to="/popular"
+                        className={location.pathname === '/popular' ? 'active' : ''}
+                    >
+                        인기
+                    </Link>
+                </Nav>
+
+                <AuthSection>
+                    {user ? (
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                            {/* ✅ 알림 드롭다운 추가 */}
+                            <NotificationDropdown />
+                            <ProfileDropdown />
+                        </div>
+                    ) : (
+                        <LoginButton
+                            style={{ display: 'flex', alignItems: 'center' }}
+                            onClick={onLoginClick}
+                        >
+                            <FaSignInAlt />
+                            로그인
+                        </LoginButton>
+                    )}
+                </AuthSection>
+            </HeaderInner>
         </StyledHeader>
     );
 };

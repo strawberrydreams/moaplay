@@ -161,6 +161,12 @@ def get_events():
     tag = request.args.get('tag') 
     sort = request.args.get('sort', 'created_at')  # created_at, view_count, start_date
     order = request.args.get('order', 'desc')  # asc, desc
+    host_id = request.args.get('host_id', type=int)
+    tag_names_param = request.args.get('tags')
+    date_from = request.args.get('date_from')
+    date_to = request.args.get('date_to')
+    
+    query = db.session.query(Event)
     
     # 페이지 유효성 검증
     if page < 1:
@@ -175,6 +181,7 @@ def get_events():
     try:
         status_enum = EventStatus(status)
         query = query.filter(Event.status == status_enum)
+        
     except ValueError:
         return {
             "error_code": "INVALID_STATUS",
@@ -198,7 +205,36 @@ def get_events():
             .subquery()
         )
         query = query.filter(Event.id.in_(db.select(tag_subquery)))
-    
+
+    # 날짜 필터
+    if date_from:
+        try:
+            start_date_obj = datetime.strptime(date_from, "%Y-%m-%d").date()
+            query = query.filter(Event.start_date >= start_date_obj)
+        except ValueError:
+            return {"error_code": "INVALID_DATE_FORMAT", "message": "date_from 형식이 잘못되었습니다 (YYYY-MM-DD)"}, 400
+
+    if date_to:
+        try:
+            end_date_obj = datetime.strptime(date_to, "%Y-%m-%d").date()
+            query = query.filter(Event.end_date <= end_date_obj)
+        except ValueError:
+            return {"error_code": "INVALID_DATE_FORMAT", "message": "date_to 형식이 잘못되었습니다 (YYYY-MM-DD)"}, 400
+
+    # 태그 필터
+    tag_names: list[str] = []
+    if tag_names_param:
+        tag_names = [t.strip() for t in tag_names_param.split(',') if t.strip()]
+        if tag_names:
+            # 여기까지는 "OR" 조건
+            query = (
+                query
+                .join(EventTag, Event.id == EventTag.event_id)
+                .join(Tag, Tag.id == EventTag.tag_id)
+                .filter(Tag.name.in_(tag_names))
+            )
+
+                             
     # 정렬
     if sort == 'view_count':
         order_column = Event.view_count
@@ -214,8 +250,33 @@ def get_events():
     
     # 페이징
     pagination = query.paginate(page=page, per_page=per_page, error_out=False)
+    events_models = pagination.items
     
     events = [event.to_dict() for event in pagination.items]
+    
+    # 태그 일치 결과가 없는 경우 → 인기순으로 대체
+    if tag_names:
+        requested = set(tag_names)
+        filtered_events = []
+
+        for event in events_models:
+            # Event.to_dict에서 "tags": [tag.tag.name for tag in self.tags]
+            event_tag_names = {et.tag.name for et in event.tags}  # set으로 변환
+            # AND 조건: 요청한 태그 전부 포함해야 통과
+            if requested.issubset(event_tag_names):
+                filtered_events.append(event.to_dict())
+
+        events = filtered_events
+
+        # AND 필터 후 0개면 → 인기순 fallback
+        if not events:
+            fallback_query = (
+                db.session.query(Event)
+                .filter(Event.status == EventStatus.APPROVED)
+                .order_by(Event.view_count.desc())
+                .limit(per_page)
+            )
+            events = [e.to_dict() for e in fallback_query]
     
     return {
         "events": events,

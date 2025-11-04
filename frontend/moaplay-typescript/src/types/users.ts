@@ -3,6 +3,7 @@ export interface Users {
     user_id: string;
     nickname?: string;
     created_at: string;
+    preferred_tags: string[];
     statisctics: {
         events_count: number,
         reviews: number
@@ -26,6 +27,7 @@ export interface MyUserResponse {
     role: string;
     created_at: string;
     updated_at: string;
+    preferred_tags: string[];
     statistics: {
         events_count: number;
         reviews: number;
@@ -73,11 +75,10 @@ export interface ChangePasswordPayload {
 
 
 export interface ChangeUserPayload {
-    nickname?: string,
-    email?: string,
+    nickname?: string;
+    email?: string;
     phone?: string | null;
     password?: string;
-    tags?: string[],
     profile_image?: string | null;
-
+    preferred_tags?: string[];
 }

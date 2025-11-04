@@ -1,141 +1,206 @@
 import React, { useEffect, useState, useCallback } from 'react';
-import * as EventApi from '../services/eventsApi';   // 행사 API 경로 확인
-import * as UserApi from '../services/usersApi';     // 사용자 API 경로 확인 (선호 태그 가져오기용)
-import type * as E from '../types/events';          // Event 타입 경로 확인
-import EventCard from '../components/EventCard';               // EventCard 컴포넌트 경로 확인
-import { EventGrid, NoResultsMessage } from '../styles/EventSearch.styles'; // EventGrid 스타일 경로 확인
-import styled from 'styled-components';            // styled-components 임포트
-import { useAuthContext } from '../contexts/AuthContext'; // 사용자 로그인 상태 확인용
+import * as EventApi from '../services/eventsApi';
+import * as UserApi from '../services/usersApi';
+import type * as E from '../types/events';
+import EventCard from '../components/EventCard';
+import styled from 'styled-components';
+import { useAuthContext } from '../contexts/AuthContext';
+import { Link } from 'react-router-dom';
+import Modal from '../components/common/Modal';
+import LoginForm from '../components/auth/LoginForm';
+import { useModal } from '../hooks/useModal';
 
-// --- 페이지 스타일 (다른 추천 페이지와 유사하게) ---
 const PageContainer = styled.div`
-  color: #333;
   max-width: 1200px;
-  margin: 2rem auto;
+  margin: 3rem auto;
   padding: 0 1rem;
+  color: #333;
+  font-family: 'Pretendard', sans-serif;
 `;
 
-const PageTitle = styled.h1`
-  font-size: 1.8rem;
-  margin-bottom: 1.5rem;
+const HeaderText = styled.h2`
+  font-size: 1.7rem;
+  font-weight: 600;
   text-align: center;
+  margin-bottom: 0.8rem;
 `;
 
-// --- 선호 태그 기반 추천 페이지 컴포넌트 ---
+const SubLink = styled.div`
+  text-align: center;
+  margin-bottom: 2rem;
+  font-size: 0.95rem;
+  color: #666;
+
+  a {
+    color: #9E77ED;
+    text-decoration: none;
+    font-weight: 500;
+    margin-left: 4px;
+
+    &:hover {
+      text-decoration: underline;
+    }
+  }
+`;
+
+const EventGrid = styled.div`
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  gap: 1.5rem;
+  margin-bottom: 2rem;
+`;
+
+const FallbackNotice = styled.div`
+  text-align: center;
+  color: #777;
+  margin: 1rem 0 2rem;
+  font-size: 1rem;
+`;
+
+const MoreButton = styled.button`
+  display: block;
+  margin: 0 auto;
+  padding: 0.8rem 1.5rem;
+  border: none;
+  border-radius: 25px;
+  background: #f0f0f0;
+  color: #333;
+  font-size: 0.95rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+
+  &:hover {
+    background: #e0e0e0;
+  }
+
+  &:focus { outline : none; }
+`;
+
 const RecommendedEventsPage: React.FC = () => {
-  const { user:currentUser } = useAuthContext(); // 로그인 사용자 정보 가져오기
-  const [recommendedEvents, setRecommendedEvents] = useState<E.Event[]>([]);
-  const [preferredTags, setPreferredTags] = useState<string[]>([]); // 사용자 선호 태그
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const { user } = useAuthContext();
+  const [events, setEvents] = useState<E.Event[]>([]);
+  const [preferredTags, setPreferredTags] = useState<string[]>([]);
+  const [usedFallback, setUsedFallback] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const { isLoginModalOpen, closeAllModals, loginToSignUp, openLoginModal } = useModal();  
 
-  // --- 사용자 선호 태그 가져오기 ---
+  // ✅ 사용자 선호 태그 가져오기
   const fetchPreferredTags = useCallback(async () => {
-    // 로그인 상태가 아니면 실행하지 않음
-    if (!currentUser) {
-      setIsLoading(false); // 로딩 종료
-      return;
-    }
+    if (!user) return setLoading(false);
     try {
-      // 사용자 선호 태그를 가져오는 API 호출 (UserApi에 함수 필요)
-      // 예: const tagsResponse = await UserApi.getMyTags();
-      // 여기서는 임시 데이터 사용
-      const tagsResponse = ['음악', '콘서트']; // 🚨 임시 데이터! 실제 API 호출로 변경 필요
-      setPreferredTags(tagsResponse || []);
+      const me = await UserApi.getMe();
+      const tags = me.preferred_tags || [];
+      setPreferredTags(tags);
     } catch (err) {
-      console.error("선호 태그 로딩 실패:", err);
-      setPreferredTags([]); // 에러 시 빈 배열
-      // 에러 메시지를 표시할 수도 있음
+      console.error('선호 태그 로딩 실패', err);
+      setPreferredTags([]);
     }
-  }, [currentUser]); // currentUser가 변경될 때마다 실행
+  }, [user]);
 
-  // --- 선호 태그 기반 행사 데이터 로드 ---
+  // ✅ 태그 기반 행사 로드
   const fetchRecommendedEvents = useCallback(async (tags: string[]) => {
-    // 선호 태그가 없으면 실행하지 않음
-    if (tags.length === 0) {
-      setRecommendedEvents([]); // 빈 목록으로 설정
-      setIsLoading(false); // 로딩 종료
-      return;
-    }
-
-    setIsLoading(true);
-    setError(null);
     try {
-      const params: E.GetEventsPayload = {
-        page: 1,
-        per_page: 12, // 추천 개수 (조절 가능)
-        status: 'approved',
-        // API가 tags 파라미터를 어떻게 받는지 확인 필요 (쉼표 구분 문자열 or 배열)
-        // tags: tags, // 👈 선호 태그 전달 (배열이라고 가정)
-        // tags: tags.join(','), // 👈 쉼표 구분 문자열이라면
-        sort: 'start_date', // 최신순 추천 (선택 사항)
-        order: 'desc',
-      };
-      const response = await EventApi.getEvents(params);
-      setRecommendedEvents(response.events || []); // API 응답 구조 확인!
-    } catch (err: any) {
-      console.error("추천 행사 로딩 실패:", err);
-      setError("추천 행사 목록을 불러오는 중 오류가 발생했습니다.");
-      setRecommendedEvents([]);
-    } finally {
-      setIsLoading(false);
-    }
-  }, []); // 의존성 없음
+      setLoading(true);
+      setUsedFallback(false);
 
-  // 1. 마운트 시 및 사용자 변경 시 선호 태그 가져오기
+      let response = { events: [] as E.Event[] };
+      if (tags.length > 0) {
+        response = await EventApi.getEvents({
+          page: 1,
+          per_page: 12,
+          status: 'approved',
+          tags: tags.join(','),
+          sort: 'start_date',
+          order: 'desc',
+        });
+      }
+
+      let eventList = response.events || [];
+      if (eventList.length === 0) {
+        console.warn('태그 일치 없음 → 인기순으로 대체');
+        setUsedFallback(true);
+        const fallback = await EventApi.getEvents({
+          page: 1,
+          per_page: 12,
+          status: 'approved',
+          sort: 'likes',
+          order: 'desc',
+        });
+        eventList = fallback.events || [];
+      }
+
+      setEvents(eventList);
+    } catch (err) {
+      console.error('행사 로드 실패', err);
+      setEvents([]);
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
   useEffect(() => {
     fetchPreferredTags();
-  }, [fetchPreferredTags]); // useCallback으로 감쌌으므로 의존성 추가
+  }, [fetchPreferredTags]);
 
-  // 2. 선호 태그가 변경되면 추천 행사 다시 가져오기
   useEffect(() => {
-    // preferredTags 상태가 설정된 후에만 추천 행사 로드
-    if (preferredTags.length > 0) {
-      fetchRecommendedEvents(preferredTags);
-    } else if (currentUser) {
-        // 로그인했지만 선호 태그가 없는 경우 (아직 로딩 중일 수 있음)
-        // 또는 선호 태그가 0개인 경우 -> 로딩 상태 해제
-        setIsLoading(false);
-        setRecommendedEvents([]);
-    } else {
-        // 비로그인 상태 -> 로딩 상태 해제
-        setIsLoading(false);
-        setRecommendedEvents([]);
-    }
-  }, [preferredTags, fetchRecommendedEvents, currentUser]); // preferredTags가 변경될 때 실행
+    if (preferredTags.length > 0) fetchRecommendedEvents(preferredTags);
+    else setLoading(false);
+  }, [preferredTags, fetchRecommendedEvents]);
 
-  // --- 렌더링 ---
+  if (loading) return <PageContainer>행사 불러오는 중...</PageContainer>;
+
   return (
     <PageContainer>
-      <PageTitle>🎯 맞춤 추천 행사</PageTitle>
+      <HeaderText>
+        {user?.nickname
+          ? (
+          <>
+          {user.nickname}님이 좋아하실만한 행사들입니다.
+            <SubLink>
+              혹시 원하신 결과가 아닌가요?
+              <Link to="/mypage">선호태그 설정하러 가기 →</Link>
+            </SubLink>
+          </>
+          ) : (
+            <>
+            추천 행사 페이지입니다.
+            <SubLink>
+              행사를 추천받으려면 로그인 해야합니다.
+              <a onClick={()=>{openLoginModal()}}>로그인하러 가기 →</a>
+            </SubLink>
+            </>
+          )}
+      </HeaderText>
 
-      {/* 로그인 상태 확인 */}
-      {!currentUser && !isLoading && (
-        <div style={{ textAlign: 'center', color: '#777' }}>
-          로그인 후 선호하는 태그를 설정하시면 맞춤 행사를 추천해 드려요!
-        </div>
+      
+
+      {usedFallback && (
+        <FallbackNotice>
+          💡 <strong>{preferredTags.join(', ')}</strong>에 맞는 행사가 없어
+          인기 많은 행사를 대신 보여드려요.
+        </FallbackNotice>
       )}
 
-      {/* 로딩 상태 표시 */}
-      {isLoading && <div>추천 행사 목록을 불러오는 중...</div>}
-
-      {/* 에러 상태 표시 */}
-      {error && <div style={{ color: 'red', textAlign: 'center' }}>{error}</div>}
-
-      {/* 행사 목록 표시 (로그인 상태이고 로딩/에러 아닐 때) */}
-      {currentUser && !isLoading && !error && (
+      {events.length === 0 ? (
+        <FallbackNotice>표시할 행사가 없습니다.</FallbackNotice>
+      ) : (
         <EventGrid>
-          {preferredTags.length === 0 ? (
-            <NoResultsMessage>선호 태그를 설정해주세요.</NoResultsMessage>
-          ) : recommendedEvents.length === 0 ? (
-            <NoResultsMessage>추천할 행사가 없습니다.</NoResultsMessage>
-          ) : (
-            recommendedEvents.map(event => (
-              <EventCard key={event.id} event={event} />
-            ))
-          )}
+          {events.map((event) => (
+            <EventCard key={event.id} event={event} />
+          ))}
         </EventGrid>
       )}
+
+      {/* <MoreButton>더 많은 여행지 보러가기 &gt;</MoreButton> */}
+
+      <Modal
+          isOpen={isLoginModalOpen}
+          onClose={closeAllModals} // 닫기 함수 연결
+          title="로그인"
+      >
+          {/* 6. LoginForm의 onCloseModal prop 수정 */}
+          <LoginForm onSwitchToSignUp={loginToSignUp} onCloseModal={closeAllModals} /> 
+      </Modal>
     </PageContainer>
   );
 };

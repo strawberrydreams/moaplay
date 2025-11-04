@@ -19,7 +19,7 @@ export interface Favorite {
 
 
 export interface FavoriteResponse {
-    "favorites": Favorite;
+    "favorites": Favorite[];
     "pagination": {
         "page": number;
         "per_page": number;

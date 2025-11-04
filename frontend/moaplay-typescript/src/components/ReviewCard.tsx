@@ -5,12 +5,13 @@ import type * as R from '../types/reviews';
 import { useAuthContext } from '../contexts/AuthContext';
 import * as S from '../styles/ReviewCard.styles';
 import { FaImage } from 'react-icons/fa';
+import * as ReviewApi from '../services/reviewsApi';
 
 interface ReviewCardProps {
   review: R.Review;
-  onClick?: () => void;
-  onEdit?: (id: number) => void;
-  onDelete?: (id: number) => void;
+  onClick: () => void;
+  onEdit: () => void;
+  onDelete: () => void;
 }
 
 const ReviewCard: React.FC<ReviewCardProps> = ({ review, onClick, onEdit, onDelete }) => {
@@ -32,14 +33,14 @@ const ReviewCard: React.FC<ReviewCardProps> = ({ review, onClick, onEdit, onDele
 
   const handleEditClick = (e: React.MouseEvent) => {
     e.stopPropagation();
-    onEdit?.(review.id);
+    onEdit();
   };
 
   const handleDeleteClick = (e: React.MouseEvent) => {
     e.stopPropagation();
-    onDelete?.(review.id);
+    onDelete();
   };
-
+  
   const imagesToShow = (review.image_urls || []).slice(0, 2);
 
   return (
@@ -48,18 +49,7 @@ const ReviewCard: React.FC<ReviewCardProps> = ({ review, onClick, onEdit, onDele
       <S.Content>{review.content}</S.Content>
       <S.ImageGrid>
         {imagesToShow.map((url, index) =>
-          url ? (
             <S.Thumbnail key={index} src={url} alt={`리뷰 이미지 ${index + 1}`} />
-          ) : (
-            <S.ImagePlaceholder key={index}><FaImage /></S.ImagePlaceholder>
-          )
-        )}
-        {imagesToShow.length === 1 && <S.ImagePlaceholder><FaImage /></S.ImagePlaceholder>}
-        {imagesToShow.length === 0 && (
-          <>
-            <S.ImagePlaceholder><FaImage /></S.ImagePlaceholder>
-            <S.ImagePlaceholder><FaImage /></S.ImagePlaceholder>
-          </>
         )}
       </S.ImageGrid>
       <S.Footer>

@@ -1,52 +1,38 @@
-import axiosInstance from './core/axios'; // 공용 Axios 인스턴스 (이미 프로젝트에 존재)
+// src/services/tagsApi.ts
+import axiosInstance from "./core/axios";
+import type { Tag, GetTagsResponse } from "../types/tags";
 
-import type {
-    Tag,
-    UserPreferredTagsPayload,
-    UserPreferredTagsResponse,
-} from '../types/tags';
-
-// TODO: Tag API 구현
-/**
- * 태그 관련 API
- * 백엔드 Flask Blueprint가 /api/tags 로 마운트되어 있다고 가정.
- * - POST /api/tags           : 태그 생성 (routes_tag.py에 존재)
- * - GET  /api/tags           : 태그 목록 (백엔드에 리스트 라우트 추가 필요 시 구현)
- *
- * 사용자 선호 태그 저장:
- * - POST /api/users/:userId/preferences/tags  : { tag_ids: number[] }
- *   -> 백엔드 라우트 추가 필요(이름은 예시). BFF 쓰면 BFF 경로에 맞춰 바꿔도 됨.
- */
 export const tagsApi = {
-    /** 태그 전체 목록 */
-    async list(): Promise<Tag[]> {
-        const { data } = await axiosInstance.get('/tags');
-        // data: Tag[]
-        return data;
-    },
+  /** 태그 전체 목록 조회 */
+  async list(
+    page: number = 1,
+    per_page: number = 100,
+    search?: string
+  ): Promise<Tag[]> {
+    const params: Record<string, string | number> = { page, per_page };
+    if (search) params.search = search;
 
-    /** 태그 생성 (관리자/운영툴에서 사용) */
-    async create(name: string): Promise<Tag> {
-        const { data } = await axiosInstance.post('/tags', { name });
-        // data: Tag
-        return data;
-    },
+    const { data } = await axiosInstance.get<GetTagsResponse>("/tags", { params });
 
-    /**
-     * 사용자 선호 태그 저장
-     * - 최소 3개 보장은 프론트에서 1차 체크, 서버에서도 2차 체크 권장
-     */
-    async saveUserPreferredTags(
-        payload: UserPreferredTagsPayload
-    ): Promise<UserPreferredTagsResponse> {
-        if (!Array.isArray(payload.tags) || payload.tags.length < 3) {
-            throw new Error('선호 태그는 최소 3개 이상 선택해야 해.');
-        }
-        const { data } = await axiosInstance.put(
-            `/me/`,
-            payload
-        );
-        // data: UserPreferredTagsResponse
-        return data;
-    },
+    // data.tags가 존재할 때만 반환
+    if (Array.isArray(data?.tags)) {
+      return data.tags;
+    } else {
+      console.warn("Unexpected tags API response:", data);
+      return [];
+    }
+  },
+
+  /** 태그 생성 (관리자/운영툴) */
+  async create(name: string): Promise<Tag> {
+    if (!name.trim()) throw new Error("태그 이름은 비어 있을 수 없습니다.");
+    const { data } = await axiosInstance.post<Tag>("/tags", { name });
+    return data;
+  },
+
+  /** 태그 삭제 (관리자/운영툴) */
+  async delete(tagId: number): Promise<void> {
+    await axiosInstance.delete(`/tags/${tagId}`);
+  },
 };
+
