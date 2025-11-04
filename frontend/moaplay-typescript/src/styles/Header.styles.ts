@@ -219,5 +219,8 @@ export const GlobalStyle = createGlobalStyle`
     height: auto;
   }
 
+  button {
+    &:focus { outline:none; }
+  }
 
 `;

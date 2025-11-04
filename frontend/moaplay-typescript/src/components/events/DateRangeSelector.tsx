@@ -211,7 +211,7 @@ export const DateRangeSelector: React.FC<DateRangeSelectorProps> = ({
 // 스타일 컴포넌트들
 const DateRangeContainer = styled.div`
     margin-bottom: 24px;
-    width: 98.5%;
+    width: 95%;
 `;
 
 const DateRangeHeader = styled.div`
@@ -266,6 +266,7 @@ const RequiredMark = styled.span`
 const DateInput = styled.input.withConfig({
     shouldForwardProp: (prop) => prop !== 'hasError'
 })<{ hasError?: boolean }>`
+    position:relative;
     padding: 12px 16px;
     border: 2px solid ${props => props.hasError ? '#dc3545' : '#e9ecef'};
     border-radius: 8px;
@@ -279,6 +280,19 @@ const DateInput = styled.input.withConfig({
     &:focus {
         outline: none;
         border-color: ${props => props.hasError ? '#dc3545' : '#7a5af8'};
+    }
+
+    
+    &::-webkit-calendar-picker-indicator {
+      position:absolute;
+      //왼쪽위에 위치시키고 클릭 영역을 부모(input)의 크기만큼 가짐
+      left: 0;
+      top: 0;
+      width: 100%;
+      height: 100%;
+      // 배경과 글자를 투명하게 하여 기존의 아이콘이 없는 것처럼 보여줌
+      background: transparent;
+      color: transparent;
     }
 `;
 

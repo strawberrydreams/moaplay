@@ -400,3 +400,5 @@ def get_user_events(user_id):
             "pages": pagination.pages
         }
     }, 200
+    
+    

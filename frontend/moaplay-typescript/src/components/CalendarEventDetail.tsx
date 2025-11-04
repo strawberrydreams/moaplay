@@ -74,12 +74,12 @@ const CalendarEventDetail: React.FC<IDetailProps> = ({ events = [],
             const scheduleToDelete = schedules.find(s => s.event?.id === displayEvent.id);
 
             if (!scheduleToDelete) {
-                alert("삭제할 찜 정보를 찾을 수 없습니다.");
+                alert("삭제할 일정 정보를 찾을 수 없습니다.");
                 return;
             }
 
             // 4. 확인 메시지 (선택 사항)
-            if (!window.confirm(`'${displayEvent.title}' 찜을 삭제하시겠습니까?`)) {
+            if (!window.confirm(`'${displayEvent.title}' 일정을 삭제하시겠습니까?`)) {
                 return;
             }
 
@@ -90,11 +90,13 @@ const CalendarEventDetail: React.FC<IDetailProps> = ({ events = [],
                 // 6. 성공 시: 목록 보기로 돌아가고, 부모에게 새로고침 요청
                 setSelectedDetailEvent(null);
                 onBackToList(); // 👈 부모의 fetchAndSetSchedules 호출
-                alert("찜이 삭제되었습니다.");
+                alert("일정이 삭제되었습니다.");
 
             } catch (error) {
-                console.error("찜 삭제 중 오류 발생:", error);
-                alert("찜 삭제 중 오류가 발생했습니다.");
+                console.error("일정 삭제 중 오류 발생:", error);
+                alert("일정 삭제 중 오류가 발생했습니다.");
+            } finally {
+                window.location.reload();
             }
         };
 

@@ -8,9 +8,9 @@ export const DetailContainer = styled.div`
   display: flex;
   flex-direction: column;
   align-items: flex-start;
-  padding: 32px; // 패딩 조정
+  padding: 12px; // 패딩 조정
   gap: 24px; // 요소 간 간격 조정
-  background: #FFFFFF;
+  background: none;
   width: 100%; // ModalContent 너비에 맞춤
 `;
 

@@ -8,17 +8,17 @@ export interface ITagButtonProps {
 
 // --- 스타일 컴포넌트 ---
 export const Container = styled.div`
-  max-width: 1200px;
+
   margin: 0 auto;
-  padding: 2rem;
   color: #131313;
+  width: 100%;
 
   @media (max-width: 1024px) {
-    padding: 1.5rem;
+    width: 100%;
   }
 
   @media (max-width: 600px) {
-    padding: 1rem;
+    width: 100%;
   }
 `;
 
@@ -78,14 +78,19 @@ export const InputGroup = styled.div`
   &.order-select {
     select {
       display: flex;
-      justify-content: right !important;
-      width: 18%;
+      justify-content: center;
+      margin-left: 85%;
+      width: 100%;
     }
   }
 
   &.search-bar {
     flex-grow: 3;
     input { width: 100%; padding-right: 2rem; }
+  }
+
+  input [type="date"] {
+    width: 100%;
   }
 
   input[type="text"] {
@@ -99,9 +104,14 @@ export const InputGroup = styled.div`
     input, select {
       font-size: 0.85rem;
     }
-    input[type="date"] {
-      display: flex;
+
+    
+  &.order-select {
+    select {
+      margin-left: 0%;
     }
+  }
+
   }
 
   @media (max-width: 480px) {
@@ -177,7 +187,7 @@ export const DateRangeGroup = styled(InputGroup)`
     font-weight: 500;
     font-size: 0.9rem;
   }
-
+  
   input[type="date"]::-webkit-calendar-picker-indicator {
     cursor: pointer;
     display: block !important;
@@ -185,16 +195,20 @@ export const DateRangeGroup = styled(InputGroup)`
     filter: invert(56%) sepia(61%) saturate(1510%) hue-rotate(224deg) brightness(94%) contrast(91%);
   }
 
-  @media (max-width: 768px) {
-    flex-direction: row;
+  @media (max-width: 600px) {
+    display: flex;
     align-items: center;
-    input { flex-grow: 1; }
-    width: 30% !important;
+    flex-direction: column;
+    width: 100% !important;
+
+    input[type="date"] {
+      width:100%;
+    }
 
     input[type="date"]::-webkit-calendar-picker-indicator {
     cursor: pointer;
     display: block !important;
-    width: 50%;
+    padding: 0 0 0 2px;
     opacity: 1 !important;
     filter: invert(56%) sepia(61%) saturate(1510%) hue-rotate(224deg) brightness(94%) contrast(91%);
     }
@@ -347,6 +361,7 @@ export const TagInput = styled.input`
 `;
 
 export const EventGrid = styled.section`
+  width: 100%;
   display: grid;
   grid-template-columns: repeat(4, 1fr);
   gap: 1.5rem;

@@ -1,6 +1,7 @@
 import axiosInstance from './core/axios';
 import type { PaginatedResponse } from '../types/index';
-import type { AdminDashboard, PendingEvent, ApprovedEvent, ManagedEvent } from '../types/admin';
+import type { AdminDashboard, PendingEvent, ApprovedEvent, ManagedEvent, UserPagination } from '../types/admin';
+import type { Users } from '../types/users';
 
 type PendingEventListResponse = PaginatedResponse<PendingEvent, 'pendingEvents'>;
 type ApprovedEventListResponse = PaginatedResponse<ApprovedEvent, 'approvedEvents'>;
@@ -39,6 +40,31 @@ export const getManagedEvents = async (params: {
     return data;
 };
 
-export const getUsers = async () => {
-    // TODO: 전체 유저 목록 받아오기 추후 구현
+
+
+// (GET) 사용자 목록 조회 (필터: user_id, role)
+export const getUsers = async (params?: {
+  page?: number;
+  per_page?: number;
+  user_id?: string;
+  role?: string;
+}): Promise<{ users: Users[]; pagination: UserPagination; filters: any }> => {
+  const { data } = await axiosInstance.get('/admin/users', { params });
+  return data;
+};
+
+/** (PUT) 사용자 역할(role) 변경
+ *  예: updateUserRole(3, 'admin')
+ */
+export const updateUserRole = async (userId: number, role: string): Promise<{ message: string; user: Users }> => {
+  const { data } = await axiosInstance.put(`/admin/users/${userId}/role`, { role });
+  return data;
+};
+
+/** (DELETE) 사용자 삭제
+ *  예: deleteUser(5)
+ */
+export const deleteUser = async (userId: number): Promise<{ message: string }> => {
+  const { data } = await axiosInstance.delete(`/admin/users/${userId}`);
+  return data;
 };

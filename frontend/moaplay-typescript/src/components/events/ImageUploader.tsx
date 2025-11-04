@@ -98,7 +98,6 @@ export const ImageUploader: React.FC<ImageUploaderProps> = ({
   const handleRemoveImage = (index: number) => {
     const updated = images.filter((_, i) => i !== index);
     onImagesChange(updated);
-
   };
 
   const handleMoveImage = (from: number, to: number) => {
@@ -180,6 +179,7 @@ export const ImageUploader: React.FC<ImageUploaderProps> = ({
                 {index === 0 && <MainImageBadge>대표 이미지</MainImageBadge>}
 
                 <DeleteButton
+                  type='button'
                   onClick={(e) => {
                     e.stopPropagation();
                     handleRemoveImage(index);

@@ -279,16 +279,16 @@ const EventDetailPage: React.FC = () => {
         <S.InfoGridContainer>
           {/* [좌측 열 정보] */}
           <S.InfoList>
-            <li><span>시작일 {eventDetail?.start_date}</span></li>
-            <li><span>주소 {eventDetail?.location}</span></li>
-            <li><span>주관 {eventDetail?.hosted_by}</span></li>
+            <li><span>시작일 <p>{eventDetail?.start_date}</p></span></li>
+            <li><span>주소 <p>{eventDetail?.location}</p></span></li>
+            <li><span>주관 <p>{eventDetail?.hosted_by}</p></span></li>
           </S.InfoList>
 
           {/* [우측 열 정보] */}
           <S.InfoList>
-            <li><span>종료일 {eventDetail?.start_date}</span></li>
-            <li><span>전화번호 {eventDetail?.phone}</span></li>
-            <li><span>주최 {eventDetail?.organizer}</span></li>
+            <li><span>종료일 <p>{eventDetail?.start_date}</p></span></li>
+            <li><span>전화번호 <p>{eventDetail?.phone}</p></span></li>
+            <li><span>주최 <p>{eventDetail?.organizer}</p></span></li>
           </S.InfoList>
         </S.InfoGridContainer>
       </S.MapInfoSection>

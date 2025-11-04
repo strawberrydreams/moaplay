@@ -68,7 +68,6 @@ export const BannerWrapper = styled.div`
   right: 50%;
   margin-left: -50vw;
   margin-right: -50vw; /* 부모의 중앙 정렬 깨지지 않게 조정 */
-  overflow: hidden; /* 그림자나 경계 깔끔히 */
 
   display: flex;
   justify-content: center;

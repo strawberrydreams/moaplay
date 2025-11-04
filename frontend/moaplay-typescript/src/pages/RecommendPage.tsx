@@ -53,8 +53,8 @@ const EventGrid = styled.div`
 const FallbackNotice = styled.div`
   text-align: center;
   color: #777;
-  margin: 1rem 0 2rem;
-  font-size: 1rem;
+  margin: 300px 300px;
+  font-size: 1.3rem;
 `;
 
 const MoreButton = styled.button`

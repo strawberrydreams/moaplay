@@ -13,7 +13,6 @@ const pop = keyframes`
 /* --- 카드 컨테이너 --- */
 export const Card = styled.div`
   width: 100%;
-  min-width: 260px;
   flex: 0 0 260px;
   border: 1px solid #e0e0e0;
   border-radius: 8px;
@@ -31,17 +30,14 @@ export const Card = styled.div`
   /* ✅ 반응형 */
   @media (max-width: 1024px) {
     flex: 0 0 calc(33.33% - 1rem);
-    min-width: 220px;
   }
 
   @media (max-width: 768px) {
     flex: 0 0 calc(50% - 0.75rem);
-    min-width: 180px;
   }
 
   @media (max-width: 480px) {
     flex: 0 0 100%;
-    min-width: 100%;
     border-radius: 6px;
   }
 `;

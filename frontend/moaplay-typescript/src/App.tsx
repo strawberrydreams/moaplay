@@ -21,6 +21,7 @@ import RecommendedEventsPage from './pages/RecommendPage';
 import ReviewsPage from './pages/more/ReviewsPage';
 import FavoritesPage from './pages/more/FavoritesPage';
 import MyEventsPage from './pages/more/MyEventsPage';
+import UserReviewsPage from './pages/more/UserReviewsPage';
 
 // 전역 스타일 임포트 (Header.styles.js에서 정의했다면)
 import { GlobalStyle } from './styles/Header.styles';
@@ -63,6 +64,7 @@ const App: React.FC = () => {
                     <Route path="/mypage/favorites" element={<FavoritesPage />} />
                     <Route path="/mypage/events" element={<MyEventsPage />} />
                     <Route path='/users/:userId' element={<OtherUserPage/>}/>
+                    <Route path='/users/reviews/:userId' element={<UserReviewsPage/>}/>
                     <Route path='/admin/dashboard' element={<AdminDashboardPage/>}/>
                     <Route path="/faq" element={<FAQPage />} />
                 </Routes>

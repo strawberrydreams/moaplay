@@ -285,3 +285,141 @@ def get_events_list():
             "error_code": "INTERNAL_SERVER_ERROR",
             "message": "행사 목록 조회 중 오류가 발생했습니다."
         }, 500
+        
+        
+### 사용자 목록 조회 (페이징 + 필터)
+### GET /api/admin/users?page=1&per_page=20&role=HOST&user_id=abc123
+@admin_bp.route('/users', methods=['GET'])
+@login_required
+@admin_required
+def get_users():
+    try:
+        # 파라미터
+        page = request.args.get('page', 1, type=int)
+        per_page = request.args.get('per_page', 20, type=int)
+        user_id = request.args.get('user_id', type=str)
+        role = request.args.get('role', type=str)
+
+        if page < 1:
+            page = 1
+        if per_page < 1 or per_page > 100:
+            per_page = 20
+
+        query = db.session.query(User)
+
+        if user_id:
+            query = query.filter(User.user_id.like(f"%{user_id}%"))
+
+        if role:
+            try:
+                role_enum = UserRole(role)
+                query = query.filter(User.role == role_enum)
+            except ValueError:
+                return {
+                    "error_code": "INVALID_ROLE",
+                    "message": "유효하지 않은 role 값입니다."
+                }, 400
+
+        query = query.order_by(User.created_at.desc())
+        pagination = query.paginate(page=page, per_page=per_page, error_out=False)
+
+        users = [user.to_dict(include_role=True) for user in pagination.items]
+
+        return {
+            "users": users,
+            "pagination": {
+                "page": pagination.page,
+                "per_page": pagination.per_page,
+                "total": pagination.total,
+                "pages": pagination.pages,
+            },
+            "filters": {
+                "user_id": user_id,
+                "role": role,
+            }
+        }, 200
+
+    except Exception as e:
+        print(e)
+        return {
+            "error_code": "INTERNAL_SERVER_ERROR",
+            "message": "사용자 목록 조회 중 오류가 발생했습니다."
+        }, 500
+
+        
+### 사용자 Role 변경 API
+### PUT /api/admin/users/<int:user_id>/role
+@admin_bp.route('/users/<int:user_id>/role', methods=['PUT'])
+@login_required
+@admin_required
+def update_user_role(user_id):
+    try:
+        data = request.get_json()
+        new_role = data.get('role')
+
+        if not new_role:
+            return {
+                "error_code": "MISSING_ROLE",
+                "message": "변경할 role 값이 필요합니다."
+            }, 400
+
+        try:
+            role_enum = UserRole(new_role)
+        except ValueError:
+            return {
+                "error_code": "INVALID_ROLE",
+                "message": "유효하지 않은 role 값입니다."
+            }, 400
+
+        user = db.session.get(User, user_id)
+        if not user:
+            return {
+                "error_code": "USER_NOT_FOUND",
+                "message": "해당 사용자를 찾을 수 없습니다."
+            }, 404
+
+        user.role = role_enum
+        db.session.commit()
+
+        return {
+            "message": f"사용자 {user.id}의 역할이 '{new_role}'(으)로 변경되었습니다.",
+            "user": user.to_dict()
+        }, 200
+
+    except Exception as e:
+        db.session.rollback()
+        print(e)
+        return {
+            "error_code": "INTERNAL_SERVER_ERROR",
+            "message": "사용자 역할 변경 중 오류가 발생했습니다."
+        }, 500
+        
+        
+### 사용자 삭제 API
+### DELETE /api/admin/users/<int:user_id>
+@admin_bp.route('/users/<int:user_id>', methods=['DELETE'])
+@login_required
+@admin_required
+def delete_user(user_id):
+    try:
+        user = db.session.get(User, user_id)
+        if not user:
+            return {
+                "error_code": "USER_NOT_FOUND",
+                "message": "해당 사용자를 찾을 수 없습니다."
+            }, 404
+
+        db.session.delete(user)
+        db.session.commit()
+
+        return {
+            "message": f"사용자 ID {user_id}가 성공적으로 삭제되었습니다."
+        }, 200
+
+    except Exception as e:
+        db.session.rollback()
+        print(e)
+        return {
+            "error_code": "INTERNAL_SERVER_ERROR",
+            "message": "사용자 삭제 중 오류가 발생했습니다."
+        }, 500

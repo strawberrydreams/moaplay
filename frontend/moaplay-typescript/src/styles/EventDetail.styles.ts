@@ -17,7 +17,7 @@ export const EventHeader = styled.div`
 `;
 
 export const EventTitle = styled.h2`
-    font-size: 2.2rem;
+    font-size: 2.5rem;
     font-weight: 700;
     color: #333;
     margin: 0;
@@ -26,7 +26,7 @@ export const EventTitle = styled.h2`
 
 export const EventLocation = styled.p`
     color: #888;
-    font-size: 0.9rem;
+    font-size: 1rem;
     margin: 5px 0 10px;
 `;
 
@@ -34,7 +34,7 @@ export const EventSummary = styled.h3`
     /* 텍스트 내용의 너비만큼만 영역을 차지하도록 합니다. (인라인 요소) */
     display: inline-block; 
     
-    font-size: 1.2rem;
+    font-size: 1.3rem;
     font-weight: 500;
     color: #555;
     margin-top: 20px; 
@@ -46,7 +46,6 @@ export const EventSummary = styled.h3`
         display: block;
         /* width: 100%;를 사용하여 부모 요소(텍스트 컨테이너)의 너비와 동일하게 설정 */
         width: 100%; 
-        /* 밑줄의 두께 */
         height: 4px; 
         background-color: #FFC18B; /* 보라색 계열의 선 색상 */
         /* 텍스트 아래 5px 간격, auto를 사용하여 중앙 정렬 효과 유지 */
@@ -84,13 +83,13 @@ export const CarouselButton = styled.button<{ $direction: 'left' | 'right' }>`
     position: absolute;
     top: 50%;
     transform: translateY(-50%);
-    background: rgba(0, 0, 0, 0.4);
-    color: white;
+    background: none;
+    color: #333;
     border: none;
     border-radius: 50%;
     width: 50px;
     height: 55px;
-    font-size: 1.5rem;
+    font-size: 2rem;
     cursor: pointer;
     z-index: 10;
     display: flex;
@@ -98,7 +97,8 @@ export const CarouselButton = styled.button<{ $direction: 'left' | 'right' }>`
     justify-content: center;
     
     &:hover {
-        background: rgba(0, 0, 0, 0.6);
+      color: #afafafff;
+      transition: color 0.2s ease;
     }
     
     ${(props) => (props.$direction === 'left' ? 'left: 10px;' : 'right: 10px;')}
@@ -127,6 +127,7 @@ export const SectionTitle = styled.h3`
     border-bottom: 2px solid #6a0dad;
     padding-bottom: 10px;
     margin-bottom: 20px;
+
 `;
 
 export const ContentBlock = styled.div`
@@ -158,7 +159,7 @@ export const InfoGridContainer = styled.div`
     /* 2개의 컬럼으로 나누고, 간격은 30px */
     grid-template-columns: repeat(2, 1fr); 
     gap: 30px;
-    padding: 20px 0;
+    padding: 10px 0;
     
     @media (max-width: 600px) {
       /* 모바일에서는 1단으로 다시 변경 */
@@ -167,38 +168,33 @@ export const InfoGridContainer = styled.div`
 `;
 
 export const InfoList = styled.ul`
-  width: 100%;
+  width: 90%;
   list-style: none;
   padding: 0;
   margin: 0;
 
   li {
     line-height: 1.6;
-    margin-bottom: 10px;
     color: #444;
 
     /* 한 줄 유지 + 텍스트 잘림 방지 */
-    display: flex;
-    flex-wrap: nowrap;
     align-items: center;
-    white-space: nowrap; 
-    overflow: hidden;
-    text-overflow: ellipsis;
-
+    white-space: break-word; 
     /* span(레이블)과 값 사이 간격 고정 */
     span {
+      display: flex;
+      align-items: center;
       font-weight: 600;
-      margin-right: 10px;
+      font-size: 1.2rem;
       color: #333;
       flex-shrink: 0; /* 라벨은 줄어들지 않게 */
     }
 
     /*값 텍스트는 가능한 한 줄로 */
     p, div {
-      margin: 0;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      white-space: nowrap;
+      padding-left: 1rem;
+      font-size: 1.1rem;
+      font-weight: 400;
       flex: 1;
     }
   }
@@ -272,7 +268,7 @@ export const ReviewCard = styled.div`
   padding-bottom: 40px; 
 `;
 
-// --- ReviewCard 내부 요소 스타일 (필요하다면 추가/수정) ---
+// --- ReviewCard 내부 요소 스타일 ---
 
 export const ReviewTitle = styled.h4` // 제목 스타일 추가 (이미지 참고)
   font-size: 1.1rem;
@@ -379,18 +375,18 @@ export const ReviewActions = styled.div`
   gap: 8px;
 `;
 
-export const ActionButton = styled.button<{ danger?: boolean }>` // 👈 danger prop 추가
+export const ActionButton = styled.button<{ danger?: boolean }>` 
   background: none;
   border: none;
   padding: 0;
   margin: 0;
   font-size: 0.8rem;
-  /* 👈 danger prop에 따라 색상 변경 */
+  /* danger prop에 따라 색상 변경 */
   color: ${props => props.danger ? '#ff4d4f' : '#888'}; 
   cursor: pointer;
 
   &:hover {
-    /* 👈 danger prop에 따라 호버 색상 변경 */
+    /* danger prop에 따라 호버 색상 변경 */
     color: ${props => props.danger ? '#d9363e' : '#333'};
     text-decoration: underline;
   }

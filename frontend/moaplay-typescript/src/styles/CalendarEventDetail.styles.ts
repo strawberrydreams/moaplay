@@ -15,13 +15,13 @@ export const CalendarDetailWrapper = styled.div`
   border: 2px solid #d9d9d9;
   display: flex;
   flex-direction: column;
-  height: 765px;
+  height: 100%;
 
   @media (max-width: 768px) {
     max-width: 100%;
     height: auto;
-    border: none;
-    border-radius: 0;
+    border: 1px solid #d9d9d9;
+    border-radius: 5px;
   }
 `;
 
