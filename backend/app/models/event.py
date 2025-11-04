@@ -12,6 +12,7 @@ if TYPE_CHECKING:
     from .schedule import Schedule
     from .favorite import Favorite
     from .event_tag import EventTag
+    from .notification import Notification
 
 class Event(db.Model):
     __tablename__ = 'events'
@@ -51,6 +52,7 @@ class Event(db.Model):
     schedules: Mapped[List["Schedule"]] = relationship("Schedule", back_populates="event", cascade="all, delete-orphan")
     favorites: Mapped[List["Favorite"]] = relationship("Favorite", back_populates="event", cascade="all, delete-orphan")
     tags: Mapped[List["EventTag"]] = relationship("EventTag", back_populates="event", cascade="all, delete-orphan")
+    notifications: Mapped[List["Notification"]] = relationship("Notification", back_populates="event", cascade="all, delete-orphan")
 
     def to_dict(self) -> dict:
         return {

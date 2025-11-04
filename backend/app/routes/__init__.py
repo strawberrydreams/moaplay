@@ -11,6 +11,7 @@ from .favorite import favorite_bp
 from .admin import admin_bp
 from .upload import upload_bp
 from .tag import tag_bp
+from .notification import noti_bp
 
 api_bp.register_blueprint(user_bp, url_prefix="/users")
 api_bp.register_blueprint(auth_bp, url_prefix="/auth")
@@ -21,3 +22,4 @@ api_bp.register_blueprint(favorite_bp, url_prefix="/favorites")
 api_bp.register_blueprint(admin_bp, url_prefix="/admin")
 api_bp.register_blueprint(upload_bp, url_prefix="/upload")
 api_bp.register_blueprint(tag_bp, url_prefix='/tags')
+api_bp.register_blueprint(noti_bp, url_prefix='/notifications')

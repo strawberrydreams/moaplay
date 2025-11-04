@@ -13,6 +13,8 @@ if TYPE_CHECKING:
     from .schedule import Schedule
     from .favorite import Favorite
     from .user_tag import UserTag
+    from .notification import Notification
+    from .notification_recipient import NotificationRecipient
 
 class User(UserMixin, db.Model):
     __tablename__ = 'users'
@@ -39,6 +41,8 @@ class User(UserMixin, db.Model):
     schedules: Mapped[List["Schedule"]] = relationship("Schedule", back_populates="user", cascade="all, delete-orphan")
     favorites: Mapped[List["Favorite"]] = relationship("Favorite", back_populates="user", cascade="all, delete-orphan")
     preferred_tags: Mapped[List["UserTag"]] = relationship("UserTag", back_populates="user", cascade="all, delete-orphan")
+    sent_notifications: Mapped[List["Notification"]] = relationship("Notification", foreign_keys="Notification.sent_by", back_populates="sender")
+    received_notifications: Mapped[List["NotificationRecipient"]] = relationship("NotificationRecipient", back_populates="user", cascade="all, delete-orphan")
 
     def set_password(self, password):
         self.password_hash = generate_password_hash(password)
