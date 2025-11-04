@@ -96,6 +96,7 @@ const ReviewForm: React.FC<ReviewFormProps> = ({
         // 수정 API 호출
         await ReviewApi.updateReview(review.id, payload);
         alert('리뷰가 수정되었습니다.');
+        window.location.reload();
       } else {
         // 신규 작성 API 호출
         await ReviewApi.createReview(payload);

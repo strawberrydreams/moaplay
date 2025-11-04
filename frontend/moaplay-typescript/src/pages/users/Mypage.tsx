@@ -56,16 +56,17 @@ const MyPage: React.FC = () => {
   const [editingField, setEditingField] = useState<EditableUserField | null>(null);
   const [selectedReview, setSelectedReview] = useState<R.Review | null>(null);
   const [myEvents, setMyEvent] = useState<E.Event[]>([]);
-  const [isAtStartReviews, setIsAtStartReviews] = useState(true);
-  const [isAtEndReviews, setIsAtEndReviews] = useState(false);
-  const reviewListRef = useRef<HTMLDivElement>(null);
+  
 
   // ★ 추가된 상태 (스크롤 감지용)
   const [isAtStartFavorites, setIsAtStartFavorites] = useState(true);
   const [isAtEndFavorites, setIsAtEndFavorites] = useState(false);
   const [isAtStartEvents, setIsAtStartEvents] = useState(true);
   const [isAtEndEvents, setIsAtEndEvents] = useState(false);
+  const [isAtStartReviews, setIsAtStartReviews] = useState(true);
+  const [isAtEndReviews, setIsAtEndReviews] = useState(false);
 
+  const reviewListRef = useRef<HTMLDivElement>(null);
   const favoriteListRef = useRef<HTMLDivElement>(null);
   const myEventListRef = useRef<HTMLDivElement>(null); // ★ 작성한 행사용 ref
   const { user } = useAuthContext();
@@ -120,7 +121,9 @@ const MyPage: React.FC = () => {
       console.error("마이페이지 데이터 로딩 실패:", error);
       setIsLoading(false);
     } finally {
-      
+      if(userData?.role === 'user'){
+        setIsLoading(false);
+      }
     }
   }, []);
 
@@ -236,7 +239,7 @@ const MyPage: React.FC = () => {
   }
 
   if (!isLoading && !userData) {
-    alert("사용자 정보를 불러올 수 없습니다.");
+    // alert("사용자 정보를 불러올 수 없습니다.");
     navigate('/');
   }
 

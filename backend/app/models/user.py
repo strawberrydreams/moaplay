@@ -56,7 +56,7 @@ class User(UserMixin, db.Model):
         # 선호 태그 이름 리스트 반환
         return [rel.tag.name for rel in self.preferred_tags if rel.tag]
     
-    def to_dict(self, me=False) -> dict:
+    def to_dict(self, me=False, include_role=False) -> dict:
         data = {
             "id": self.id,
             "user_id": self.user_id,
@@ -69,11 +69,14 @@ class User(UserMixin, db.Model):
                 "reviews": len(self.reviews)
             }
         }
+        
+        # 관리자나 본인일 때만 role 포함
+        if include_role or me:
+            data["role"] = self.role.value
 
         if me == True:
             data["email"] = self.email
             data["phone"] = self.phone
-            data["role"] = self.role.value
             data["updated_at"] = self.updated_at
             data["statistics"]["favorites"] = len(self.favorites)
 

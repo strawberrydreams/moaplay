@@ -1,9 +1,10 @@
 import { useState, useCallback } from 'react';
 
-import { type AdminDashboard } from '../types/admin';
+import { type AdminDashboard, type UserPagination } from '../types/admin';
 import type { Event } from '../types/events';
+import type { Users } from '../types/users';
 import type { Pagination } from '../types/index';
-import { getAdminDashboard, getApprovedEvents, getPendingEvents } from "../services/adminApi";
+import { getAdminDashboard, getApprovedEvents, getPendingEvents, getUsers } from "../services/adminApi";
 import { updateEventStatus } from "../services/eventsApi";
 
 interface UseAdminDashboardReturn {
@@ -23,6 +24,12 @@ interface UseAdminDashboardReturn {
     approvedEventsLoading: boolean;
     approvedEventsError: string | null;
     approvedEventsPagination: Pagination | null;
+
+    // 사용자 목록
+    users: Users[];
+    usersLoading: boolean;
+    usersError: string | null;
+    usersPagination: UserPagination | null;
 
     // 액션 함수들
     refreshStats: () => Promise<void>;
@@ -51,6 +58,12 @@ export const useAdminDashboard = (): UseAdminDashboardReturn => {
     const [approvedEventsError, setApprovedEventsError] = useState<string | null>(null);
     const [approvedEventsPagination, setApprovedEventsPagination] = useState<Pagination | null>(null);
 
+    // 사용자 목록
+    const [users, setUsers] = useState<Users[]>([]);
+    const [usersLoading, setUsersLoading] = useState(false);
+    const [usersError, setUsersError] = useState<string | null>(null);
+    const [usersPagination, setUsersPagination] = useState<UserPagination | null>(null);
+
     // 대시보드 응답 형식 정규화
     const toAdminDashboardStats = (resp: unknown): AdminDashboard => {
         const data = resp as any;
@@ -59,7 +72,7 @@ export const useAdminDashboard = (): UseAdminDashboardReturn => {
             totalEvents: data?.total_events ?? 0,
             approvedEvents: data?.approved_events ?? 0,
             pendingEvents: data?.pending_events ?? 0,
-            totalUsers: data?.total_users ?? 0,
+            totalUsers: data?.statistics?.users?.total ?? 0,
         };
     };
 
@@ -70,6 +83,7 @@ export const useAdminDashboard = (): UseAdminDashboardReturn => {
             setStatsError(null);
 
             const dashboardStats = await getAdminDashboard();
+            console.log(dashboardStats.totalUsers);
             setStats(toAdminDashboardStats(dashboardStats));
         } catch (error) {
             console.error('대시보드 통계 조회 실패:', error);
@@ -163,6 +177,33 @@ export const useAdminDashboard = (): UseAdminDashboardReturn => {
         }
     }, [refreshStats, loadPendingEvents]);
 
+    // 사용자 목록 조회 (role, user_id 필터 + pagination)
+    const loadUsers = useCallback(
+        async (page: number = 1, role?: string, userId?: string) => {
+        try {
+            setUsersLoading(true);
+            setUsersError(null);
+
+            const params = {
+            page,
+            per_page: 10,
+            role: role || undefined,
+            user_id: userId?.trim() || undefined,
+            };
+
+            const result = await getUsers(params);
+            setUsers(result.users ?? []);
+            setUsersPagination(result.pagination ?? null);
+        } catch (err) {
+            console.error('사용자 목록 조회 실패:', err);
+            setUsersError('사용자 목록을 불러오는데 실패했습니다.');
+        } finally {
+            setUsersLoading(false);
+        }
+        },
+        []
+    );
+
     return {
         // 대시보드 통계
         stats,
@@ -180,6 +221,12 @@ export const useAdminDashboard = (): UseAdminDashboardReturn => {
         approvedEventsLoading,
         approvedEventsError,
         approvedEventsPagination,
+
+        // 회원
+        users,
+        usersLoading,
+        usersError,
+        usersPagination,
 
         // 액션 함수들
         refreshStats,

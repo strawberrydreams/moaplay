@@ -32,6 +32,7 @@ export const useReview = (openReviewModal: () => void) => {
     if (window.confirm('정말로 리뷰를 삭제하시겠습니까?')) {
       await ReviewApi.deleteReview(reviewId);
       loadMyReviews(); // 삭제 후 다시 불러오기
+      window.location.reload();
     }
   };
 

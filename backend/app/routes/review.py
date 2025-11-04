@@ -157,6 +157,93 @@ def get_review(review_id):
     
     return review.to_dict(), 200
 
+### 특정 유저의 리뷰 목록 조회 API
+### GET /api/reviews/user/<int:user_id>
+
+@review_bp.route('/user/<int:user_id>', methods=['GET'])
+def get_reviews_by_user(user_id):
+    # 쿼리 파라미터
+    page = request.args.get('page', 1, type=int)
+    per_page = request.args.get('per_page', 10, type=int)
+    
+    # 페이지 유효성 검증
+    if page < 1:
+        page = 1
+    if per_page < 1 or per_page > 100:
+        per_page = 10
+    
+    try:
+        # 해당 유저의 리뷰 조회 (최신순)
+        query = (
+            db.session.query(Review)
+            .filter_by(user_id=user_id)
+            .order_by(Review.created_at.desc())
+        )
+
+        # 페이지네이션
+        pagination = query.paginate(page=page, per_page=per_page, error_out=False)
+        reviews = [review.to_dict() for review in pagination.items]
+
+        return {
+            "user_id": user_id,
+            "reviews": reviews,
+            "pagination": {
+                "page": pagination.page,
+                "per_page": pagination.per_page,
+                "total": pagination.total,
+                "pages": pagination.pages,
+            },
+        }, 200
+
+    except Exception as e:
+        print("리뷰 조회 실패:", e)
+        return {"error": "리뷰 조회 중 오류가 발생했습니다."}, 500
+
+
+### 내 리뷰 목록 조회 API
+### GET /api/reviews/me
+
+@review_bp.route('/me', methods=['GET'])
+@login_required
+def get_my_reviews():
+    # 쿼리 파라미터
+    page = request.args.get('page', 1, type=int)
+    per_page = request.args.get('per_page', 10, type=int)
+    
+    if page < 1:
+        page = 1
+    if per_page < 1 or per_page > 100:
+        per_page = 10
+
+    try:
+        # 현재 로그인한 유저의 리뷰 조회
+        query = (
+            db.session.query(Review)
+            .filter_by(user_id=current_user.id)
+            .order_by(Review.created_at.desc())
+        )
+
+        # 페이지네이션 처리
+        pagination = query.paginate(page=page, per_page=per_page, error_out=False)
+        reviews = [review.to_dict() for review in pagination.items]
+
+        return {
+            "reviews": reviews,
+            "pagination": {
+                "page": pagination.page,
+                "per_page": pagination.per_page,
+                "total": pagination.total,
+                "pages": pagination.pages,
+            },
+        }, 200
+
+    except Exception as e:
+        print("내 리뷰 조회 실패:", e)
+        return {
+            "error_code": "INTERNAL_SERVER_ERROR",
+            "message": "내 리뷰를 조회하는 중 오류가 발생했습니다."
+        }, 500
+
 
 ### 리뷰 수정 API
 ### PUT /api/reviews/<id>
@@ -255,39 +342,8 @@ def delete_review(review_id):
             "message": "리뷰 삭제 중 오류가 발생했습니다."
         }, 500
     
-### 내가 쓴 리뷰 목록 조회 API
-### GET /api/reviews/me
-@review_bp.route('/me', methods=['GET'])
-@login_required
-def get_my_reviews():
-    # 쿼리 파라미터
-    page = request.args.get('page', 1, type=int)
-    per_page = request.args.get('per_page', 10, type=int)
-    
-    # 페이지 유효성 검증
-    if page < 1:
-        page = 1
-    if per_page < 1 or per_page > 100:
-        per_page = 10
-    
-    try:
-        # 내가 쓴 리뷰 조회 (최신순)
-        query = db.session.query(Review).filter_by(user_id=current_user.id).order_by(Review.created_at.desc())
+
         
-        # 페이징
-        pagination = query.paginate(page=page, per_page=per_page, error_out=False)
-        
-        reviews = [review.to_dict() for review in pagination.items]
-        
-        return {
-            "reviews": reviews,
-            "pagination": {
-                "page": pagination.page,
-                "per_page": pagination.per_page,
-                "total": pagination.total,
-                "pages": pagination.pages
-            }
-        }, 200
         
     except Exception as e:
         return {

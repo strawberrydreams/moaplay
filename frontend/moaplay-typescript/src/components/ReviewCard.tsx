@@ -63,9 +63,9 @@ const ReviewCard: React.FC<ReviewCardProps> = ({ review, onClick, onEdit, onDele
         <S.Rating>{renderStars(review.rating)}</S.Rating>
       </S.Footer>
 
-      {currentUser && review.user && currentUser.id === review.user.id && (
+      {currentUser && (review.user?.id === currentUser.id || currentUser.role === 'admin') && (
         <S.Actions>
-          <S.ActionButton onClick={handleEditClick}>수정</S.ActionButton>
+          {review.user?.id === currentUser.id && ( <S.ActionButton onClick={handleEditClick}>수정</S.ActionButton>)}
           <S.ActionButton danger onClick={handleDeleteClick}>삭제</S.ActionButton>
         </S.Actions>
       )}

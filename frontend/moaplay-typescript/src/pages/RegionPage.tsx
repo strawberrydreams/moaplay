@@ -5,6 +5,7 @@ import EventCard from '../components/EventCard';
 import * as S from '../styles/RegionPage.styles';
 import { FaChevronLeft, FaChevronRight } from 'react-icons/fa';
 import { EventGrid, NoResultsMessage } from '../styles/EventSearch.styles';
+import { LoadingSpinner } from '../styles/Spinner.styles';
 
 const regions = [
   { value: "서울", label: "서울", icon: '🏙️' },
@@ -96,7 +97,7 @@ const RegionPage: React.FC = () => {
       </S.RegionSelectorContainer>
 
       <S.EventGridContainer>
-        {isLoading && <S.LoadingText>{selectedRegion} 행사 불러오는 중...</S.LoadingText>}
+        {isLoading && <LoadingSpinner>{selectedRegion} 행사 불러오는 중...</LoadingSpinner>}
         {error && <S.ErrorText>{error}</S.ErrorText>}
         {!isLoading && !error && (
           <EventGrid>

@@ -1,4 +1,5 @@
 import type { Host } from './';
+import type { Pagination } from '../types/index';
 
 // =================================================================
 // == Response (응답) 타입들
@@ -42,3 +43,13 @@ export interface ApprovedEvent extends AdminEventListItem {
 export interface ManagedEvent extends AdminEventListItem {
     approved_at?: string; // 승인된 행사만 값이 있음
 }
+
+export interface UserPagination {
+  page: number;
+  per_page: number;
+  total: number;
+  pages: number;
+}
+
+
+// export interface UserPagination extends Pagination {}

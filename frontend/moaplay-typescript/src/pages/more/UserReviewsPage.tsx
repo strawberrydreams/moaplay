@@ -10,17 +10,17 @@ import { useReview } from '../../hooks/useReview';
 import { useModal } from '../../hooks/useModal';
 import Modal from '../../components/common/Modal';
 import ReviewForm from '../../components/ReviewForm';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 
 const ReviewsPage: React.FC = () => {
-  const { user } = useAuthContext();
-
   const [reviews, setReviews] = useState<R.Review[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [page, setPage] = useState<number>(1);
   const [totalPages, setTotalPages] = useState<number>(1);
-  const [total, setTotal] = useState<number>(0);
+  const [total, setTotal] = useState<number>(1);
   const navigate = useNavigate();
+  const { userId } = useParams<{ userId: string }>();
+  const numericUserId = Number(userId); // 숫자로 변환
 
   const [selectedReview, setSelectedReview] = useState<R.Review | null>(null);
 
@@ -51,12 +51,11 @@ const ReviewsPage: React.FC = () => {
 
   useEffect(() => {
     const load = async () => {
-      if (!user) return;
 
       setIsLoading(true);
       try {
         // 서버에 page, per_page 넘기기
-        const resp = await ReviewApi.getMyReview({ page, per_page: perPage });
+        const resp = await ReviewApi.getReviewByUser({ page, per_page: perPage, user_Id: numericUserId });
 
         setReviews(resp.reviews || []);
 
@@ -66,7 +65,7 @@ const ReviewsPage: React.FC = () => {
           const perPageCount = pagination.per_page ?? perPage;
           const pages = Math.ceil(total / perPageCount);
           setTotalPages(pages);
-          setTotal(pagination.total);
+          setTotal(total);
         } else {
           setTotalPages(1);
         }
@@ -78,13 +77,9 @@ const ReviewsPage: React.FC = () => {
     };
 
     load();
-  }, [user, page, perPage]);
+  }, [page, perPage]);
 
-  if (!user) {
-    return <p>로그인이 필요합니다.</p>;
-  }
-
-  //  카드 클릭 시: 선택된 리뷰 세팅 + 상세 모달 오픈
+  // 카드 클릭 시: 선택된 리뷰 세팅 + 상세 모달 오픈
   const handleOpenDetail = (review: R.Review) => {
     setSelectedReview(review);
     openReviewDetailModal();
@@ -97,7 +92,7 @@ const ReviewsPage: React.FC = () => {
         <S.BackButton onClick={() => navigate('/mypage')} aria-label="마이페이지로 돌아가기">
           <FaArrowLeft />
         </S.BackButton>
-        <S.SectionTitle>내 리뷰 전체 보기</S.SectionTitle>
+        <S.SectionTitle>리뷰 전체 보기</S.SectionTitle>
       </S.PageHeader>
 
       <p style={{textAlign:'right'}}>{total}개</p>
@@ -115,7 +110,7 @@ const ReviewsPage: React.FC = () => {
               <ReviewCard
                 key={review.id}
                 review={review}
-                onClick={() => handleOpenDetail(review)}  // ✅ 상세 모달 열기
+                onClick={() => handleOpenDetail(review)}  // 상세 모달 열기
                 onEdit={() => handleEditReview(review)}   // 수정 모달 열기
                 onDelete={() => handleDeleteReview(review.id)} // 삭제
               />

@@ -76,9 +76,9 @@ const ReviewDetail: React.FC<ReviewDetailModalProps> = ({ isOpen, onClose, revie
           <S.RatingDisplay>{renderStars(review.rating)}</S.RatingDisplay>
         </S.Footer>
 
-        {currentUser && review.user?.id === currentUser.id && (
+        {currentUser && (review.user?.id === currentUser.id || currentUser.role === 'admin') && (
           <S.Actions>
-            <S.ActionButton onClick={() => onEdit?.(review)}>수정</S.ActionButton>
+            {review.user?.id === currentUser.id && (<S.ActionButton onClick={() => onEdit?.(review)}>수정</S.ActionButton>)}
             <S.ActionButton danger onClick={() => onDelete?.(review.id)}>삭제</S.ActionButton>
           </S.Actions>
         )}

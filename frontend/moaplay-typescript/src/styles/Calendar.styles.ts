@@ -92,13 +92,6 @@ export const StyledCalendarWrapper = styled.div`
       color: #9ca3af;
     }
 
-    &:hover {
-      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
-      filter: brightness(95%);
-      transition: all 0.2s ease-in-out;
-    }
-
-        
   }
 
   /* --- 3. 요일 헤더 --- */
@@ -106,25 +99,23 @@ export const StyledCalendarWrapper = styled.div`
   .fc-col-header-cell {
     background-color: #f8f9fa;
     border-bottom: 1px solid #ddd;
-    font-size: 0.8rem; /* ✅ 기존 0.9rem → 더 작게 */
+    font-size: 0.8rem; /* 기존 0.9rem → 더 작게 */
     font-weight: 600;
-    padding: 0 !important; /* ✅ 전체 여백 제거 */
+    padding: 0 !important; /*전체 여백 제거 */
 
     @media (max-width: 768px) {
-      font-size: 0.7rem; /* ✅ 모바일에선 더 작게 */
+      font-size: 0.7rem; /* 모바일에선 더 작게 */
     }
-
-
   }
 
   .fc-col-header-cell-cushion {
     color: #555;
-    padding: 6px 0 !important; /* ✅ 위아래 여백 축소 */
+    padding: 6px 0 !important; /* 위아래 여백 축소 */
     display: block;
     text-align: center;
   }
 
-  /* ✅ 요일 색상 유지 */
+  /*  요일 색상 유지 */
   .fc-col-header-cell.fc-day-sun .fc-col-header-cell-cushion {
     color: #d9534f;
   }
@@ -134,13 +125,11 @@ export const StyledCalendarWrapper = styled.div`
 
     /* --- 4. 날짜 셀 내부 프레임 --- */
   .fc-daygrid-day-frame {
-    height: auto !important; /* ✅ 고정 높이 제거 */
-    min-height: 107px; /* ✅ 기본 최소 높이만 설정 */
+    height: auto !important; /* 고정 높이 제거 */
+
     display: flex;
     flex-direction: column;
-    align-items: flex-start;
-    overflow: visible !important; /* ✅ 내부 콘텐츠 잘림 방지 */
-    padding: 0px 4px;
+    overflow: visible !important; /*  내부 콘텐츠 잘림 방지 */
     box-sizing: border-box;
 
     @media (max-width: 768px) {
@@ -155,7 +144,6 @@ export const StyledCalendarWrapper = styled.div`
 
   .fc-daygrid-day {
   padding: 0 !important;
-
   }
 
 
@@ -167,23 +155,9 @@ export const StyledCalendarWrapper = styled.div`
     gap: 4px;
   }
 
-  /* 이벤트 텍스트가 줄바꿈되도록 */
-  .fc-event-title {
-    white-space: normal !important;
-    overflow: visible !important;
-    line-height: 1.3;
-  }
-
-  /* 날짜 숫자와 이벤트 간 여백 정리 */
-  .fc-daygrid-day-top {
-    margin-bottom: 0px;
-  }
-
-
   .fc-daygrid-day-number {
     font-weight: 500;
     margin-bottom: 0.25rem;
-    padding: 6px;
     color: #131313;
 
     .fc-daygrid-day-other & {
@@ -209,11 +183,12 @@ export const StyledCalendarWrapper = styled.div`
     border: 1px solid #a3d8ff;
     color: #1e3a8a;
     border-radius: 8px;
-    padding: 4px 8px;
+    padding: 3px 15px;
+    align-items: center;
+    justify-content: center;
+    margin-top: 3px;
     font-size: 0.8rem;
     font-weight: 600;
-    cursor: pointer;
-    overflow: hidden;
     text-overflow: ellipsis;
 
     @media (max-width: 768px) {
@@ -224,8 +199,8 @@ export const StyledCalendarWrapper = styled.div`
 
     .fc-event-title {
       color: #0056b3;
+      width: 100%;
       font-weight: 600;
-      overflow: hidden;
       text-overflow: ellipsis;
       white-space: nowrap;
     }
@@ -236,6 +211,12 @@ export const StyledCalendarWrapper = styled.div`
     box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
     filter: brightness(90%);
     transition: all 0.2s ease-in-out;
+  }
+
+  .fc-daygrid-event {
+  /* Or use a fixed pixel value */
+  width: 100%;
+  cursor: pointer;
   }
 
   /* --- 6. FullCalendar 기본 테두리 제거 --- */

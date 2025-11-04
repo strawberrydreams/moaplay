@@ -141,7 +141,7 @@ const Dropdown = styled.div<{ position: 'left' | 'right' }>`
 `;
 
 const Input = styled.input`
-  width: 240px;
+  width: 230px;
   padding: 6px 8px;
   background: #fff;
   margin-bottom: 8px;
@@ -152,7 +152,7 @@ const Input = styled.input`
 
 const Textarea = styled.textarea`
   font-family: 'Noto Sans KR', sans-serif;
-  width: 240px;
+  width: 230px;
   height: 90px;
   padding: 4px 8px;
   background: #fff;

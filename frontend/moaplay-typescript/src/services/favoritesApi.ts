@@ -17,7 +17,7 @@ export const getFavorites = async ({
 
 // (GET) 특정 찜 항목 조회
 export const getFavoriteById = async (event_id: number): Promise<FavoriteStatus> => {
-    const { data } = await axiosInstance.get<FavoriteStatus>(`/favorites/event/${event_id}`);
+    const { data } = await axiosInstance.get<FavoriteStatus>(`/favorites/check/${event_id}`);
     return data;
 }
 

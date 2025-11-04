@@ -90,7 +90,7 @@ export const NotificationDropdown: React.FC = () => {
 const Wrapper = styled.div`
   position: relative;
   display: inline-block;
-  margin-right: 8px;
+  margin-right: -15px;
 `;
 
 const BellButton = styled.button`
@@ -101,9 +101,9 @@ const BellButton = styled.button`
   padding: 0;
 
   img {
-    width: 22px;
-    height: 22px;
-    opacity: 0.85;
+    width: 25px;
+    height: 25px;
+    opacity: 0.75;
     transition: opacity 0.2s;
   }
 
@@ -114,15 +114,15 @@ const BellButton = styled.button`
 
 const NewBadge = styled.span`
   position: absolute;
-  top: 0px;
-  right: 8px;
+  top: -3px;
+  right: -2px;
   background: #ff4d4d;
   color: white;
   font-size: 0.5rem;
   font-weight: 700;
   border-radius: 50%;
-  width: 15px;
-  height: 15px;
+  width: 13px;
+  height: 13px;
   display: flex;
   justify-content: center;
   align-items: center;
@@ -139,7 +139,7 @@ const Dropdown = styled.div`
   position: absolute;
   top: 120%;
   right: 0;
-  width: 280px;
+  width: 400px;
   background: #fff;
   border: 1px solid #ddd;
   border-radius: 8px;

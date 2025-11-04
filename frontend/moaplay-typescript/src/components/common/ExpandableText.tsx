@@ -23,7 +23,7 @@ const MoreButton = styled.button`
 const ContentWrapper = styled.div`
   line-height: 1.6;
   color: #333;
-  font-size: 0.95rem;
+  font-size: 1.1rem;
   white-space: pre-wrap; /* 줄바꿈 유지 */
 `;
 
