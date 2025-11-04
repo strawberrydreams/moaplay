@@ -121,9 +121,7 @@ const MyPage: React.FC = () => {
       console.error("마이페이지 데이터 로딩 실패:", error);
       setIsLoading(false);
     } finally {
-      if(userData?.role === 'user'){
         setIsLoading(false);
-      }
     }
   }, []);
 
@@ -132,23 +130,24 @@ const MyPage: React.FC = () => {
   }, [loadMyPageData]);
 
   const loadMyEvent = useCallback(async () => {
-  
-  try {
-    const response = await EventApi.getEvents({ host_id: userData?.id });
+  if(userData?.role === 'host' || 'admin') {
+    try {
+      const response = await EventApi.getEvents({ host_id: userData?.id });
 
-    // 응답이 배열인지 객체인지 확인
-    if (Array.isArray(response)) {
-      setMyEvent(response); // 배열 그대로 세팅
-    } else if (response?.events) {
-      setMyEvent(response.events); // events 배열만 추출
-    } else {
-      setMyEvent([]); // 예외 처리
+      // 응답이 배열인지 객체인지 확인
+      if (Array.isArray(response)) {
+        setMyEvent(response); // 배열 그대로 세팅
+      } else if (response?.events) {
+        setMyEvent(response.events); // events 배열만 추출
+      } else {
+        setMyEvent([]); // 예외 처리
+      }
+    } catch (error) {
+      console.log("마이이벤트 데이터 로딩 실패:", error);
+      setMyEvent([]);
+    } finally {
+      setIsLoading(false);
     }
-  } catch (error) {
-    console.log("마이이벤트 데이터 로딩 실패:", error);
-    setMyEvent([]);
-  } finally {
-    setIsLoading(false);
   }
 }, [userData?.id]);
 
@@ -317,6 +316,7 @@ const MyPage: React.FC = () => {
           )}
 
           <S.ReviewScrollContainer ref={reviewListRef}>
+            <S.ReviewGrid>
             {myReviews.length === 0 ? (
               <S.NoResultsMessage>작성한 리뷰가 없습니다.</S.NoResultsMessage>
             ) : (
@@ -330,6 +330,7 @@ const MyPage: React.FC = () => {
                 />
               ))
             )}
+            </S.ReviewGrid>
           </S.ReviewScrollContainer>
 
           {myReviews.length > 0 && !isAtEndReviews && (

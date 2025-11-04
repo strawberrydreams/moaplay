@@ -265,6 +265,7 @@ export const ReviewScrollContainer = styled.div`
 export const ReviewGrid = styled.div`
   display: flex;
   gap: 1.5rem;
+  width: 50%;
   padding: 10px 0 10px 5px;
   overflow-x: auto;
 
