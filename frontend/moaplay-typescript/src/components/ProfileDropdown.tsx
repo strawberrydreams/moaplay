@@ -1,4 +1,3 @@
-// src/components/ProfileDropdown.tsx
 import React, { useState, useRef, useEffect } from 'react';
 import { useAuthContext } from '../contexts/AuthContext';
 import * as S from '../styles/ProfileDropdown.styles';
@@ -9,53 +8,56 @@ import { useNavigate } from 'react-router-dom';
 const ProfileDropdown: React.FC = () => {
   const navigate = useNavigate();
   const { user, logout } = useAuthContext();
-  console.log(user?.role);
 
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
+  const openDropdown = () => setIsDropdownOpen(true);
+  const closeDropdown = () => setIsDropdownOpen(false);
   const toggleDropdown = () => setIsDropdownOpen(prev => !prev);
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
-        setIsDropdownOpen(false);
+        closeDropdown();
       }
     };
     document.addEventListener('mousedown', handleClickOutside);
-    return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
-    };
+    return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
   if (!user) return null;
 
   const handleMyPageClick = () => {
     navigate('/mypage');
-    setIsDropdownOpen(false);
+    closeDropdown();
   };
 
   const handleLogoutClick = () => {
     logout();
-    setIsDropdownOpen(false);
+    closeDropdown();
   };
 
   const handleCreateEventClick = () => {
     navigate('/events/new');
-    setIsDropdownOpen(false);
+    closeDropdown();
   };
 
   const handleAdminPageClick = () => {
     navigate('/admin/dashboard');
-    setIsDropdownOpen(false);
+    closeDropdown();
   };
 
   return (
-    <S.ProfileContainer ref={dropdownRef}>
+    <S.ProfileContainer
+      ref={dropdownRef}
+      onMouseEnter={openDropdown}
+      onMouseLeave={closeDropdown}
+    >
       <S.ProfileImage
         src={user.profile_image || defaultProfile}
         alt="프로필 사진"
-        onClick={toggleDropdown}
+        onClick={toggleDropdown} // 클릭으로도 여닫기 가능
       />
       <S.DropdownArrowButton onClick={toggleDropdown}>
         <FaChevronDown />
@@ -65,22 +67,14 @@ const ProfileDropdown: React.FC = () => {
         <S.DropdownMenu>
           <S.MenuItem onClick={handleMyPageClick}>마이페이지</S.MenuItem>
 
-          {/* HOST 역할이면 행사 작성하기 메뉴 추가 */}
           {user.role === 'host' && (
-            <S.MenuItem onClick={handleCreateEventClick}>
-              행사 작성하기
-            </S.MenuItem>
+            <S.MenuItem onClick={handleCreateEventClick}>행사 작성하기</S.MenuItem>
           )}
 
-          {/* ADMIN 역할이면 행사 작성 + 관리자 페이지 메뉴 추가 */}
           {user.role === 'admin' && (
             <>
-              <S.MenuItem onClick={handleCreateEventClick}>
-                행사 작성하기
-              </S.MenuItem>
-              <S.MenuItem onClick={handleAdminPageClick}>
-                관리자 페이지
-              </S.MenuItem>
+              <S.MenuItem onClick={handleCreateEventClick}>행사 작성하기</S.MenuItem>
+              <S.MenuItem onClick={handleAdminPageClick}>관리자 페이지</S.MenuItem>
             </>
           )}
 

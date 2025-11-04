@@ -161,28 +161,47 @@ export const InfoGridContainer = styled.div`
     padding: 20px 0;
     
     @media (max-width: 600px) {
-        /* 모바일에서는 1단으로 다시 변경 */
-        grid-template-columns: 1fr;
+      /* 모바일에서는 1단으로 다시 변경 */
+      grid-template-columns: 1fr;
     }
 `;
 
 export const InfoList = styled.ul`
-    width: 100%; /* 너비를 100%로 설정하여 Grid 컨테이너의 항목이 됨 */
-    list-style: none;
-    padding: 0;
-    margin: 0;
-    
-    li {
-        line-height: 1.6;
-        margin-bottom: 10px;
-        color: #444;
-        
-        span {
-            font-weight: 600;
-            margin-right: 10px;
-            color: #333;
-        }
+  width: 100%;
+  list-style: none;
+  padding: 0;
+  margin: 0;
+
+  li {
+    line-height: 1.6;
+    margin-bottom: 10px;
+    color: #444;
+
+    /* 한 줄 유지 + 텍스트 잘림 방지 */
+    display: flex;
+    flex-wrap: nowrap;
+    align-items: center;
+    white-space: nowrap; 
+    overflow: hidden;
+    text-overflow: ellipsis;
+
+    /* span(레이블)과 값 사이 간격 고정 */
+    span {
+      font-weight: 600;
+      margin-right: 10px;
+      color: #333;
+      flex-shrink: 0; /* 라벨은 줄어들지 않게 */
     }
+
+    /*값 텍스트는 가능한 한 줄로 */
+    p, div {
+      margin: 0;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      flex: 1;
+    }
+  }
 `;
 
 // 리뷰 섹션
@@ -230,18 +249,18 @@ export const ReviewCard = styled.div`
   display: flex;
   flex-direction: column;
   align-items: flex-start;
-  padding: 23.1837px; // 제공된 padding
-  gap: 10px; // 제공된 gap
+  padding: 23.1837px;
+  gap: 10px;
 
-  width: 320px; // 제공된 width
-  min-width: 231.84px; // 제공된 min-width
-  height: 200px; // 제공된 height
+  width: 320px;
+  min-width: 231.84px; 
+  height: 200px;
   
   background: #FFFFFF;
-  border: 0.965986px solid #D9D9D9; // 제공된 border
-  border-radius: 7.79734px; // 제공된 border-radius
+  border: 0.965986px solid #D9D9D9; 
+  border-radius: 7.79734px;
 
-  cursor: pointer; // 클릭 가능함을 표시
+  cursor: pointer;
   transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out; // 호버 효과
   
   &:hover {
@@ -394,5 +413,7 @@ export const ImageActionGroup = styled.div`
     &:hover {
       transform: scale(1.1);
     }
+
+    &:focus { outline : none; }
   }
 `;

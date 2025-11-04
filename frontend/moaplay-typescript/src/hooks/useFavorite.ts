@@ -32,11 +32,13 @@ export const useFavorite = () => {
         await FavoriteApi.deleteFavorite(favoriteId);
         // 삭제 성공 시 상태에서 제거
         setFavorites(prev => prev.filter(fav => fav.id !== favoriteId));
+        window.location.reload();
       } else {
         await FavoriteApi.addFavorite(event_id);
         // 추가 성공 시 다시 불러오거나 새로운 항목 추가
         const res = await FavoriteApi.getFavorites();
         setFavorites(res.favorites || []);
+        window.location.reload();
       }
     } catch (err) {
       console.error('찜 토글 실패:', err);

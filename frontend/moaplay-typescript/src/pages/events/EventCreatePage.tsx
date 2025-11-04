@@ -4,225 +4,200 @@ import { useNavigate } from 'react-router-dom';
 import { validateEventForm } from '../../utils/validation';
 import { useEventCreate } from "../../hooks/useEventCreate";
 import * as E from "../../types/events";
+import {tagsApi} from "../../services/tagsApi"; 
 import TagSelector from "../../components/events/TagSelector";
 import { DateRangeSelector } from "../../components/events/DateRangeSelector";
 import { ImageUploader } from "../../components/events/ImageUploader";
 import {
-    PageContainer,
-    MainContent,
-    FormContainer,
-    FormHeader,
-    FormTitle,
-    FormSubtitle,
-    Form,
-    FormSection,
-    SectionTitle,
-    SectionDescription,
-    InputGroup,
-    InputLabel,
-    TextInput,
-    TextArea,
-    ErrorMessage,
-    CharacterCount,
-    FormActions,
-    CancelButton,
-    SubmitButton,
-    ErrorAlert,
-    RequiredMark,
+  PageContainer,
+  MainContent,
+  FormContainer,
+  FormHeader,
+  FormTitle,
+  FormSubtitle,
+  Form,
+  FormSection,
+  SectionTitle,
+  SectionDescription,
+  InputGroup,
+  InputLabel,
+  TextInput,
+  TextArea,
+  ErrorMessage,
+  CharacterCount,
+  FormActions,
+  CancelButton,
+  SubmitButton,
+  ErrorAlert,
+  RequiredMark,
 } from '../../styles/EventCreatePage.styles';
 
-// 행사 작성 폼 타입
 export interface EventFormData {
-    images: File[];
-    title: string;
-    summary?: string;
-    startDate: string;
-    endDate: string;
-    location: string;
-    description: string;
-    phone: string;
-    organizer?: string;
-    hostedBy?: string;
-    tags: string[];
+  images: File[];
+  title: string;
+  summary?: string;
+  startDate: string;
+  endDate: string;
+  location: string;
+  description: string;
+  phone: string;
+  organizer?: string;
+  hosted_By?: string;
+  tags: string[];
 }
 
-// 신규 행사 작성 페이지 컴포넌트
 export const EventCreatePage: React.FC = () => {
-    const navigate = useNavigate();
-    const { createEvent, isLoading, error } = useEventCreate();
+  const navigate = useNavigate();
+  const { createEvent, isLoading, error } = useEventCreate();
 
-    // 접근 가드: 주최자/관리자만 페이지 접근 허용
-    useEffect(() => {
-        try {
-            const stored =
-                window.localStorage.getItem('currentUser') ||
-                window.sessionStorage.getItem('currentUser');
-            if (!stored) return;
+  // 접근 가드
+  useEffect(() => {
+    try {
+      const stored =
+        window.localStorage.getItem('currentUser') ||
+        window.sessionStorage.getItem('currentUser');
+      if (!stored) return;
 
-            const obj: any = JSON.parse(stored);
-            const roleRaw = obj?.role ?? obj?.roles ?? '';
-            const roleStr = Array.isArray(roleRaw) ? roleRaw.join(',') : String(roleRaw || '');
+      const obj: any = JSON.parse(stored);
+      const roleRaw = obj?.role ?? obj?.roles ?? '';
+      const roleStr = Array.isArray(roleRaw) ? roleRaw.join(',') : String(roleRaw || '');
+      const normalized = roleStr.toLowerCase();
 
-            const normalized = roleStr.toLowerCase();
-            const isAdmin = normalized === 'admin';
-            const isHost = normalized === 'host';
+      if (!(normalized === 'admin' || normalized === 'host')) {
+        alert('접근 권한이 없습니다. 행사 주최자와 관리자만 접근 가능합니다.');
+        navigate('/');
+      }
+    } catch (err) {
+      console.error(err);
+    }
+  }, [navigate]);
 
-            if (!isAdmin && !isHost) {
-                alert('접근 권한이 없습니다. 행사 주최자와 관리자만 접근 가능합니다.');
-                navigate('/');
-            }
-        } catch (err) {
-            console.error(err);
-        }
-    }, [navigate]);
+  // 태그 목록 상태
+  const [availableTags, setAvailableTags] = useState<string[]>([]);
+  const [tagLoading, setTagLoading] = useState(true);
+  const [tagError, setTagError] = useState<string | null>(null);
 
-    // 폼 데이터 상태
-    const [formData, setFormData] = useState<EventFormData>({
-        images: [],
-        title: '',
-        summary: '',
-        startDate: '',
-        endDate: '',
-        location: '',
-        description: '',
-        phone: '',
-        organizer: '',
-        hostedBy: '',
-        tags: []
+  // 태그 목록 불러오기
+  useEffect(() => {
+    (async () => {
+      try {
+        setTagLoading(true);
+        const data = await tagsApi.list(); // [{ id, name, created_at }]
+        const tagNames = (data || []).map((t: any) => t.name);
+        setAvailableTags(tagNames);
+      } catch (err) {
+        console.error("태그 불러오기 실패:", err);
+        setTagError("태그 목록을 불러오지 못했습니다.");
+      } finally {
+        setTagLoading(false);
+      }
+    })();
+  }, []);
+
+  // 폼 데이터
+  const [formData, setFormData] = useState<EventFormData>({
+    images: [],
+    title: '',
+    summary: '',
+    startDate: '',
+    endDate: '',
+    location: '',
+    description: '',
+    phone: '',
+    organizer: '',
+    hosted_By: '',
+    tags: []
+  });
+
+  const [validationErrors, setValidationErrors] = useState<Record<string, string>>({});
+
+  const handleFieldChange = (field: keyof EventFormData, value: string | File[] | string[]) => {
+    setFormData(prev => ({ ...prev, [field]: value }));
+    if (validationErrors[field]) {
+      setValidationErrors(prev => {
+        const newErrors = { ...prev };
+        delete newErrors[field];
+        return newErrors;
+      });
+    }
+  };
+
+  const handleImagesChange = (images: File[]) => handleFieldChange('images', images);
+
+  const handleDateRangeChange = (startDate: string, endDate: string) => {
+    setFormData(prev => ({ ...prev, startDate, endDate }));
+    if (validationErrors.startDate || validationErrors.endDate) {
+      setValidationErrors(prev => {
+        const newErrors = { ...prev };
+        delete newErrors.startDate;
+        delete newErrors.endDate;
+        return newErrors;
+      });
+    }
+  };
+
+  const handleTagsChange = (tags: string[]) => handleFieldChange('tags', tags);
+
+  const validateForm = (): boolean => {
+    const validation = validateEventForm({
+      title: formData.title,
+      summary: formData.summary,
+      startDate: formData.startDate,
+      endDate: formData.endDate,
+      location: formData.location,
+      description: formData.description,
+      phone: formData.phone,
+      tags: formData.tags,
+      images: formData.images
     });
 
-    // 폼 검증 에러 상태
-    const [validationErrors, setValidationErrors] = useState<Record<string, string>>({});
+    if (!validation.isValid) {
+      const errorMap: Record<string, string> = {};
+      validation.errors.forEach((errItem: { field: string | number; message: string; }) => {
+        errorMap[errItem.field] = errItem.message;
+      });
+      setValidationErrors(errorMap);
+      return false;
+    }
 
-    // 폼 필드 값 변경 처리
-    const handleFieldChange = (field: keyof EventFormData, value: string | File[] | string[]) => {
-        setFormData(prev => ({
-            ...prev,
-            [field]: value
-        }));
+    setValidationErrors({});
+    return true;
+  };
 
-        if (validationErrors[field]) {
-            setValidationErrors(prev => {
-                const newErrors = { ...prev };
-                delete newErrors[field];
-                return newErrors;
-            });
-        }
-    };
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!validateForm()) return;
 
-    // 이미지 변경 처리
-    const handleImagesChange = (images: File[]) => {
-        handleFieldChange('images', images);
-    };
+    try {
+      const createRequest: E.CreateEventPayload = {
+        title: formData.title.trim(),
+        summary: formData.summary?.trim() || "",
+        start_date: formData.startDate,
+        end_date: formData.endDate,
+        location: formData.location.trim(),
+        description: formData.description.trim(),
+        phone: formData.phone.trim(),
+        organizer: formData.organizer?.trim() || "",
+        hosted_by: formData.hosted_By?.trim() || "",
+        image_urls: [],
+        tag_names: formData.tags.map(t => t.trim()).filter(Boolean)
+      };
 
-    // 날짜 범위 변경 처리
-    const handleDateRangeChange = (startDate: string, endDate: string) => {
-        setFormData(prev => ({
-            ...prev,
-            startDate,
-            endDate
-        }));
+      await createEvent(createRequest, formData.images, formData.tags);
 
-        if (validationErrors.startDate || validationErrors.endDate) {
-            setValidationErrors(prev => {
-                const newErrors = { ...prev };
-                delete newErrors.startDate;
-                delete newErrors.endDate;
-                return newErrors;
-            });
-        }
-    };
+      alert('행사가 성공적으로 등록되었습니다. 관리자 승인 후 공개됩니다.');
+      navigate('/');
+    } catch (err) {
+      console.error('Failed to create event:', err);
+    }
+  };
 
-    // 태그 변경 처리
-    const handleTagsChange = (tags: string[]) => {
-        handleFieldChange('tags', tags);
-    };
+  const handleCancel = () => {
+    if (window.confirm('작성 중인 내용이 사라집니다. 정말 취소하시겠습니까?')) {
+      navigate('/');
+    }
+  };
 
-    // 폼 유효성 검사
-    const validateForm = (): boolean => {
-        const validation = validateEventForm({
-            title: formData.title,
-            summary: formData.summary,
-            startDate: formData.startDate,
-            endDate: formData.endDate,
-            location: formData.location,
-            description: formData.description,
-            phone: formData.phone,
-            tags: formData.tags,
-            images: formData.images
-        });
-
-        if (!validation.isValid) {
-            const errorMap: Record<string, string> = {};
-            validation.errors.forEach((errItem: { field: string | number; message: string; }) => {
-                errorMap[errItem.field] = errItem.message;
-            });
-            setValidationErrors(errorMap);
-            return false;
-        }
-
-        setValidationErrors({});
-        return true;
-    };
-
-    // 허용된 태그 목록
-    const PERMITTED_TAGS = [
-        "행사", "이벤트", "온라인", "오프라인", "가볼만한곳", "주말에뭐하지",
-        "전시회", "콘서트", "페스티벌", "공연", "팬미팅", "영화",
-        "팝업스토어", "플리마켓", "박람회", "세일",
-        "세미나", "컨퍼런스", "강연", "워크숍", "클래스",
-        "네트워킹", "파티", "소모임", "정모",
-        "원데이클래스", "스포츠", "게임", "여행", "봉사활동",
-        "힐링", "감성", "신나는", "액티비티", "조용한", "로맨틱",
-        "핫플", "힙스터", "이색체험", "인생샷",
-        "누구나", "가족나들이", "아이와함께", "커플추천", "친구랑",
-        "혼자서도좋아", "직장인", "대학생", "반려동물동반"
-    ];
-
-    // 폼 제출 처리
-    const handleSubmit = async (e: React.FormEvent) => {
-        e.preventDefault();
-
-        if (!validateForm()) {
-            return;
-        }
-
-        const invalidTags = formData.tags.filter(t => !PERMITTED_TAGS.includes(t.trim()));
-        if (invalidTags.length > 0) {
-            alert(`허용되지 않은 태그가 포함되어 있습니다: ${invalidTags.join(', ')}`);
-            return;
-        }
-
-        try {
-            const createRequest: E.CreateEventPayload = {
-                title: formData.title.trim(),
-                summary: formData.summary?.trim() || "",
-                start_date: formData.startDate,
-                end_date: formData.endDate,
-                location: formData.location.trim(),
-                description: formData.description.trim(),
-                phone: formData.phone.trim(),
-                organizer: formData.organizer?.trim() || "",
-                hosted_by: formData.hostedBy?.trim() || "",
-                image_urls: [],
-                tag_names: formData.tags.map(t => t.trim()).filter(Boolean)
-            };
-
-            const createdEvent = await createEvent(createRequest, formData.images, formData.tags);
-
-            alert('행사가 성공적으로 등록되었습니다. 관리자 승인 후 공개됩니다.');
-            navigate('/');
-            
-        } catch (err) {
-            console.error('Failed to create event:', err);
-        }
-    };
-
-    const handleCancel = () => {
-        if (window.confirm('작성 중인 내용이 사라집니다. 정말 취소하시겠습니까?')) {
-            navigate('/');
-        }
-    };
 
     return (
         <PageContainer>
@@ -330,12 +305,12 @@ export const EventCreatePage: React.FC = () => {
                             </InputGroup>
 
                             <InputGroup>
-                                <InputLabel htmlFor="hostedBy">주관</InputLabel>
+                                <InputLabel htmlFor="hosted_By">주관</InputLabel>
                                 <TextInput
-                                    id="hostedBy"
+                                    id="hosted_By"
                                     type="text"
-                                    value={formData.hostedBy || ''}
-                                    onChange={(e) => handleFieldChange('hostedBy', e.target.value)}
+                                    value={formData.hosted_By || ''}
+                                    onChange={(e) => handleFieldChange('hosted_By', e.target.value)}
                                 />
                             </InputGroup>
                         </FormSection>
@@ -398,12 +373,20 @@ export const EventCreatePage: React.FC = () => {
                                 <InputLabel>
                                     태그 <RequiredMark>*</RequiredMark>
                                 </InputLabel>
+                                {/* 태그 로딩 상태 처리 */}
+                                {tagLoading ? (
+                                <p style={{ color: '#777' }}>태그 불러오는 중...</p>
+                                ) : tagError ? (
+                                <ErrorMessage>{tagError}</ErrorMessage>
+                                ) : (
                                 <TagSelector
+                                    availableTags={availableTags} // 실제 DB 태그 전달
                                     selectedTags={formData.tags}
                                     onTagsChange={handleTagsChange}
                                     maxTags={10}
                                     error={validationErrors.tags}
                                 />
+                                )}
                             </InputGroup>
                         </FormSection>
 

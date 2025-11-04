@@ -74,6 +74,7 @@ export const UserImage = styled.img`
   height: 40px;
   border-radius: 50%;
   object-fit: cover;
+  cursor: pointer;
 `;
 
 export const UserDetails = styled.div`

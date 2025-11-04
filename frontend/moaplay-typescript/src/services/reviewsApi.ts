@@ -36,7 +36,11 @@ export const deleteReview = async (id: number): Promise<void> => {
 
 
 // (GET) 내가 쓴 리뷰 목록 조회 API
-export const getMyReview = async (): Promise<GetMyReviewResponse> => {
-    const { data } = await axiosInstance.get<GetMyReviewResponse>('/reviews/me');
-    return data;
-}
+export const getMyReview = async (
+  params?: { page?: number; per_page?: number }
+): Promise<GetMyReviewResponse> => {
+  const { data } = await axiosInstance.get<GetMyReviewResponse>('/reviews/me', {
+    params,
+  });
+  return data;
+};

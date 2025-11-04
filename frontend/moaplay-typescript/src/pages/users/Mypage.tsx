@@ -1,20 +1,21 @@
-import React, { useEffect, useState, useRef, useCallback, type CSSProperties } from 'react'; // useRef 추가
+import React, { useEffect, useState, useRef, useCallback, type CSSProperties } from 'react';
 import { useNavigate } from 'react-router-dom';
 
-import * as UserApi from '../../services/usersApi';     // 사용자 정보 API
-import * as ReviewApi from '../../services/reviewsApi';  // 리뷰 API
-import * as FavoriteApi from '../../services/favoritesApi';// 찜 API
+import * as UserApi from '../../services/usersApi';
+import * as ReviewApi from '../../services/reviewsApi';
+import * as FavoriteApi from '../../services/favoritesApi';
+import * as EventApi from '../../services/eventsApi';
 import { useAuthContext } from '../../contexts/AuthContext';
 import { useModal } from '../../hooks/useModal';
 import { useReview } from '../../hooks/useReview';
 import { useFavorite } from '../../hooks/useFavorite';
 
-import type * as U from '../../types/users';        // User 타입
-import type * as R from '../../types/reviews';       // Review 타입
-import type * as F from '../../types/favorites';     // Favorite 타입 (찜 목록용)
-import type * as E from '../../types/events';        // Event 타입 (찜 목록 내부용)
+import type * as U from '../../types/users';
+import type * as R from '../../types/reviews';
+import type * as F from '../../types/favorites';
+import * as E from '../../types/events';
 
-import EventCard from '../../components/EventCard';   // EventCard 재사용
+import EventCard from '../../components/EventCard';
 import ReviewCard from '../../components/ReviewCard'
 import Modal from '../../components/common/Modal';
 import { ProfileUploadModal } from '../../components/ProfileUploadModal';
@@ -27,9 +28,9 @@ import BeatLoader from "react-spinners/BeatLoader";
 import ReviewDetail from '../../components/ReviewDetail';
 import ReviewForm from '../../components/ReviewForm';
 
-import * as S from '../../styles/Mypage.styles';    // 스타일 임포트
-import { FaPencilAlt, FaChevronLeft, FaChevronRight } from 'react-icons/fa'; // 아이콘
-import { number } from 'yup';
+import * as S from '../../styles/Mypage.styles';
+import { FaPencilAlt, FaChevronLeft, FaChevronRight } from 'react-icons/fa';
+import UpdateSelectTagsForm from '../../components/auth/UpdateSelectTagsForm';
 
 
 type EditableUserField = 'nickname' | 'email' | 'phone' | 'password' | 'tags';
@@ -54,12 +55,23 @@ const MyPage: React.FC = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [editingField, setEditingField] = useState<EditableUserField | null>(null);
   const [selectedReview, setSelectedReview] = useState<R.Review | null>(null);
-  const favoriteListRef = useRef<HTMLDivElement>(null); // 찜 목록 스크롤용
+  const [myEvents, setMyEvent] = useState<E.Event[]>([]);
+  const [isAtStartReviews, setIsAtStartReviews] = useState(true);
+  const [isAtEndReviews, setIsAtEndReviews] = useState(false);
+  const reviewListRef = useRef<HTMLDivElement>(null);
+
+  // ★ 추가된 상태 (스크롤 감지용)
+  const [isAtStartFavorites, setIsAtStartFavorites] = useState(true);
+  const [isAtEndFavorites, setIsAtEndFavorites] = useState(false);
+  const [isAtStartEvents, setIsAtStartEvents] = useState(true);
+  const [isAtEndEvents, setIsAtEndEvents] = useState(false);
+
+  const favoriteListRef = useRef<HTMLDivElement>(null);
+  const myEventListRef = useRef<HTMLDivElement>(null); // ★ 작성한 행사용 ref
   const { user } = useAuthContext();
   const navigate = useNavigate();
-  
 
-  const { 
+  const {
     isReviewModalOpen,
     isDeleteAccountModalOpen,
     isProfileModalOpen,
@@ -69,13 +81,10 @@ const MyPage: React.FC = () => {
     setIsHostApplyModalOpen,
     setReviewDetailModalOpen,
     openDeleteAccountModal,
-    openReviewDetailModal,
     openReviewModal,
-    openHostApplyModal,
     closeDeleteAccountModal,
     closeReviewModal,
     closeReviewDetailModal,
-    closeAllModals
   } = useModal();
 
   const {
@@ -87,12 +96,9 @@ const MyPage: React.FC = () => {
     handleDeleteReview,
   } = useReview(openReviewModal);
 
-  const {
-    favorites,
-    loadFavorites
-  } = useFavorite();
+  const { favorites, loadFavorites } = useFavorite();
 
-   useEffect(() => {
+  useEffect(() => {
     loadMyReviews();
   }, [loadMyReviews]);
 
@@ -100,40 +106,56 @@ const MyPage: React.FC = () => {
     loadFavorites();
   }, [loadFavorites]);
   
-
-  // 데이터 로딩
   const loadMyPageData = useCallback(async () => {
     setIsLoading(true);
     try {
-        // API 호출 로직 (이전과 동일)
-        const [userRes, favoritesRes] = await Promise.all([
-            UserApi.getMe(), // 내 정보 가져오기
-            FavoriteApi.getFavorites(), // 내 찜 8개
-        ]);
-        
-        // 가상 데이터 사용 (이전과 동일)
-        await new Promise(resolve => setTimeout(resolve, 500)); 
-        setUserData(userRes);
-        setMyFavorites(favoritesRes.favorites || []);
-
+      const [userRes, favoritesRes] = await Promise.all([
+        UserApi.getMe(),
+        FavoriteApi.getFavorites(),
+      ]);
+      await new Promise(resolve => setTimeout(resolve, 500)); 
+      setUserData(userRes);
+      setMyFavorites(favoritesRes.favorites || []);
     } catch (error) {
-        console.error("마이페이지 데이터 로딩 실패:", error);
-      // 필요 시 에러 상태 설정
+      console.error("마이페이지 데이터 로딩 실패:", error);
+      setIsLoading(false);
     } finally {
-        setIsLoading(false);
+      
     }
-  }, []); // 의존성 배열 비움 (처음 한 번만 생성)
-  // --- 👆 ---
+  }, []);
 
-    // --- 2. useEffect는 loadMyPageData 호출만 하도록 변경 ---
-    useEffect(() => {
-        loadMyPageData(); // 마운트 시 데이터 로딩 함수 호출
-    }, [loadMyPageData]);
+  useEffect(() => {
+    loadMyPageData();
+  }, [loadMyPageData]);
+
+  const loadMyEvent = useCallback(async () => {
+  
+  try {
+    const response = await EventApi.getEvents({ host_id: userData?.id });
+
+    // 응답이 배열인지 객체인지 확인
+    if (Array.isArray(response)) {
+      setMyEvent(response); // 배열 그대로 세팅
+    } else if (response?.events) {
+      setMyEvent(response.events); // events 배열만 추출
+    } else {
+      setMyEvent([]); // 예외 처리
+    }
+  } catch (error) {
+    console.log("마이이벤트 데이터 로딩 실패:", error);
+    setMyEvent([]);
+  } finally {
+    setIsLoading(false);
+  }
+}, [userData?.id]);
+
+  useEffect(() => {
+    if (userData?.role === 'host' || userData?.role === 'admin') loadMyEvent();
+  }, [userData, loadMyEvent]);
 
   const handleFieldUpdate = async (field: keyof U.Users, value: string) => {
     if (!userData) return;
     try {
-      // API 호출 예: UserApi.changeUser({ [field]: value })
       const payload = { [field]: value } as Partial<U.Users>;
       const updated = await UserApi.updateMe(payload);
       setUserData((prev) => prev ? { ...prev, ...updated } : prev);
@@ -143,37 +165,77 @@ const MyPage: React.FC = () => {
     }
   };
 
-  // 찜 목록 스크롤 함수
-  const scrollFavorites = (direction: 'left' | 'right') => {
-      if (favoriteListRef.current) {
-          const scrollAmount = favoriteListRef.current.offsetWidth * 0.8; // 화면 너비의 80% 스크롤
-          favoriteListRef.current.scrollBy({
-              left: direction === 'left' ? -scrollAmount : scrollAmount,
-              behavior: 'smooth'
-          });
-      }
+  const handleScroll = (ref: React.RefObject<HTMLDivElement>, setStart: any, setEnd: any) => {
+    if (!ref.current) return;
+    const { scrollLeft, scrollWidth, clientWidth } = ref.current;
+    setStart(scrollLeft <= 0);
+    setEnd(scrollLeft + clientWidth >= scrollWidth - 1);
   };
-  
+
+  const scrollFavorites = (direction: 'left' | 'right') => {
+    if (!favoriteListRef.current) return;
+    const scrollAmount = favoriteListRef.current.offsetWidth * 0.8;
+    favoriteListRef.current.scrollBy({
+      left: direction === 'left' ? -scrollAmount : scrollAmount,
+      behavior: 'smooth',
+    });
+  };
+
+  const scrollEvents = (direction: 'left' | 'right') => {
+    if (!myEventListRef.current) return;
+    const scrollAmount = myEventListRef.current.offsetWidth * 0.8;
+    myEventListRef.current.scrollBy({
+      left: direction === 'left' ? -scrollAmount : scrollAmount,
+      behavior: 'smooth',
+    });
+  };
+
+  const scrollReviews = (direction: 'left' | 'right') => {
+    if (!reviewListRef.current) return;
+    const scrollAmount = reviewListRef.current.offsetWidth * 0.8;
+    reviewListRef.current.scrollBy({
+      left: direction === 'left' ? -scrollAmount : scrollAmount,
+      behavior: 'smooth',
+    });
+  };
+
+  useEffect(() => {
+    const favRef = favoriteListRef.current;
+    const evtRef = myEventListRef.current;
+
+    if (!favRef && !evtRef) return; // null일 경우 바로 return
+
+    const handleFavScroll = () =>
+      handleScroll(favoriteListRef, setIsAtStartFavorites, setIsAtEndFavorites);
+    const handleEvtScroll = () =>
+      handleScroll(myEventListRef, setIsAtStartEvents, setIsAtEndEvents);
+
+    if (favRef) favRef.addEventListener('scroll', handleFavScroll);
+    if (evtRef) evtRef.addEventListener('scroll', handleEvtScroll);
+
+    // 초기 상태 세팅 시도할 때도 null 체크
+    if (favRef) handleFavScroll();
+    if (evtRef) handleEvtScroll();
+
+    // cleanup 시 동일 핸들러로 제거 (익명함수로 하면 안 됨)
+    return () => {
+      if (favRef) favRef.removeEventListener('scroll', handleFavScroll);
+      if (evtRef) evtRef.removeEventListener('scroll', handleEvtScroll);
+    };
+  }, [favorites, myEvents]);
 
   const handleAccountDeleted = () => {
-    // 예: 로그아웃 처리, 홈으로 이동 등
     alert('회원탈퇴가 완료되었습니다.');
-    // 로그아웃 로직
     navigate('/');
   };
 
   if (isLoading) {
-    return  <BeatLoader
-        color="#8b8b8bff"
-        loading={isLoading}
-        cssOverride={override}
-        size={15}
-        aria-label="Loading Spinner"
-        data-testid="loader"
-      />;
+    return (
+      <BeatLoader color="#8b8b8bff" loading={isLoading} cssOverride={override} size={15} />
+    );
   }
-  if (!userData) {
-    // 로그인 안 된 경우 등
+
+  if (!isLoading && !userData) {
     alert("사용자 정보를 불러올 수 없습니다.");
     navigate('/');
   }
@@ -181,7 +243,7 @@ const MyPage: React.FC = () => {
   const onClose = () => {
     closeReviewModal();
     setEditingReview(null);
-  }
+  };
 
   const openDetailModal = (review: R.Review) => {
     setSelectedReview(review);
@@ -190,106 +252,154 @@ const MyPage: React.FC = () => {
 
   return (
     <S.PageContainer>
-      {/* --- 1. 프로필 섹션 --- */}
+      {/* --- 프로필 섹션 --- */}
       <S.ProfileSection>
         <S.ProfileAvatar src={user?.profile_image || defaultImage} alt="프로필 사진" />
         <S.ProfileInfo>
           <S.ProfileName>{userData?.nickname}</S.ProfileName>
           <S.ProfileUserId>{userData?.user_id}</S.ProfileUserId>
         </S.ProfileInfo>
-        <S.EditProfileButton 
-          aria-label="프로필 수정"
-          onClick={() => setIsProfileModalOpen(true)}
-        >
+        <S.EditProfileButton onClick={() => setIsProfileModalOpen(true)}>
           <FaPencilAlt />
         </S.EditProfileButton>
       </S.ProfileSection>
 
-      {/* --- 2. 기본 정보 --- */}
-      <S.InfoSection>
-        <S.SectionTitle>기본 정보</S.SectionTitle>
-        <S.InfoRow>
-          <S.InfoLabel>닉네임</S.InfoLabel>
-          <S.InfoValue>{userData?.nickname}</S.InfoValue>
-          <S.ChangeButton onClick={() => setEditingField('nickname')}>변경</S.ChangeButton>
-        </S.InfoRow>
-        <S.InfoRow>
-          <S.InfoLabel>아이디</S.InfoLabel>
-          <S.InfoValue>{userData?.user_id}</S.InfoValue>
-          {/* 아이디는 변경 불가하므로 버튼 없음 */}
-        </S.InfoRow>
-        <S.InfoRow>
-          <S.InfoLabel>비밀번호</S.InfoLabel>
-          <S.InfoValue>************</S.InfoValue>
-          <S.ChangeButton onClick={() => setEditingField('password')}>변경</S.ChangeButton>
-        </S.InfoRow>
-        <S.InfoRow>
-          <S.InfoLabel>이메일</S.InfoLabel>
-          <S.InfoValue>{userData?.email}</S.InfoValue>
-          <S.ChangeButton onClick={() => setEditingField('email')}>변경</S.ChangeButton>
-        </S.InfoRow>
-        <S.InfoRow>
-          <S.InfoLabel>전화번호</S.InfoLabel>
-          <S.InfoValue>{userData?.phone || '-'}</S.InfoValue>
-          <S.ChangeButton onClick={() => setEditingField('phone')}>변경</S.ChangeButton>
-        </S.InfoRow>
-        <S.InfoRow>
-          <S.InfoLabel>선호 태그</S.InfoLabel>
-          {/* <S.InfoValue>{(userData.tags || []).join(', ') || '-'}</S.InfoValue> */}
-          <S.ChangeButton>변경</S.ChangeButton>
-        </S.InfoRow>
+      {/* --- 2. 기본 정보 --- */} 
+      <S.InfoSection> 
+        <S.SectionTitle>기본 정보</S.SectionTitle> 
+        <S.InfoRow> 
+          <S.InfoLabel>닉네임</S.InfoLabel> 
+          <S.InfoValue>{userData?.nickname}</S.InfoValue> 
+            <S.ChangeButton onClick={() => setEditingField('nickname')}>변경</S.ChangeButton> 
+        </S.InfoRow> 
+        <S.InfoRow> 
+          <S.InfoLabel>아이디</S.InfoLabel> 
+          <S.InfoValue>{userData?.user_id}</S.InfoValue> 
+          {/* 아이디는 변경 불가하므로 버튼 없음 */} 
+        </S.InfoRow> 
+        <S.InfoRow> 
+          <S.InfoLabel>비밀번호</S.InfoLabel> 
+          <S.InfoValue>************</S.InfoValue> 
+          <S.ChangeButton onClick={() => setEditingField('password')}>변경</S.ChangeButton> 
+        </S.InfoRow> 
+        <S.InfoRow> 
+          <S.InfoLabel>이메일</S.InfoLabel> 
+          <S.InfoValue>{userData?.email}</S.InfoValue> 
+          <S.ChangeButton onClick={() => setEditingField('email')}>변경</S.ChangeButton> 
+        </S.InfoRow> 
+        <S.InfoRow> 
+          <S.InfoLabel>전화번호</S.InfoLabel> 
+          <S.InfoValue>{userData?.phone || '-'}</S.InfoValue> 
+          <S.ChangeButton onClick={() => setEditingField('phone')}>변경</S.ChangeButton> 
+        </S.InfoRow> 
+        <S.InfoRow> 
+          <S.InfoLabel>선호 태그</S.InfoLabel> 
+          <S.InfoValue>{(userData?.preferred_tags || []).join(', ') || '-'}</S.InfoValue> 
+          <S.ChangeButton onClick={() => setEditingField('tags')}>변경</S.ChangeButton> 
+        </S.InfoRow> 
       </S.InfoSection>
 
-      {/* --- 3. 내 리뷰 --- */}
+      {/* --- 리뷰 섹션 --- */}
       <section>
         <S.ListHeader>
           <S.SectionTitle style={{ borderBottom: 'none', marginBottom: 0 }}>리뷰</S.SectionTitle>
-          <S.ViewMoreButton>더보기</S.ViewMoreButton>
+          <S.ViewMoreButton onClick={() => navigate('/mypage/reviews')}>더보기</S.ViewMoreButton>
         </S.ListHeader>
-        <S.ReviewGrid>
-          {myReviews.length === 0 ? (
-            <S.NoResultsMessage>작성한 리뷰가 없습니다.</S.NoResultsMessage> 
-          ) : (
-            // 👇 ReviewCard 컴포넌트 사용
-            myReviews.map(review => (
-              <ReviewCard
-                review={review}
-                onClick={() => openDetailModal(review)} 
-                onEdit={() => handleEditReview(review)} 
-                onDelete={() => handleDeleteReview(review.id)} // 삭제
-              />
-            ))
-            // 👆 ReviewCard 컴포넌트 사용
+
+        <S.FavoriteListContainer>
+          {myReviews.length > 0 && !isAtStartReviews && (
+            <S.ArrowButton direction="left" onClick={() => scrollReviews('left')}>
+              <FaChevronLeft />
+            </S.ArrowButton>
           )}
-        </S.ReviewGrid>
+
+          <S.ReviewScrollContainer ref={reviewListRef}>
+            {myReviews.length === 0 ? (
+              <S.NoResultsMessage>작성한 리뷰가 없습니다.</S.NoResultsMessage>
+            ) : (
+              myReviews.slice(0, 5).map((review) => (
+                <ReviewCard
+                  key={review.id}
+                  review={review}
+                  onClick={() => openDetailModal(review)}
+                  onEdit={() => handleEditReview(review)}
+                  onDelete={() => handleDeleteReview(review.id)}
+                />
+              ))
+            )}
+          </S.ReviewScrollContainer>
+
+          {myReviews.length > 0 && !isAtEndReviews && (
+            <S.ArrowButton direction="right" onClick={() => scrollReviews('right')}>
+              <FaChevronRight />
+            </S.ArrowButton>
+          )}
+        </S.FavoriteListContainer>
       </section>
 
-      {/* --- 4. 찜한 행사 --- */}
+      {/* --- 찜한 행사 섹션 --- */}
       <section>
         <S.ListHeader>
           <S.SectionTitle style={{ borderBottom: 'none', marginBottom: 0 }}>찜한 행사</S.SectionTitle>
-          <S.ViewMoreButton>더보기</S.ViewMoreButton>
+          <S.ViewMoreButton onClick={() => navigate('/mypage/favorites')}>더보기</S.ViewMoreButton>
         </S.ListHeader>
+
         <S.FavoriteListContainer>
-          <S.ArrowButton direction="left" onClick={() => scrollFavorites('left')} aria-label="왼쪽으로 스크롤">
-            <FaChevronLeft />
-          </S.ArrowButton>
+          {favorites.length > 0 && !isAtStartFavorites && (
+            <S.ArrowButton direction="left" onClick={() => scrollFavorites('left')} aria-label="왼쪽으로 스크롤">
+              <FaChevronLeft />
+            </S.ArrowButton>
+          )}
+
           <S.FavoriteGrid ref={favoriteListRef}>
             {favorites.length === 0 ? (
-              <S.NoResultsMessage>찜한 행사가 없습니다.</S.NoResultsMessage> // NoResultsMessage 재사용 가능
+              <S.NoResultsMessage>찜한 행사가 없습니다.</S.NoResultsMessage>
             ) : (
-              favorites.map(favorite => (
-                // 찜 목록의 favorite 객체 안에 event 객체가 포함되어야 함
-                favorite.event && <EventCard key={favorite.id} event={favorite.event as E.Event} /> 
-              ))
+              favorites.slice(0, 5).map(favorite =>
+                favorite.event && <EventCard key={favorite.id} event={favorite.event as E.Event} />
+              )
             )}
-            <S.ArrowButton direction="right" onClick={() => scrollFavorites('right')} aria-label="오른쪽으로 스크롤">
-            <FaChevronRight />
-          </S.ArrowButton>
           </S.FavoriteGrid>
-          
+
+          {favorites.length > 0 && !isAtEndFavorites && (
+            <S.ArrowButton direction="right" onClick={() => scrollFavorites('right')} aria-label="오른쪽으로 스크롤">
+              <FaChevronRight />
+            </S.ArrowButton>
+          )}
         </S.FavoriteListContainer>
       </section>
+
+      {/* --- 작성한 행사 섹션 (host/admin만) --- */}
+      {(userData?.role === 'host' || userData?.role === 'admin') && (
+        <section>
+          <S.ListHeader>
+            <S.SectionTitle style={{ borderBottom: 'none', marginBottom: 0 }}>작성한 행사</S.SectionTitle>
+            <S.ViewMoreButton onClick={() => navigate('/mypage/events')}>더보기</S.ViewMoreButton>
+          </S.ListHeader>
+
+          <S.FavoriteListContainer>
+            {myEvents.length > 0 && !isAtStartEvents && (
+              <S.ArrowButton direction="left" onClick={() => scrollEvents('left')} aria-label="왼쪽으로 스크롤">
+                <FaChevronLeft />
+              </S.ArrowButton>
+            )}
+
+            <S.FavoriteGrid ref={myEventListRef}>
+              {myEvents.length === 0 ? (
+                <S.NoResultsMessage>작성한 행사가 없습니다.</S.NoResultsMessage>
+              ) : (
+                myEvents.slice(0, 5).map(event => event && <EventCard key={event.id} event={event as E.Event} />)
+              )}
+            </S.FavoriteGrid>
+
+            {myEvents.length > 0 && !isAtEndEvents && (
+              <S.ArrowButton direction="right" onClick={() => scrollEvents('right')} aria-label="오른쪽으로 스크롤">
+                <FaChevronRight />
+              </S.ArrowButton>
+            )}
+          </S.FavoriteListContainer>
+        </section>
+      )}
 
       {/* --- 5. 하단 링크 --- */}
       <S.ActionLinks>
@@ -373,7 +483,16 @@ const MyPage: React.FC = () => {
             closeReviewDetailModal();
           }}
         />
-  
+
+        {editingField === 'tags' && (
+          <Modal isOpen={true} onClose={() => setEditingField(null)} title="">
+            <UpdateSelectTagsForm
+              userTags={userData?.preferred_tags || []}
+              onCloseModal={() => setEditingField(null)}
+              onSuccess={loadMyPageData} // 데이터 새로고침
+            />
+          </Modal>
+        )}
     </S.PageContainer>
   );
 };

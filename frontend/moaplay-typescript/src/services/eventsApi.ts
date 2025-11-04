@@ -4,9 +4,16 @@ import type * as E from '../types/events';
 // eventApi.ts 전용 Response 타입을 추가 정의
 
 // (GET) 모든 행사 목록 조회 (페이지네이션)
-export const getEvents = async (params : E.GetEventsPayload): Promise<E.Event[]> => {
-    const { data } = await axiosInstance.get<E.Event[]>('/events/', {params: params});
-    return data;
+export const getEvents = async (params: E.GetEventsPayload) => {
+  const query: any = { ...params };
+
+  // 배열을 쉼표 문자열로 변환
+  if (Array.isArray(params.tags) && params.tags.length > 0) {
+    query.tags = params.tags.join(',');
+  }
+
+  const { data } = await axiosInstance.get('/events', { params: query });
+  return data;
 };
 
 // (GET) 특정 ID의 행사 상세 정보 조회

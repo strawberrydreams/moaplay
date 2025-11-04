@@ -55,7 +55,7 @@ export const EventUpdatePage: React.FC = () => {
         description: '',
         phone: '',
         organizer: '',
-        hostedBy: '',
+        hosted_By: '',
         tags: []
     });
 
@@ -92,8 +92,8 @@ export const EventUpdatePage: React.FC = () => {
                     location: (data as any).location || '',
                     description: (data as any).description || '',
                     phone: (data as any).phone || '',
-                    organizer: (data as any).host?.name || '',
-                    hostedBy: (data as any).host?.organization || '',
+                    organizer: (data as any).organizer  || '',
+                    hosted_By: (data as any).hosted_by  || '',
                     tags: Array.isArray((data as any).tags) ? (data as any).tags : []
                 });
 
@@ -179,7 +179,6 @@ export const EventUpdatePage: React.FC = () => {
             phone: formData.phone,
             tags: formData.tags,
             images: formData.images,
-            // existingImages could be handled inside validation util if needed
         });
         if (!validation.isValid) {
             const errorMap: Record<string,string> = {};
@@ -208,7 +207,7 @@ export const EventUpdatePage: React.FC = () => {
                 description: formData.description.trim(),
                 phone: formData.phone.trim(),
                 organizer: formData.organizer?.trim() || '',
-                hosted_by: formData.hostedBy?.trim() || '',
+                hosted_by: formData.hosted_By?.trim() || '',
                 image_urls: [] as string[], // 백엔드 요구사항에 맞게 세팅
                 tag_names: formData.tags.map(t => t.trim()).filter(Boolean)
             };
@@ -395,10 +394,10 @@ export const EventUpdatePage: React.FC = () => {
                                 <InputGroup>
                                     <InputLabel htmlFor="hostedBy">주관</InputLabel>
                                     <TextInput
-                                        id="hostedBy"
+                                        id="hosted_By"
                                         type="text"
-                                        value={formData.hostedBy || ''}
-                                        onChange={(e) => handleFieldChange('hostedBy', e.target.value)}
+                                        value={formData.hosted_By || ''}
+                                        onChange={(e) => handleFieldChange('hosted_By', e.target.value)}
                                     />
                                 </InputGroup>
                             </FormSection>

@@ -39,7 +39,7 @@ export interface GetReviewApiResponse {
 
 export interface GetMyReviewResponse {
     reviews: Review[];
-    pagenation: {
+    pagination: {
         page: number;
         per_page: number;
         total: number;

@@ -139,12 +139,19 @@ def update_me():
             
             # 새 선호 태그 추가
             for tag_name in tag_names:
+                
+                 # 문자열 검증
+                if not isinstance(tag_name, str) or not tag_name.strip():
+                    continue
+                tag_name = tag_name.strip()
+
                 # 태그 찾기 또는 생성
                 tag = db.session.query(Tag).filter_by(name=tag_name).first()
                 if not tag:
                     tag = Tag(name=tag_name)
                     db.session.add(tag)
                     db.session.flush()
+                    db.session.refresh(tag)  # tag.id 보장
                 
                 # 선호 태그 관계 생성
                 user_tag = UserTag(

@@ -12,6 +12,14 @@ export const Container = styled.div`
   margin: 0 auto;
   padding: 2rem;
   color: #131313;
+
+  @media (max-width: 1024px) {
+    padding: 1.5rem;
+  }
+
+  @media (max-width: 600px) {
+    padding: 1rem;
+  }
 `;
 
 export const SearchContainer = styled.form`
@@ -20,6 +28,10 @@ export const SearchContainer = styled.form`
   padding: 1.5rem;
   margin-bottom: 2rem;
   border: 1px solid #E0E0E0;
+
+  @media (max-width: 600px) {
+    padding: 1rem;
+  }
 `;
 
 export const FormRow = styled.div`
@@ -42,12 +54,14 @@ export const InputGroup = styled.div`
   align-items: center;
   gap: 0.5rem;
   position: relative;
+  flex: 1;
 
   label {
     font-size: 0.9rem;
     font-weight: 500;
     white-space: nowrap;
   }
+
   input[type="text"],
   input[type="date"],
   select {
@@ -58,25 +72,52 @@ export const InputGroup = styled.div`
     font-size: 0.9rem;
     background-color: #fff;
     font-family: inherit;
+    width: 100%;
   }
+
+  &.order-select {
+    select {
+      display: flex;
+      justify-content: right !important;
+      width: 18%;
+    }
+  }
+
   &.search-bar {
-    flex-grow: 1;
+    flex-grow: 3;
     input { width: 100%; padding-right: 2rem; }
   }
 
   input[type="text"] {
-    border: 1px solid #E0E0E0;
-    border-radius: 6px;
-    padding: 0.5rem 65px 0.5rem 0.75rem; /* 👈 오른쪽 패딩 증가 */
-    font-size: 0.9rem;
-    background-color: #fff;
-    font-family: inherit;
-    flex-grow: 1; /* input이 남은 공간 채우도록 */
-    width: 100%;
+    padding: 0.5rem 65px 0.5rem 0.75rem;
   }
-    
-`;
 
+  @media (max-width: 600px) {
+    label {
+      font-size: 0.8rem;
+    }
+    input, select {
+      font-size: 0.85rem;
+    }
+    input[type="date"] {
+      display: flex;
+    }
+  }
+
+  @media (max-width: 480px) {
+    width: 100% !important;
+    display: flex;
+    justify-content: left;
+    align-items: center;
+    flex-direction: column;
+
+    &.order-select {
+    select {
+      width: 100%;
+    }
+  }
+  }
+`;
 
 export const SearchButton = styled.button`
   position: absolute;
@@ -84,25 +125,25 @@ export const SearchButton = styled.button`
   transform: translateY(-50%);
   background: none;
   border: none;
-  padding: 0 10px; /* 좌우 여백 */
+  padding: 0 10px;
   margin: 0;
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
-  height: 80%; /* input보다 약간 작게 */
+  height: 80%;
   color: #777;
-  right: 5px; /* X 버튼 왼쪽에 위치 */
+  right: 5px;
 
-  &:hover {
-    color: #333;
-  }
+  &:hover { color: #333; }
+  &:focus { outline: none; }
 
-  &:focus {
-    outline: none;
+  @media (max-width: 480px) {
+    right: 2px;
+    margin-top: 13px;
+    padding: 0 6px;
   }
 `;
-
 
 export const ClearButton = styled.button`
   position: absolute;
@@ -110,28 +151,32 @@ export const ClearButton = styled.button`
   transform: translateY(-50%);
   background: none;
   border: none;
-  padding: 0 10px; /* 좌우 여백 */
+  padding: 0 10px;
   margin: 0;
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
-  height: 80%; /* input보다 약간 작게 */
-  color: #aaa; /* 약간 흐리게 */
-  right: 35px; /* 가장 오른쪽에 위치 */
+  height: 80%;
+  color: #aaa;
+  right: 35px;
   font-size: 1.2rem;
 
-  &:hover {
-    color: #555;
-  }
+  &:hover { color: #555; }
+  &:focus { outline: none; }
 
-  &:focus {
-    outline: none;
+  @media (max-width: 480px) {
+    font-size: 1rem;
+    right: 28px;
   }
 `;
 
 export const DateRangeGroup = styled(InputGroup)`
-  span { color: #777; font-weight: 500; }
+  span {
+    color: #777;
+    font-weight: 500;
+    font-size: 0.9rem;
+  }
 
   input[type="date"]::-webkit-calendar-picker-indicator {
     cursor: pointer;
@@ -144,17 +189,52 @@ export const DateRangeGroup = styled(InputGroup)`
     flex-direction: row;
     align-items: center;
     input { flex-grow: 1; }
+    width: 30% !important;
+
+    input[type="date"]::-webkit-calendar-picker-indicator {
+    cursor: pointer;
+    display: block !important;
+    width: 50%;
+    opacity: 1 !important;
+    filter: invert(56%) sepia(61%) saturate(1510%) hue-rotate(224deg) brightness(94%) contrast(91%);
+    }
+  }
+
+  @media (max-width: 480px) {
+    span {
+      font-size: 0.8rem;
+    }
+    width: 100% !important;
+    display: flex;
+    justify-content: left;
+    align-items: center;
+    flex-direction: column;
+
+    input[type="date"]::-webkit-calendar-picker-indicator {
+    cursor: pointer;
+    display: block !important;
+    width: 15% !important;
+    opacity: 1 !important;
+    filter: invert(56%) sepia(61%) saturate(1510%) hue-rotate(224deg) brightness(94%) contrast(91%);
+    }
   }
 `;
 
 export const FilterRow = styled(FormRow)`
   justify-content: space-between;
+  flex-wrap: wrap;
+
+  @media (max-width: 768px) {
+    justify-content: flex-start;
+    gap: 0.75rem;
+  }
 `;
 
 export const FilterGroup = styled.div`
   display: flex;
   align-items: center;
   gap: 1rem;
+
   .filter-label {
     font-weight: 700;
     font-size: 1rem;
@@ -162,86 +242,107 @@ export const FilterGroup = styled.div`
     align-items: center;
     gap: 0.25rem;
   }
+
+  @media (max-width: 600px) {
+    flex-direction: column;
+    align-items: flex-start;
+
+    .filter-label {
+      font-size: 0.9rem;
+    }
+  }
+
+  @media (max-width: 480px) {
+    flex-direction: column;
+    align-items: center;
+  }
 `;
 
 export const TagList = styled.div`
   display: flex;
   flex-wrap: wrap;
   gap: 0.5rem;
+
+  @media (max-width: 480px) {
+    gap: 0.4rem;
+  }
 `;
 
 export const DeleteTagButton = styled.span`
-  display: none; /* 평소에는 숨김 */
+  display: none;
   position: absolute;
   top: 50%;
-  right: 5px; /* 오른쪽에서 5px 떨어짐 */
-  transform: translateY(-50%); /* 세로 중앙 정렬 */
-  
+  right: 5px;
+  transform: translateY(-50%);
   width: 14px;
   height: 14px;
-  line-height: 14px; /* 'x' 기호 중앙 정렬 */
+  line-height: 14px;
   text-align: center;
-  
   background-color: #865dd1;
   color: white;
   border-radius: 50%;
   font-size: 10px;
   font-weight: bold;
   cursor: pointer;
-  
+
   &:hover {
-    background-color: #865dd1;
+    background-color: #7043c1;
   }
 `;
 
 export const TagButton = styled.button<ITagButtonProps>`
-  /* ... (기존 스타일: background-color, border, color, etc.) ... */
+  position: relative;
   border-radius: 15px;
   font-size: 0.85rem;
   cursor: pointer;
   transition: all 0.2s ease;
   background-color: #865dd1;
+  color: white;
   border: 1px solid #d9d9d9;
+  padding: 0.4rem 22px 0.4rem 1rem;
 
-  /* 3. 삭제 버튼을 위한 position과 padding 추가 */
-  position: relative; /* 자식(DeleteTagButton)을 absolute로 위치시키기 위함 */
-  padding: 0.4rem 22px 0.4rem 1rem; /* 👈 오른쪽 패딩(22px)을 줘서 'x' 버튼 공간 확보 */
-
-  /* 4. 마우스를 올리면 삭제 버튼을 보여줌 */
   &:hover ${DeleteTagButton} {
     display: block;
   }
 
-  &.add-tag { 
-    background-color: #fff; 
-    color: #777; 
-    padding: 0.4rem 1rem; /* 👈 + 버튼은 오른쪽 패딩이 필요 없음 */
+  &.add-tag {
+    background-color: #fff;
+    color: #777;
+    padding: 0.4rem 1rem;
   }
 
   &:focus {
     outline: none;
   }
+
+  @media (max-width: 480px) {
+    font-size: 0.8rem;
+    padding: 0.35rem 18px 0.35rem 0.8rem;
+  }
 `;
 
-// --- 👇 1. 이 스타일을 새로 추가합니다. ---
 export const TagInput = styled.input`
   background-color: #fff;
   border: 1px solid #E0E0E0;
   border-radius: 15px;
   padding: 0.4rem 0.8rem;
   font-size: 0.85rem;
-  width: 100px; /* 입력창 너비 (조절 가능) */
+  width: 100px;
   outline: none;
   font-family: inherit;
   color: #333;
-  
+
   &::placeholder {
     color: #aaa;
   }
-    
+
   &:focus {
-    outline: none;
-    border: 1px solid #8A2BE2; /* 활성화된 태그 버튼과 유사하게 */
+    border: 1px solid #865dd1;
+  }
+
+  @media (max-width: 480px) {
+    width: 100%;
+    font-size: 0.8rem;
   }
 `;
 
@@ -251,24 +352,31 @@ export const EventGrid = styled.section`
   gap: 1.5rem;
 
   @media (max-width: 1024px) {
+    grid-template-columns: repeat(3, 1fr);
+  }
+
+  @media (max-width: 768px) {
     grid-template-columns: repeat(2, 1fr);
   }
-  @media (max-width: 768px) {
+
+  @media (max-width: 480px) {
     grid-template-columns: 1fr;
+    gap: 1rem;
   }
 `;
 
 export const NoResultsMessage = styled.p`
-  grid-column: 1 / -1; /* 그리드의 첫 열부터 마지막 열까지 차지 */
+  grid-column: 1 / -1;
   width: 100%;
-  
-  /* 텍스트 가운데 정렬 */
   text-align: center;
-  
-  /* 추가 스타일 (선택 사항) */
   color: #777;
-  padding: 3rem 0; /* 위아래 여백 */
+  padding: 3rem 0;
   font-size: 1rem;
+
+  @media (max-width: 480px) {
+    padding: 2rem 0;
+    font-size: 0.9rem;
+  }
 `;
 
 export const LoadingMessage = styled.div`
@@ -276,4 +384,9 @@ export const LoadingMessage = styled.div`
   text-align: center;
   color: #888;
   font-size: 1rem;
+
+  @media (max-width: 480px) {
+    font-size: 0.9rem;
+    margin: 24px auto;
+  }
 `;

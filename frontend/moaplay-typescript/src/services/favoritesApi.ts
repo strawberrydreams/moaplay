@@ -2,9 +2,17 @@ import axiosInstance from './core/axios';
 import type { FavoriteCreationResponse, FavoriteResponse, FavoriteStatus } from '../types/favorites';
 
 // (GET) 사용자의 모든 찜 목록 조회
-export const getFavorites = async (): Promise<FavoriteResponse> => {
-    const { data } = await axiosInstance.get<FavoriteResponse>('/favorites/');
-    return data;
+export const getFavorites = async ({
+  page = 1,
+  per_page = 12,
+}: {
+  page?: number;
+  per_page?: number;
+} = {}): Promise<FavoriteResponse> => {
+  const { data } = await axiosInstance.get<FavoriteResponse>('/favorites/', {
+    params: { page, per_page },
+  });
+  return data;
 };
 
 // (GET) 특정 찜 항목 조회

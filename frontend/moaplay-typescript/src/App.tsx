@@ -11,7 +11,16 @@ import MainPage from './pages/MainPage';
 import FAQPage from './pages/FAQPage';
 import MyPage from './pages/users/Mypage';
 import HostApplyPage from './pages/HostApplyForm';
-
+import { AdminDashboardPage } from "./pages/admin/AdminDashboardPage";
+import EventCreatePage from "./pages/events/EventCreatePage";
+import {EventUpdatePage} from "./pages/events/EventUpdatePage";
+import OtherUserPage from './pages/users/OtherUserPage';
+import PopularEventsPage from './pages/PopularEventsPage';
+import RegionalEventsPage from './pages/RegionPage';
+import RecommendedEventsPage from './pages/RecommendPage';
+import ReviewsPage from './pages/more/ReviewsPage';
+import FavoritesPage from './pages/more/FavoritesPage';
+import MyEventsPage from './pages/more/MyEventsPage';
 
 // 전역 스타일 임포트 (Header.styles.js에서 정의했다면)
 import { GlobalStyle } from './styles/Header.styles';
@@ -20,14 +29,8 @@ import { GlobalStyle } from './styles/Header.styles';
 // Modal 제어 커스텀 Hook
 import { useModal } from './hooks/useModal';
 import { AuthProvider } from './contexts/AuthContext';
-import PopularEventsPage from './pages/PopularEventsPage';
-import RegionalEventsPage from './pages/RegionPage';
-import RecommendedEventsPage from './pages/RecommendPage';
 
-import { AdminDashboardPage } from "./pages/admin/AdminDashboardPage";
-import EventCreatePage from "./pages/events/EventCreatePage";
-import {EventUpdatePage} from "./pages/events/EventUpdatePage";
-import OtherUserPage from './pages/users/OtherUserPage';
+
 
 const App: React.FC = () => {
     const { 
@@ -56,6 +59,9 @@ const App: React.FC = () => {
                     <Route path='/region' element={<RegionalEventsPage/>}/>
                     <Route path='/recommend' element={<RecommendedEventsPage/>}/>
                     <Route path='/mypage' element={<MyPage/>}/>
+                    <Route path="/mypage/reviews" element={<ReviewsPage />} />
+                    <Route path="/mypage/favorites" element={<FavoritesPage />} />
+                    <Route path="/mypage/events" element={<MyEventsPage />} />
                     <Route path='/users/:userId' element={<OtherUserPage/>}/>
                     <Route path='/admin/dashboard' element={<AdminDashboardPage/>}/>
                     <Route path="/faq" element={<FAQPage />} />

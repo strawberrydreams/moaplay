@@ -111,12 +111,14 @@ const CalendarEventDetail: React.FC<IDetailProps> = ({ events = [],
                 {/* ... (DetailTitle, DetailInfoGrid - displayEvent 사용) ... */}
                 <S.DetailInfoGrid>
                     <p>날짜: <span>{displayEvent.start_date}</span> ~ <span>{displayEvent.end_date}</span></p>
-                    <p>주최자: <span>{displayEvent.host?.nickname || '정보 없음'}</span></p>
+                    <p>주관: <span>{displayEvent.organizer || '정보 없음'}</span></p>
+                    <p>주최: <span>{displayEvent.hosted_by || '정보 없음'}</span></p>
                     <p>장소: <span>{displayEvent.location}</span></p>
                     <p>연락처: <span>{displayEvent.phone || '정보 없음'}</span></p>
                 </S.DetailInfoGrid>
                 <S.DetailTagList>
-                    <h4>태그</h4> <br />
+                    <h4 style={{padding: '0px'}}>태그</h4>
+                    <br />
                     {tagsArray.map((tag, index) => ( <S.DetailTag key={index}>{tag}</S.DetailTag> ))}
                 </S.DetailTagList>
                 {/* ... (DetailDescription - displayEvent 사용) ... */}

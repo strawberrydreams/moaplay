@@ -33,7 +33,6 @@ export const ImageUploader: React.FC<ImageUploaderProps> = ({
   const [dragOver, setDragOver] = useState(false);
   const [previews, setPreviews] = useState<ImagePreview[]>([]);
   const [draggedIndex, setDraggedIndex] = useState<number | null>(null);
-  const [representativeIndex, setRepresentativeIndex] = useState<number | null>(0); // ✅ 대표 이미지 인덱스 추가
 
   
   const handleFileSelect = useCallback(
@@ -100,10 +99,6 @@ export const ImageUploader: React.FC<ImageUploaderProps> = ({
     const updated = images.filter((_, i) => i !== index);
     onImagesChange(updated);
 
-    // ✅ 대표 이미지가 삭제되면 0번으로 초기화
-    if (representativeIndex === index) {
-      setRepresentativeIndex(updated.length > 0 ? 0 : null);
-    }
   };
 
   const handleMoveImage = (from: number, to: number) => {
@@ -112,11 +107,6 @@ export const ImageUploader: React.FC<ImageUploaderProps> = ({
     const [moved] = updated.splice(from, 1);
     updated.splice(to, 0, moved);
     onImagesChange(updated);
-  };
-
-  // ✅ 이미지 클릭 시 대표 이미지 변경
-  const handleSetRepresentative = (index: number) => {
-    setRepresentativeIndex(index);
   };
 
   // 미리보기 동기화
@@ -183,23 +173,25 @@ export const ImageUploader: React.FC<ImageUploaderProps> = ({
                 onDragStart={onDragStart(index)}
                 onDragOver={onDragOverThumbnail(index)}
                 onDragEnd={onDragEnd}
-                onClick={() => handleSetRepresentative(index)} // ✅ 클릭 시 대표 이미지 변경
               >
                 <PreviewImage src={preview.preview} alt={preview.file.name} />
-                {representativeIndex === index && (
-                  <MainImageBadge>대표 이미지</MainImageBadge>
-                )}
-                <DeleteButton onClick={(e) => { 
-                  e.stopPropagation(); 
-                  handleRemoveImage(index);
-                }}>
+                
+                {/* 항상 첫 번째 이미지를 대표로 표시 */}
+                {index === 0 && <MainImageBadge>대표 이미지</MainImageBadge>}
+
+                <DeleteButton
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleRemoveImage(index);
+                  }}
+                >
                   ✕
                 </DeleteButton>
               </PreviewItem>
             ))}
           </PreviewGrid>
           <PreviewHint>
-            클릭한 이미지가 대표 이미지로 설정됩니다. 순서를 바꾸려면 드래그하세요.
+            첫 번째 이미지가 대표 이미지로 자동 설정됩니다. 순서를 바꾸려면 드래그하세요.
           </PreviewHint>
         </PreviewContainer>
       )}

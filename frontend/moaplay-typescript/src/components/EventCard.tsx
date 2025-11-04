@@ -17,7 +17,6 @@ const EventCard: React.FC<{ event: E.Event }> = ({ event }) => {
 
   const favoriteItem = favorites.find(fav => fav.event?.id === event.id);
   const isFavorited = !!favoriteItem
-  console.log("찜 확인: ", favoriteItem );
 
   useEffect(() => {
     loadFavorites();

@@ -25,6 +25,8 @@ export interface Event {
     tags: string[];
     phone: string;
     image_urls: string[];
+    organizer: string;
+    hosted_by: string;
     host: Host;
     status: 'pending' | 'approved' | 'modified' | 'rejected';
     created_at: string;
@@ -55,26 +57,30 @@ export interface CreateEventPayload {
 
 // 행사 목록 조회를 위한 데이터 타입 (Payload)
 // API: POST /api/events?page={id}&limit={limit}&region={region}&tag={tag}&date_from={date_from}&date_to={date_to}&sort={sort}
-// export interface GetEventsPayload {
-//     // search?: string;
-//     page?: number;
-//     limit?: number;
-//     region?: string;
-//     tag?: string[];
-//     date_from?: string;
-//     date_to?: string;
-//     sort?: string;
-//     order?: 'asc' | 'desc';
-// }
-
 export interface GetEventsPayload {
-    page?: number;
-    per_page?: number;
-    status?: 'status' | 'approved';
-    location?: string;
-    sort?: 'view_count' | 'start_date';
-    order?: 'asc' | 'desc';
+  title?: string;
+  page?: number;
+  per_page?: number;
+  status?: string;
+  limit?: number;
+  location?: string;
+  host_id?: number;
+  tags?: string[]; // 그대로 유지
+  date_from?: string;
+  date_to?: string;
+  sort?: string;
+  order?: 'asc' | 'desc';
 }
+
+// export interface GetEventsPayload {
+//     page?: number;
+//     per_page?: number;
+//     status?: 'status' | 'approved';
+//     location?: string;
+//     sort?: 'view_count' | 'start_date';
+//     order?: 'asc' | 'desc';
+//     host_id?: number;
+// }
 
 // 행사 수정을 위한 데이터 타입 (Payload)
 // API: PUT /api/events/{id} (수정 요청 Body)

@@ -1,49 +1,102 @@
 import styled from 'styled-components';
 
 export const MainPageContainer = styled.div`
-  /* 1. 최대 너비 설정 */
-  width: 1200px; 
-  
-  /* 2. 'margin: 0 auto'를 사용해 컨테이너 자체를 가운데 정렬합니다. */
-  margin-left: auto;
-  margin-right: auto;
-
-  /* 페이지 좌우에 여백을 줄 수도 있습니다. */
+  /* 1 최대 너비 설정 */
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
   padding: 0 20px;
+
+  /* 2 반응형 조정 */
+  @media (max-width: 1024px) {
+    padding: 0 16px;
+  }
+
+  @media (max-width: 768px) {
+    padding: 0 12px;
+  }
+
+  @media (max-width: 480px) {
+    padding: 0 8px;
+  }
 `;
 
 export const CalendarSection = styled.section`
-  /* 캘린더 + 상세정보 섹션을 가로(행)로 배치 */
   display: flex;
-  flex-direction: row; /* 행 방향 */
-  gap: 20px; /* 캘린더와 상세정보 사이의 간격 */
-  margin-bottom: 2rem; /* EventSearchPage와의 간격 */
+  flex-direction: row;
+  gap: 20px;
+  margin-bottom: 2rem;
+
+  /* 반응형: 모바일에서 세로 정렬 */
+  @media (max-width: 1024px) {
+    gap: 16px;
+  }
+
+  @media (max-width: 768px) {
+    flex-direction: column;
+    gap: 1.5rem;
+  }
 `;
 
 export const CalendarWrapper = styled.div`
-  /* 캘린더가 차지할 비율 */
-  flex: 2; /* 2의 비율 (약 66%) */
-  min-width: 0; /* flex 아이템이 부모보다 커지는 것을 방지 */
+  flex: 2;
+  min-width: 0; /* flex overflow 방지 */
+  background-color: #fff;
+
+  @media (max-width: 768px) {
+    width: 100%;
+    flex: none;
+  }
 `;
 
 export const CalendarDetailWrapper = styled.div`
-  /* 상세정보가 차지할 비율 */
-  flex: 1; /* 1의 비율 (약 33%) */
+  flex: 1;
   min-width: 0;
+  background-color: #fff;
+
+  @media (max-width: 768px) {
+    width: 100%;
+    flex: none;
+    order: -1; /* 모바일에서 상세 패널을 캘린더 위로 */
+  }
+`;
+
+export const BannerWrapper = styled.div`
+  width: 100vw; /* 화면 전체 폭 */
+  position: relative;
+  left: 50%;
+  right: 50%;
+  margin-left: -50vw;
+  margin-right: -50vw; /* 부모의 중앙 정렬 깨지지 않게 조정 */
+  overflow: hidden; /* 그림자나 경계 깔끔히 */
+
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  @media (max-width: 768px) {
+    margin-top: 0;
+  }
 `;
 
 export const BannerImage = styled.img`
   display: block;
-  align-item: center;
-  justify-content: center;
-  margin-top: -30px;
-  margin-bottom: 50px;
-  filter: drop-shadow(0 2px 4px rgba(0,0,0,0.25));
+  width: 100%;
+  max-width: 1200px;
+  aspect-ratio: 6 / 1; /* 1200x200 비율 유지 */
+  object-fit: cover;
+  margin: 0px auto 50px auto;
 
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.25));
   transition: filter 0.2s ease-in-out;
 
   &:hover {
     cursor: pointer;
-    filter: drop-shadow(0 4px 8px rgba(0,0,0,0.25));
+    filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.25));
+  }
+
+  /* ✅ 반응형 크기 조정 */
+  @media (max-width: 768px) {
+    max-height: 180px;
   }
 `;
