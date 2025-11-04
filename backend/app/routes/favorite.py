@@ -116,7 +116,7 @@ def get_favorites():
 
 
 ### 찜 단일 조회 API
-### GET /api/favorites/event/check/<int:event_id>
+### GET /api/favorites/check/<int:event_id>
 @favorite_bp.route('/check/<int:event_id>', methods=['GET'])
 @login_required
 def get_favorite_by_event(event_id):
