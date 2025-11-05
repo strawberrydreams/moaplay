@@ -99,62 +99,39 @@ const MyPage: React.FC = () => {
 
   const { favorites, loadFavorites } = useFavorite();
 
-  useEffect(() => {
-    loadMyReviews();
-  }, [loadMyReviews]);
-
-  useEffect(() => {
-    loadFavorites();
-  }, [loadFavorites]);
-  
+   /** 한 번에 모든 마이페이지 데이터 로딩 */
   const loadMyPageData = useCallback(async () => {
-    setIsLoading(true);
-    try {
-      const [userRes, favoritesRes] = await Promise.all([
-        UserApi.getMe(),
-        FavoriteApi.getFavorites(),
-      ]);
-      await new Promise(resolve => setTimeout(resolve, 500)); 
-      setUserData(userRes);
-      setMyFavorites(favoritesRes.favorites || []);
-    } catch (error) {
-      console.error("마이페이지 데이터 로딩 실패:", error);
-      setIsLoading(false);
-    } finally {
-      if(userData?.role === 'user'){
-        setIsLoading(false);
-      }
-    }
-  }, []);
+  setIsLoading(true);
+  try {
+    // user / events 만 로드
+    const [userRes, eventsRes] = await Promise.all([
+      UserApi.getMe(),
+      (userData?.role === 'host' || userData?.role === 'admin')
+        ? EventApi.getEvents({ host_id: userData?.id })
+        : Promise.resolve({ events: [] }),
+    ]);
+
+    setUserData(userRes);
+    setMyEvent(eventsRes?.events || []);
+
+    loadFavorites();
+    loadMyReviews();
+
+  } catch (error) {
+    console.error("마이페이지 데이터 로딩 실패:", error);
+  } finally {
+    setIsLoading(false);
+  }
+}, [userData?.id, userData?.role, loadFavorites, loadMyReviews]);
 
   useEffect(() => {
     loadMyPageData();
   }, [loadMyPageData]);
 
-  const loadMyEvent = useCallback(async () => {
-  
-  try {
-    const response = await EventApi.getEvents({ host_id: userData?.id });
-
-    // 응답이 배열인지 객체인지 확인
-    if (Array.isArray(response)) {
-      setMyEvent(response); // 배열 그대로 세팅
-    } else if (response?.events) {
-      setMyEvent(response.events); // events 배열만 추출
-    } else {
-      setMyEvent([]); // 예외 처리
-    }
-  } catch (error) {
-    console.log("마이이벤트 데이터 로딩 실패:", error);
-    setMyEvent([]);
-  } finally {
-    setIsLoading(false);
-  }
-}, [userData?.id]);
-
   useEffect(() => {
-    if (userData?.role === 'host' || userData?.role === 'admin') loadMyEvent();
-  }, [userData, loadMyEvent]);
+    loadMyPageData();
+  }, [loadMyPageData]);
+  
 
   const handleFieldUpdate = async (field: keyof U.Users, value: string) => {
     if (!userData) return;
@@ -238,11 +215,12 @@ const MyPage: React.FC = () => {
     );
   }
 
-  if (!isLoading && !userData) {
-    // alert("사용자 정보를 불러올 수 없습니다.");
+   if (!isLoading && !userData) {
     navigate('/');
+    return null;
   }
 
+  /* 유저 정보 없을 때 홈으로 리다이렉트 */
   const onClose = () => {
     closeReviewModal();
     setEditingReview(null);

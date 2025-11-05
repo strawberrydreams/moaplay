@@ -15,7 +15,7 @@ export function useAuth() {
   const [schedules, setSchedules] = useState<Schedule[]>([]);
   const [schedulesLoading, setSchedulesLoading] = useState(false);
 
-  /** 🔹 찜 목록 새로고침 */
+  /** 찜 목록 새로고침 */
   const fetchSchedules = useCallback(async () => {
     setSchedulesLoading(true);
     try {
@@ -32,7 +32,7 @@ export function useAuth() {
     }
   }, []);
 
-  /** 🔹 인증 상태 확인 */
+  /** 인증 상태 확인 */
   const checkAuthStatus = useCallback(async () => {
     setLoading(true);
     setError(null);
@@ -63,7 +63,7 @@ export function useAuth() {
     }
   }, [fetchSchedules]);
 
-  /** 🔹 앱 최초 실행 시 저장된 로그인 정보 복원 */
+  /** 앱 최초 실행 시 저장된 로그인 정보 복원 */
   useEffect(() => {
     const savedUser = localStorage.getItem('user');
     const savedSchedules = localStorage.getItem('schedules');
@@ -76,7 +76,7 @@ export function useAuth() {
     checkAuthStatus();
   }, [checkAuthStatus]);
 
-  /** 🔹 로그인 */
+  /** 로그인 */
   const login = useCallback(
     async (credentials: LoginPayload) => {
       setLoading(true);
@@ -87,7 +87,7 @@ export function useAuth() {
           const userData = await UserApi.getMe();
           setUser(userData);
           localStorage.setItem('user', JSON.stringify(userData));
-          sessionStorage.setItem('active_tab', 'true'); // ✅ 현재 탭 활성
+          sessionStorage.setItem('active_tab', 'true'); // 현재 탭 활성
           await fetchSchedules();
           return userData;
         } else {
@@ -108,7 +108,7 @@ export function useAuth() {
     [fetchSchedules]
   );
 
-  /** 🔹 로그아웃 */
+  /** 로그아웃 */
   const logout = useCallback(async () => {
     setLoading(true);
     setError(null);
@@ -119,7 +119,7 @@ export function useAuth() {
       localStorage.removeItem('user');
       localStorage.removeItem('schedules');
       sessionStorage.removeItem('active_tab');
-      window.dispatchEvent(new StorageEvent('storage', { key: 'user', newValue: null })); // ✅ 다른 탭 동기화
+      window.dispatchEvent(new StorageEvent('storage', { key: 'user', newValue: null })); // 다른 탭 동기화
       window.location.reload();
     } catch (err) {
       console.error('로그아웃 API 실패:', err);
@@ -143,12 +143,12 @@ export function useAuth() {
     return () => window.removeEventListener('storage', handleStorageChange);
   }, []);
 
-  /** 🔁 모든 탭 닫힘 감지 → 자동 로그아웃 */
+  /** 모든 탭 닫힘 감지 → 자동 로그아웃 */
   useEffect(() => {
     const handleBeforeUnload = () => {
       sessionStorage.removeItem('active_tab');
       setTimeout(() => {
-        // ✅ 다른 탭 중 active_tab이 없으면 자동 로그아웃 처리
+        //  다른 탭 중 active_tab이 없으면 자동 로그아웃 처리
         const otherTabsActive = sessionStorage.length > 0;
         if (!otherTabsActive) {
           localStorage.removeItem('user');
