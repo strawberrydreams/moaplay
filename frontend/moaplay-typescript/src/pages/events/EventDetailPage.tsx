@@ -8,7 +8,6 @@ import * as R from '../../types/reviews';
 import * as ReviewApi from '../../services/reviewsApi';
 import * as EventApi from '../../services/eventsApi';
 import * as ScheduleApi from '../../services/schedulesApi';
-import * as FavoriteApi from '../../services/favoritesApi'
 
 import * as S from '../../styles/EventDetail.styles';
 import { FaImage, FaHeart, FaRegHeart, FaRegCalendarPlus, FaEdit, FaTrash } from 'react-icons/fa';
@@ -22,7 +21,6 @@ import ReviewDetail from '../../components/ReviewDetail';
 import ReviewCard from '../../components/ReviewCard';
 
 import {useAuthContext} from '../../contexts/AuthContext';
-import LoginForm from '../../components/auth/LoginForm';
 import { NotificationFormDropdown } from '../../components/NotificationFormDropdown';
 
 
@@ -64,8 +62,6 @@ const EventDetailPage: React.FC = () => {
       closeReviewModal,
       closeReviewDetailModal,
       openLoginModal,
-      loginToSignUp,
-      closeAllModals
   } = useModal();
 
   const {
@@ -210,21 +206,7 @@ const EventDetailPage: React.FC = () => {
               {/* 알림 드롭다운 */}
                <NotificationFormDropdown
                   eventId={eventDetail?.id}
-                  onSend={async () => {
-                    // { title, content }
-                    // try {
-                    //   // 실제 알림 전송 API 연결
-                    //   await NotificationApi.sendNotification({
-                    //     event_id: eventDetail?.id,
-                    //     title,
-                    //     content,
-                    //   });
-                      alert('알림이 전송되었습니다!');
-                    // } catch (error) {
-                    //   console.error('알림 전송 실패:', error);
-                    //   alert('알림 전송에 실패했습니다.');
-                    // }
-                  }}
+                  position={"left"}
                 />
                 <button onClick={handleEditEvent} title="행사 수정">
                   <FaEdit color="#4C8DFF" size={20} />
