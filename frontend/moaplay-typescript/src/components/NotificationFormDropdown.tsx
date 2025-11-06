@@ -45,32 +45,45 @@ export const NotificationFormDropdown: React.FC<NotificationFormDropdownProps> =
     }
 
     try {
-      setIsLoading(true);
+          setIsLoading(true);
 
-      await sendNotification({
-        event_id: eventId,
-        title,
-        message: content,
-        type,
-      });
+          const { data } = await sendNotification({
+            event_id: eventId,
+            title,
+            message: content,
+            type,
+          });
+          toast.success('✅ 알림이 전송되었습니다!', { autoClose: 2000 });
 
-      toast.success('✅ 알림이 전송되었습니다!', { autoClose: 2000 });
+          // 전송 후 Context 새로고침
+          await reloadNotifications();
 
-      // ✅ 전송 후 Context 새로고침
-      await reloadNotifications();
+          setTitle('');
+          setContent('');
+          setType('info');
+          setIsOpen(false);
+        } catch (error: any) {
+          console.error('알림 전송 실패:', error);
 
-      setTitle('');
-      setContent('');
-      setType('info');
-      setIsOpen(false);
-    } catch (error) {
-      console.error('알림 전송 실패:', error);
-      toast.error('❌ 알림 전송에 실패했습니다.', { autoClose: 2000 });
-    } finally {
-      setIsLoading(false);
-    }
-  };
+          // ✅ 백엔드에서 내려주는 message가 있으면 그걸 표시
+          const msg =
+            error.response?.data?.message ||
+            error.response?.data?.error ||
+            '❌ 알림 전송에 실패했습니다.';
 
+          toast.error(msg, { 
+          autoClose: 2000, 
+          style: {
+            width: 'auto',
+            minWidth: 'unset',
+            padding: '0.7rem 2rem',
+            textAlign: 'center',
+        }, });
+        } finally {
+          setIsLoading(false);
+        }
+  }
+        
   return (
     <Wrapper ref={dropdownRef}>
       <BellButton onClick={() => setIsOpen((prev) => !prev)}>

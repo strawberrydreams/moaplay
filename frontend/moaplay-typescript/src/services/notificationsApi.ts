@@ -12,8 +12,8 @@ export const sendNotification = async (payload: {
   message: string;
   type: 'info' | 'warning' | 'urgent';
 }): Promise<Notification> => {
-  const { data } = await axiosInstance.post<Notification>('/notifications/', payload);
-  return data;
+    const { data } = await axiosInstance.post<Notification>('/notifications/', payload);
+    return data;
 };
 
 /** (GET) 내 알림 목록 조회

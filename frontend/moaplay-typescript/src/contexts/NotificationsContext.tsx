@@ -32,7 +32,7 @@ export const NotificationsProvider: React.FC<NotificationsProviderProps> = ({ ch
   const [unreadCount, setUnreadCount] = useState(0);
   const eventSourceRef = useRef<EventSource | null>(null);
 
-  // ✅ 1️⃣ 알림 목록 불러오기
+  // 알림 목록 불러오기
   const loadNotifications = async () => {
     try {
       const data = await NotificationApi.getMyNotifications({ page: 1, per_page: 20 });
@@ -44,7 +44,7 @@ export const NotificationsProvider: React.FC<NotificationsProviderProps> = ({ ch
     }
   };
 
-  // ✅ 2️⃣ 알림 읽음 처리
+  //  알림 읽음 처리
   const markAsRead = async (recipientId: number) => {
     try {
       await NotificationApi.markNotificationAsRead(recipientId);
@@ -57,7 +57,7 @@ export const NotificationsProvider: React.FC<NotificationsProviderProps> = ({ ch
     }
   };
 
-  // ✅ 3️⃣ 전체 초기화 (로그아웃 등)
+  // 전체 초기화 (로그아웃 등)
   const clearNotifications = () => {
     setNotifications([]);
     setUnreadCount(0);
