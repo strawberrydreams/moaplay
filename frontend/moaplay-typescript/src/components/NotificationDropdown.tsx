@@ -1,30 +1,17 @@
 import React, { useState, useRef, useEffect } from 'react';
-import styled, { keyframes } from 'styled-components';
-import bellIcon from '../assets/bell.png'; // ✅ 업로드한 아이콘 경로에 맞게 수정
+import styled, { keyframes, css } from 'styled-components';
+import bellIcon from '../assets/bell.png';
 import { ClipLoader } from 'react-spinners';
-import { toast, ToastContainer } from 'react-toastify';
+import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
-
-interface Notification {
-  id: number;
-  title: string;
-  content: string;
-  time: string;
-  isNew?: boolean;
-}
+import { useNotifications } from '../contexts/NotificationsContext';
+import { FaInfoCircle, FaExclamationTriangle, FaExclamationCircle } from 'react-icons/fa'; // ✅ 아이콘 추가
 
 export const NotificationDropdown: React.FC = () => {
   const [isOpen, setIsOpen] = useState(false);
-  const [notifications, setNotifications] = useState<Notification[]>([]);
-  const [isLoading, setIsLoading] = useState(false);
-  const [hasNew, setHasNew] = useState(true); // ✅ N 뱃지 표시 여부
   const dropdownRef = useRef<HTMLDivElement>(null);
-
-  // 더미 알림
-  const dummyNotis: Notification[] = [
-    { id: 1, title: '새 댓글 알림', content: '당신의 리뷰에 새 댓글이 달렸어요!', time: '방금 전', isNew: true },
-    { id: 2, title: '이벤트 승인', content: '등록하신 행사 “봄 축제”가 승인되었습니다.', time: '1시간 전' },
-  ];
+  const { notifications, unreadCount, markAsRead, reloadNotifications } = useNotifications();
+  const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
@@ -41,14 +28,22 @@ export const NotificationDropdown: React.FC = () => {
     if (!isOpen) {
       setIsLoading(true);
       try {
-        await new Promise((r) => setTimeout(r, 700));
-        setNotifications(dummyNotis);
-        setHasNew(false); // 열면 “N” 제거
-      } catch (err) {
-        toast.error('알림을 불러오지 못했습니다.');
+        await reloadNotifications();
       } finally {
         setIsLoading(false);
       }
+    }
+  };
+
+  // 🔹 type별 아이콘 지정
+  const renderIcon = (type?: string) => {
+    switch (type) {
+      case 'warning':
+        return <FaExclamationTriangle color="#f5a623" />;
+      case 'urgent':
+        return <FaExclamationCircle color="#ff4d4d" />;
+      default:
+        return <FaInfoCircle color="#9e77ed" />;
     }
   };
 
@@ -56,7 +51,7 @@ export const NotificationDropdown: React.FC = () => {
     <Wrapper ref={dropdownRef}>
       <BellButton onClick={handleToggle}>
         <img src={bellIcon} alt="알림" />
-        {hasNew && <NewBadge>N</NewBadge>}
+        {unreadCount > 0 && <NewBadge>{unreadCount}</NewBadge>}
       </BellButton>
 
       {isOpen && (
@@ -68,11 +63,26 @@ export const NotificationDropdown: React.FC = () => {
           ) : notifications.length === 0 ? (
             <EmptyMessage>새로운 알림이 없습니다.</EmptyMessage>
           ) : (
-            notifications.map((n) => (
-              <NotificationItem key={n.id} $new={n.isNew}>
-                <Title>{n.title}</Title>
-                <Content>{n.content}</Content>
-                <Time>{n.time}</Time>
+            notifications.map((r) => (
+              <NotificationItem
+                key={r.id}
+                $new={!r.is_read}
+                $type={r.notification?.type}
+                onClick={() => markAsRead(r.id)}
+              >
+                <IconWrapper>{renderIcon(r.notification?.type)}</IconWrapper>
+                <ContentWrapper>
+                  <Title>{r.notification?.title}</Title>
+                  <Content>{r.notification?.message}</Content>
+                  <Time>
+                    {new Date(r.created_at).toLocaleString('ko-KR', {
+                      month: '2-digit',
+                      day: '2-digit',
+                      hour: '2-digit',
+                      minute: '2-digit',
+                    })}
+                  </Time>
+                </ContentWrapper>
               </NotificationItem>
             ))
           )}
@@ -118,16 +128,16 @@ const NewBadge = styled.span`
   right: -2px;
   background: #ff4d4d;
   color: white;
-  font-size: 0.5rem;
+  font-size: 0.55rem;
   font-weight: 700;
   border-radius: 50%;
-  width: 13px;
-  height: 13px;
+  width: 14px;
+  height: 14px;
   display: flex;
   justify-content: center;
   align-items: center;
   z-index: 2;
-  box-shadow: 0 0 4px rgba(0,0,0,0.2);
+  box-shadow: 0 0 4px rgba(0, 0, 0, 0.2);
 `;
 
 const fadeDown = keyframes`
@@ -139,15 +149,17 @@ const Dropdown = styled.div`
   position: absolute;
   top: 120%;
   right: 0;
-  width: 400px;
+  width: 380px;
   background: #fff;
   border: 1px solid #ddd;
   border-radius: 8px;
-  box-shadow: 0 4px 14px rgba(0,0,0,0.12);
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.12);
   padding: 10px;
   z-index: 1000;
   animation: ${fadeDown} 0.25s ease;
   font-family: 'Noto Sans KR', sans-serif;
+  max-height: 400px;
+  overflow-y: auto;
 `;
 
 const LoaderWrapper = styled.div`
@@ -164,14 +176,52 @@ const EmptyMessage = styled.p`
   margin: 10px 0;
 `;
 
-const NotificationItem = styled.div<{ $new?: boolean }>`
-  padding: 8px 6px;
+const NotificationItem = styled.div<{ $new?: boolean; $type?: string }>`
+  display: flex;
+  align-items: flex-start;
+  padding: 10px 8px;
   border-bottom: 1px solid #f1f1f1;
-  background: ${({ $new }) => ($new ? '#f9f4ff' : 'white')};
+  cursor: pointer;
+  transition: background 0.2s ease;
 
-  &:last-child {
-    border-bottom: none;
+  ${({ $new }) =>
+    $new &&
+    css`
+      background: #f9f4ff;
+    `}
+
+  ${({ $type }) =>
+    $type === 'warning' &&
+    css`
+      border-left: 4px solid #f5a623;
+      background: #fff9e6;
+    `}
+
+  ${({ $type }) =>
+    $type === 'urgent' &&
+    css`
+      border-left: 4px solid #ff4d4d;
+      background: #ffecec;
+    `}
+
+  &:hover {
+    background: ${({ $type }) =>
+      $type === 'urgent'
+        ? '#ffd6d6'
+        : $type === 'warning'
+        ? '#fff4cc'
+        : '#f3ecff'};
   }
+`;
+
+const IconWrapper = styled.div`
+  flex-shrink: 0;
+  font-size: 0.8rem;
+  margin-top: 7px;
+`;
+
+const ContentWrapper = styled.div`
+  flex: 1;
 `;
 
 const Title = styled.div`
