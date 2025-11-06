@@ -10,7 +10,11 @@ login_manager = LoginManager()
 
 
 def create_app(test_config=None):
-    app = Flask(__name__, instance_relative_config=True)
+    base_dir = os.path.abspath(os.path.dirname(__file__))
+    static_folder = os.path.join(base_dir, '..', 'static')
+
+    app = Flask(__name__, instance_relative_config=True, static_folder=static_folder, static_url_path='/static')
+    
     app.config.from_mapping(
         SECRET_KEY = 'dev',
         DATABASE = os.path.join(app.instance_path, "moaplay_dev.sqlite"),

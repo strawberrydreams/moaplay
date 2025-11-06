@@ -26,7 +26,7 @@ class User(UserMixin, db.Model):
     email: Mapped[str] = mapped_column(String(255), nullable=False, unique=True)
     phone: Mapped[str] = mapped_column(String(20), nullable=True)
     password_hash: Mapped[str] = mapped_column(String(255), nullable=False)
-    profile_image: Mapped[str] = mapped_column(String(500), nullable=True, default="default_profile_image.jpg")
+    profile_image: Mapped[str] = mapped_column(String(500), nullable=True, default="http://localhost:5000/static/images/profiles/default_profile_image.jpg")
     
     # 권한
     role: Mapped[UserRole] = mapped_column(Enum(UserRole), default=UserRole.USER)
