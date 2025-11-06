@@ -6,9 +6,8 @@ import { PendingEventsModal } from "../../components/admin/PendingEventsModal";
 import { UsersManagementModal } from "../../components/admin/UsersManagementModal";
 import { getApprovedEvents, getPendingEvents } from "../../services/adminApi";
 import { updateEventStatus } from "../../services/eventsApi";
-import { MenuItem } from "../../styles/ProfileDropdown.styles";
 import { useAuthContext } from "../../contexts/AuthContext";
-import { FaCheckCircle, FaClock, FaUsers, FaAngleRight } from 'react-icons/fa'; 
+import { FaCheckCircle, FaClock, FaUsers, FaAngleRight } from 'react-icons/fa';
 import {
     PageContainer,
     MainContent,
@@ -22,14 +21,13 @@ import {
     ErrorMessage,
     RetryButton,
     CardIconWrapper
-} from "../../styles/AdminDashboardPage.styles";
+} from "../../styles/pages/AdminDashboardPage.styles";
 
 // 관리자 대시보드 페이지 컴포넌트
 export const AdminDashboardPage: React.FC = () => {
     const navigate = useNavigate();
     const [approvedCount, setApprovedCount] = useState(0);
     const [pendingCount, setPendingCount] = useState(0);
-    // TODO: 추후 전체 사용자 목록 받아오는 부분 업데이트
     const { logout, user:currentUser } = useAuthContext();
     const {
         stats,
@@ -167,12 +165,12 @@ export const AdminDashboardPage: React.FC = () => {
                     <StatsList>
                         <StatItem onClick={() => handleStatCardClick('approved-events')}>
                             <CardIconWrapper color="#4C8DFF">
-                            <FaCheckCircle size={28} />
+                                <FaCheckCircle size={28} />
                             </CardIconWrapper>
 
                             <div style={{ display: 'flex', flexDirection: 'column', flex: 1 }}>
-                            <StatTitle>전체 승인 행사</StatTitle>
-                            <StatValue>{approvedCount.toLocaleString()}</StatValue>
+                                <StatTitle>전체 승인 행사</StatTitle>
+                                <StatValue>{approvedCount.toLocaleString()}</StatValue>
                             </div>
 
                             <FaAngleRight size={28} color="#757575" style={{ marginLeft: 'auto' }} />
@@ -180,12 +178,12 @@ export const AdminDashboardPage: React.FC = () => {
 
                         <StatItem onClick={() => handleStatCardClick('pending-events')}>
                             <CardIconWrapper color="#FFA726">
-                            <FaClock size={28} />
+                                <FaClock size={28} />
                             </CardIconWrapper>
 
                             <div style={{ display: 'flex', flexDirection: 'column', flex: 1 }}>
-                            <StatTitle>요청된 행사</StatTitle>
-                            <StatValue>{pendingCount.toLocaleString()}</StatValue>
+                                <StatTitle>요청된 행사</StatTitle>
+                                <StatValue>{pendingCount.toLocaleString()}</StatValue>
                             </div>
 
                             <FaAngleRight size={28} color="#757575" style={{ marginLeft: 'auto' }} />
@@ -193,17 +191,17 @@ export const AdminDashboardPage: React.FC = () => {
 
                         <StatItem onClick={() => handleStatCardClick('users')}>
                             <CardIconWrapper color="#2AC1BC">
-                            <FaUsers size={28} />
+                                <FaUsers size={28} />
                             </CardIconWrapper>
 
                             <div style={{ display: 'flex', flexDirection: 'column', flex: 1 }}>
-                            <StatTitle>회원 수</StatTitle>
-                            <StatValue>{stats.totalUsers.toLocaleString()}</StatValue>
+                                <StatTitle>회원 수</StatTitle>
+                                <StatValue>{stats.totalUsers.toLocaleString()}</StatValue>
                             </div>
 
                             <FaAngleRight size={28} color="#757575" style={{ marginLeft: 'auto' }} />
                         </StatItem>
-                        </StatsList>
+                    </StatsList>
                 )}
                 <hr style={{margin: '20px 0px', border :'2px solid #e5e7eb'}}/>
                 {/* 하단 바 + 로그아웃 버튼 */}

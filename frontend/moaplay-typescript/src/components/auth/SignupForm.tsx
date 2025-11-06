@@ -12,7 +12,7 @@ import {
     ErrorMessage,
     LinksContainer,
     SuccessMessage
-} from '../../styles/SignupForm.styles';
+} from '../../styles/components/SignupForm.styles';
 
 // --- 회원가입 폼 전용 타입 정의 ---
 interface SignupFormData extends Omit<RegisterPayload, 'password'> { // Omit password if RegisterPayload has it
@@ -61,7 +61,7 @@ const validateSignup = (values: SignupFormData): Partial<SignupFormData> => {
         errors.password = '비밀번호는 최소 8자 이상이어야 합니다.';
     } else {
         const complexity = [/[a-z]/, /[A-Z]/, /[0-9]/, /[^A-Za-z0-9\s]/]
-                           .filter(regex => values.password && regex.test(values.password)).length;
+            .filter(regex => values.password && regex.test(values.password)).length;
         if (complexity < 3) {
             errors.password = '문자, 숫자, 특수문자 중 3가지 이상을 포함해야 합니다.';
         }
@@ -110,7 +110,7 @@ const SignupForm: React.FC<SignupFormProps> = ({ onSwitchToLogin, onGoTags }) =>
             login(values);
             onGoTags(response as RegisterPayload);
         },
-        onError: (error) => { 
+        onError: (error) => {
             console.error('Signup error:', error);
             alert(error.response?.data?.error || '회원가입에 실패했습니다.');
         }
@@ -160,7 +160,7 @@ const SignupForm: React.FC<SignupFormProps> = ({ onSwitchToLogin, onGoTags }) =>
         }
     };
 
-return (
+    return (
         <FormContainer onSubmit={handleSubmit}>
             {/* 아이디 */}
             <InputGroup>
@@ -170,8 +170,8 @@ return (
                     name="user_id"
                     type="text"
                     value={values.user_id}
-                    onChange={handleChange} 
-                    onBlur={handleBlur}     
+                    onChange={handleChange}
+                    onBlur={handleBlur}
                     disabled={isSubmitting}
                 />
                 {errors.user_id && <ErrorMessage>{errors.user_id}</ErrorMessage>}
@@ -186,8 +186,8 @@ return (
                     name="password"
                     type="password"
                     value={values.password}
-                    onChange={handleChange} 
-                    onBlur={handleBlur}    
+                    onChange={handleChange}
+                    onBlur={handleBlur}
                     disabled={isSubmitting}
                 />
                 {errors.password && <ErrorMessage>{errors.password}</ErrorMessage>}
@@ -202,8 +202,8 @@ return (
                     name="confirmPassword"
                     type="password"
                     value={values.confirmPassword}
-                    onChange={handleChange} 
-                    onBlur={handleBlur}     
+                    onChange={handleChange}
+                    onBlur={handleBlur}
                     disabled={isSubmitting}
                 />
                 {errors.confirmPassword && <ErrorMessage>{errors.confirmPassword}</ErrorMessage>}
@@ -260,7 +260,7 @@ return (
             </InputGroup> */}
 
 
-            
+
             {/* 버튼 */}
             <ButtonRow>
                 <SubmitButton type="submit" disabled={isSubmitting}>

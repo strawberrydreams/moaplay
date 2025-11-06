@@ -9,23 +9,21 @@ import * as ReviewApi from '../../services/reviewsApi';
 import * as EventApi from '../../services/eventsApi';
 import * as ScheduleApi from '../../services/schedulesApi';
 
-import * as S from '../../styles/EventDetail.styles';
-import { FaImage, FaHeart, FaRegHeart, FaRegCalendarPlus, FaEdit, FaTrash } from 'react-icons/fa';
+import * as S from '../../styles/components/EventDetail.styles';
+import { FaHeart, FaRegHeart, FaRegCalendarPlus, FaEdit, FaTrash } from 'react-icons/fa';
 
 import Modal from '../../components/common/Modal'
 import {useModal} from '../../hooks/useModal';
 import {useReview} from '../../hooks/useReview';
 import { useFavorite } from '../../hooks/useFavorite';
-import ReviewForm from '../../components/ReviewForm';
-import ReviewDetail from '../../components/ReviewDetail';
-import ReviewCard from '../../components/ReviewCard';
+import ReviewForm from '../../components/reviews/ReviewForm';
+import ReviewDetail from '../../components/reviews/ReviewDetail';
+import ReviewCard from '../../components/reviews/ReviewCard';
 
 import {useAuthContext} from '../../contexts/AuthContext';
-import { NotificationFormDropdown } from '../../components/NotificationFormDropdown';
+import { NotificationFormDropdown } from '../../components/notifications/NotificationFormDropdown';
 
-
-
-  // 리뷰 배열을 받아 평균 평점을 계산하는 함수
+// 리뷰 배열을 받아 평균 평점을 계산하는 함수
 const calculateAverageRating = (reviews: R.Review[]): number => {
   // 👇 reviews가 배열이 아니면 0점 반환
   if (!Array.isArray(reviews) || reviews.length === 0) {
@@ -112,13 +110,7 @@ const EventDetailPage: React.FC = () => {
   const prevImage = (): void => {
     setCurrentImageIndex((prev) => (prev - 1 + (images.length || 1)) % (images.length || 1));
   };
-
-  const renderStars = (rating: number): string => {
-    const r = Math.max(0, Math.min(5, Math.floor(rating)));
-    return '★'.repeat(r) + '☆'.repeat(5 - r);
-  };
-
-  const loadEventDetails = async () => {
+    const loadEventDetails = async () => {
     try {
       const response = await ReviewApi.getReviews({ event_id: numericEventId });
       setEventReview(Array.isArray(response) ? response : []);

@@ -1,5 +1,4 @@
 import type { Host } from './';
-import type { Pagination } from '../types/index';
 
 // =================================================================
 // == Response (응답) 타입들
@@ -50,6 +49,3 @@ export interface UserPagination {
   total: number;
   pages: number;
 }
-
-
-// export interface UserPagination extends Pagination {}

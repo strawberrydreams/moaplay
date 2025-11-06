@@ -1,4 +1,4 @@
-import { type Pagination } from "./index.ts";
+import { type Pagination } from "./index";
 
 /** 알림 공통 타입 */
 export interface Notification {
