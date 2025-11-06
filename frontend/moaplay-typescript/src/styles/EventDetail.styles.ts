@@ -413,3 +413,20 @@ export const ImageActionGroup = styled.div`
     &:focus { outline : none; }
   }
 `;
+
+export const Tag = styled.p`
+  height: auto;
+  margin-left: 10px;
+  font-size: 0.9rem;
+  background-color: #eee;
+  color: #555;
+  font-weight: 500;
+  border-radius: 100px;
+  text-align: center;
+  padding: 4px 10px;
+  margin-top: 1.2rem;
+  cursor: pointer;
+  transition: background-color 0.15s ease;
+
+  &:hover {background-color: #ddd;}
+`

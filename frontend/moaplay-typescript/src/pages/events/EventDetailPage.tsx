@@ -273,7 +273,15 @@ const EventDetailPage: React.FC = () => {
             <li><span>주최 <p>{eventDetail?.organizer}</p></span></li>
           </S.InfoList>
         </S.InfoGridContainer>
+        <S.InfoList style={{display: 'flex', color: '#333', textAlign: 'center'
+        }}>
+          <p style={{fontWeight:'600', fontSize: '1.2rem', marginRight: '5px'}}>태그</p>
+          {eventDetail?.tags.map((tag) =>
+            <S.Tag>{tag}</S.Tag>
+          )}
+        </S.InfoList>
       </S.MapInfoSection>
+      
 
       {/* 5. 리뷰 섹션 (집계만 표시) */}
       <S.SectionTitle>리뷰</S.SectionTitle>
