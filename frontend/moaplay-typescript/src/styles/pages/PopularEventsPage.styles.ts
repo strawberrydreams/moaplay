@@ -1,5 +1,5 @@
 import styled from 'styled-components';
-import flagImg from '../assets/rank_flag.png';
+import flagImg from '../../assets/rank_flag.png';
 
 export const PageContainer = styled.div`
   max-width: 1200px;

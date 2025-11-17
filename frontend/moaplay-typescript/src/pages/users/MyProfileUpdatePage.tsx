@@ -22,7 +22,7 @@ interface ChangePasswordFormData {
 }
 
 // 프로필 정보 수정 페이지 컴포넌트
-export const ProfileUpdatePage: React.FC = () => {
+export const MyProfileUpdatePage: React.FC = () => {
     const navigate = useNavigate();
     const { userId } = useParams<{ userId?: string }>();
     const authCtx = useAuthContext() as any;
@@ -872,7 +872,7 @@ const NarrowFormBody = styled.div`
     margin: 0 auto; /* 좌우 동일 마진으로 중앙 정렬 */
 `;
 
-export default ProfileUpdatePage;
+export default MyProfileUpdatePage;
 
 const TwoColumn = styled.div`
     display: grid;

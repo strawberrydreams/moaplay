@@ -3,16 +3,16 @@ import type { FavoriteCreationResponse, FavoriteResponse, FavoriteStatus } from 
 
 // (GET) 사용자의 모든 찜 목록 조회
 export const getFavorites = async ({
-  page = 1,
-  per_page = 12,
-}: {
-  page?: number;
-  per_page?: number;
+                                       page = 1,
+                                       per_page = 12,
+                                   }: {
+    page?: number;
+    per_page?: number;
 } = {}): Promise<FavoriteResponse> => {
-  const { data } = await axiosInstance.get<FavoriteResponse>('/favorites/', {
-    params: { page, per_page },
-  });
-  return data;
+    const { data } = await axiosInstance.get<FavoriteResponse>('/favorites/', {
+        params: { page, per_page },
+    });
+    return data;
 };
 
 // (GET) 특정 찜 항목 조회

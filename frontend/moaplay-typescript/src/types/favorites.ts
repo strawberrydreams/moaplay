@@ -1,4 +1,4 @@
-import type {Event} from '../types/events';
+import type { Event } from './events';
 
 // =================================================================
 // == Response (응답) 타입들

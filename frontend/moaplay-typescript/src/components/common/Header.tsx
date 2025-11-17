@@ -1,12 +1,12 @@
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import logoImage from '../assets/logo.png';
+import logoImage from '../../assets/logo.png';
 import { FaSignInAlt } from 'react-icons/fa';
-import { useAuthContext } from '../contexts/AuthContext';
+import { useAuthContext } from '../../contexts/AuthContext';
 
-import { StyledHeader, LogoContainer, Nav, AuthSection, LoginButton, HeaderInner } from '../styles/Header.styles';
-import ProfileDropdown from './ProfileDropdown.tsx';
-import { NotificationDropdown } from './NotificationDropdown';
+import { StyledHeader, LogoContainer, Nav, AuthSection, LoginButton, HeaderInner } from '../../styles/components/Header.styles';
+import ProfileDropdown from '../users/ProfileDropdown.tsx';
+import { NotificationDropdown } from '../notifications/NotificationDropdown';
 
 interface HeaderProps {
     onLoginClick: () => void;
@@ -15,7 +15,7 @@ interface HeaderProps {
 const Header: React.FC<HeaderProps> = ({ onLoginClick }) => {
     const location = useLocation(); // 현재 경로를 가져옵니다.
     const { user } = useAuthContext();
-   
+
     return (
         <StyledHeader>
             <HeaderInner>

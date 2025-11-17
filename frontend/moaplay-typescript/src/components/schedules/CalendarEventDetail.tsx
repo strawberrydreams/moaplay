@@ -1,12 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import type * as E from '../types/events'; // Event 타입 임포트
-// import type { Schedule } from '../types/schedules'; // Schedule 타입 불필요
-import * as S from '../styles/CalendarEventDetail.styles'; // 스타일 경로 확인!
+import type * as E from '../../types/events'; // Event 타입 임포트
+import * as S from '../../styles/components/CalendarEventDetail.styles'; // 스타일 경로 확인!
 import { FaImage, FaSignInAlt, FaArrowLeft } from 'react-icons/fa';
-import { useModal } from '../hooks/useModal'; // 1. AuthModalContext 훅 임포트
-import * as SchedulesApi from '../services/schedulesApi'; // 일정 삭제 API
-import type { Schedule } from '../types/schedules'; // Schedule 타입 임포트
-import { useAuthContext } from '../contexts/AuthContext';
+import { useModal } from '../../hooks/useModal'; // 1. AuthModalContext 훅 임포트
+import * as SchedulesApi from '../../services/schedulesApi'; // 일정 삭제 API
+import type { Schedule } from '../../types/schedules'; // Schedule 타입 임포트
+import { useAuthContext } from '../../contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
 
 
@@ -37,11 +36,6 @@ const CalendarEventDetail: React.FC<IDetailProps> = ({ events = [],
 
     // 상세 보기 상태 (E.Event 타입 사용)
     const [selectedDetailEvent, setSelectedDetailEvent] = useState<E.Event | null>(null);
-
-    // 뒤로가기 핸들러
-    const handleBackToList = () => {
-        setSelectedDetailEvent(null);
-    };
 
     // Calendar에서 이벤트 클릭 시 selectedDetailEvent 업데이트
     useEffect(() => {

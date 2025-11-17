@@ -10,7 +10,6 @@ interface TagSelectorProps {
 }
 
 // 허용된 태그 목록 (create_db.py에 있는 기본 태그 49개 그대로임)
-// TODO: 별도의 태그 API가 구현되면 이 부분 삭제하기 (현재는 태그 API가 없음)
 const PERMITTED_TAGS = [
     // 기본
     "행사", "이벤트", "온라인", "오프라인", "가볼만한곳", "주말에뭐하지",

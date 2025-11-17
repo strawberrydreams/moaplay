@@ -30,7 +30,7 @@ import {
   SubmitButton,
   ErrorAlert,
   RequiredMark,
-} from '../../styles/EventCreatePage.styles';
+} from '../../styles/pages/EventCreatePage.styles';
 
 export interface EventFormData {
   images: File[];
