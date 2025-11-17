@@ -21,7 +21,7 @@ interface SignupFormData extends Omit<RegisterPayload, 'password'> { // Omit pas
     confirmPassword?: string;
     email: string;
     nickname: string;
-    // phone?: string;
+    phone?: string;
 }
 
 // --- 초기 폼 값 설정 ---
@@ -31,7 +31,7 @@ const initialSignupValues: SignupFormData = {
     confirmPassword: '',
     email: '',
     nickname: '',
-    // phone: '',
+    phone: '',
 };
 
 // --- 컴포넌트 Props 타입 ---
@@ -219,8 +219,8 @@ return (
                     name="email"
                     type="email"
                     value={values.email}
-                    onChange={handleChange} // 👈 수정된 handleChange 사용
-                    onBlur={handleBlur}     // 👈 onBlur 연결
+                    onChange={handleChange} 
+                    onBlur={handleBlur}    
                     disabled={isSubmitting}
                 />
                 {errors.email && <ErrorMessage>{errors.email}</ErrorMessage>}
@@ -235,8 +235,8 @@ return (
                     name="nickname"
                     type="text"
                     value={values.nickname}
-                    onChange={handleChange} // 👈 수정된 handleChange 사용
-                    onBlur={handleBlur}     // 👈 onBlur 연결
+                    onChange={handleChange} 
+                    onBlur={handleBlur}   
                     disabled={isSubmitting}
                 />
                 {errors.nickname && <ErrorMessage>{errors.nickname}</ErrorMessage>}
@@ -244,20 +244,20 @@ return (
             </InputGroup>
 
             {/* 전화번호 */}
-            {/* <InputGroup>
+            <InputGroup>
                 <label htmlFor="signupphone">전화번호</label>
                 <input
                     id="signupphone"
                     name="phone"
                     type="tel"
                     value={values.phone}
-                    onChange={handleChange} // 👈 수정된 handleChange 사용
-                    onBlur={handleBlur}     // 👈 onBlur 연결
+                    onChange={handleChange} 
+                    onBlur={handleBlur}     
                     disabled={isSubmitting}
                 />
                 {errors.phone && <ErrorMessage>{errors.phone}</ErrorMessage>}
                 {successMessage.phone && !errors.phone && <SuccessMessage>{successMessage.phone}</SuccessMessage>}
-            </InputGroup> */}
+            </InputGroup>
 
 
             

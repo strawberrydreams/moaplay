@@ -1,4 +1,3 @@
-// ✅ src/components/forms/UpdateTagsForm.tsx
 import React, { useEffect, useState } from "react";
 import { tagsApi } from "../../services/tagsApi";
 import * as UserApi from "../../services/usersApi";
@@ -14,18 +13,20 @@ import {
   BackButton,
   LoadingBox,
   ErrorBox,
-  SearchInput
+  SearchInput,
 } from "../../styles/SelectTagsForm.styles";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
 interface UpdateTagsFormProps {
-  userTags?: Tag[];
+  /** 유저가 이미 선택해 둔 태그 이름 배열 (ex. ['축제','전시']) */
+  userTags?: string[];
   onCloseModal: () => void;
   onSuccess?: () => void;
 }
 
 const MIN_SELECTION = 3;
+const INITIAL_SHOW_COUNT = 20;
 
 const UpdateTagsForm: React.FC<UpdateTagsFormProps> = ({
   userTags = [],
@@ -34,19 +35,23 @@ const UpdateTagsForm: React.FC<UpdateTagsFormProps> = ({
 }) => {
   const [tags, setTags] = useState<Tag[]>([]);
   const [filteredTags, setFilteredTags] = useState<Tag[]>([]);
-  const [selected, setSelected] = useState<string[]>(userTags.map(tag => tag.name)); // ✅ 이름 기반 선택
+  const [selected, setSelected] = useState<string[]>(userTags); // 이름 기반 선택
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
 
-  // ✅ 태그 불러오기 (tagsApi.list 사용)
+  // 모달이 열릴 때마다 props로 받은 userTags로 초기화
+  useEffect(() => {
+    setSelected(userTags);
+  }, [userTags]);
+
+  // 태그 불러오기
   useEffect(() => {
     (async () => {
       try {
         const data = await tagsApi.list();
 
-        // 서버 응답이 { tags: [...] } 형태이거나, 바로 배열일 수도 있음
         const safeData = Array.isArray(data?.tags)
           ? data.tags
           : Array.isArray(data)
@@ -65,26 +70,25 @@ const UpdateTagsForm: React.FC<UpdateTagsFormProps> = ({
     })();
   }, []);
 
-  // ✅ 검색 필터링
+  // 검색 필터링
   useEffect(() => {
     if (searchTerm.trim() === "") {
       setFilteredTags(tags);
     } else {
       const lower = searchTerm.toLowerCase();
-      setFilteredTags(tags.filter(t => t.name.toLowerCase().includes(lower)));
+      setFilteredTags(tags.filter((t) => t.name.toLowerCase().includes(lower)));
     }
   }, [searchTerm, tags]);
 
   // 선택 토글 (이름 기반)
   const toggleSelect = (name: string) => {
     setError(null);
-    setSelected(prev =>
-      prev.includes(name) ? prev.filter(n => n !== name) : [...prev, name]
+    setSelected((prev) =>
+      prev.includes(name) ? prev.filter((n) => n !== name) : [...prev, name]
     );
-    console.log(selected);
   };
 
-  //  저장
+  // 저장
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (selected.length < MIN_SELECTION) {
@@ -105,10 +109,9 @@ const UpdateTagsForm: React.FC<UpdateTagsFormProps> = ({
     }
   };
 
-  // ✅ 로딩/에러 처리
+  // 로딩/에러 처리
   if (loading) return <LoadingBox>태그 불러오는 중...</LoadingBox>;
   if (error) return <ErrorBox>{error}</ErrorBox>;
-  if (filteredTags.length === 0) return <ErrorBox>불러올 태그가 없습니다.</ErrorBox>;
 
   return (
     <FormContainer onSubmit={handleSubmit}>
@@ -119,11 +122,11 @@ const UpdateTagsForm: React.FC<UpdateTagsFormProps> = ({
         type="text"
         placeholder="태그 검색"
         value={searchTerm}
-        onChange={e => setSearchTerm(e.target.value)}
+        onChange={(e) => setSearchTerm(e.target.value)}
       />
 
       <TagList>
-        {filteredTags.map(tag => (
+        {filteredTags.slice(0, INITIAL_SHOW_COUNT).map((tag) => (
           <TagButton
             key={tag.id}
             type="button"
@@ -133,6 +136,12 @@ const UpdateTagsForm: React.FC<UpdateTagsFormProps> = ({
             #{tag.name}
           </TagButton>
         ))}
+
+        {filteredTags.length > INITIAL_SHOW_COUNT && (
+          <div style={{ marginTop: "0.5rem", fontSize: "0.85rem", color: "#777" }}>
+            + 더 보기 ({filteredTags.length - INITIAL_SHOW_COUNT})
+          </div>
+        )}
       </TagList>
 
       <ButtonRow>

@@ -37,16 +37,16 @@ export const RegionContentWrapper = styled.div`
 export const RegionList = styled.div`
   display: flex;
   align-items: center;
-  justify-content: center;
+  justify-content: flex-start;   /* 왼쪽부터 배치 */
   gap: 2.2rem;
   overflow-x: auto;
   overflow-y: visible;
   scroll-behavior: smooth;
   scrollbar-width: none;
-  flex-grow: 1;
-  &::-webkit-scrollbar {
-    display: none;
-  }
+  padding: 0 .5rem;          
+  &::-webkit-scrollbar { display: none; }
+
+  &:focus{}
 `;
 
 /* 지역 버튼 전체 */

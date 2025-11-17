@@ -83,7 +83,7 @@ export const RankedEventCardWrapper = styled.div`
 /* --- 깃발 랭킹 넘버 --- */
 export const RankNumber = styled.div`
   position: absolute;
-  top: -160px;
+  top: -190px;
   left: 12px;
   background-image: url(${flagImg});
   background-size: contain;
@@ -104,7 +104,7 @@ export const RankNumber = styled.div`
   text-align: center;
   z-index: 1;
 
-  /* ✅ 반응형 크기 조정 */
+  /* 반응형 크기 조정 */
   @media (max-width: 1024px) {
     width: 40px;
     height: 55px;

@@ -414,19 +414,55 @@ export const ImageActionGroup = styled.div`
   }
 `;
 
-export const Tag = styled.p`
-  height: auto;
-  margin-left: 10px;
-  font-size: 0.9rem;
-  background-color: #eee;
-  color: #555;
-  font-weight: 500;
-  border-radius: 100px;
-  text-align: center;
-  padding: 4px 10px;
-  margin-top: 1.2rem;
-  cursor: pointer;
-  transition: background-color 0.15s ease;
+// 태그 리스트
+export const TagInfoList = styled.ul`
+  width: 90%;
+  list-style: none;
+  padding: 0;
+  margin: 0;
 
-  &:hover {background-color: #ddd;}
-`
+  li {
+    display: flex;                 /* 핵심 */
+    align-items: flex-start;       /* 위쪽 정렬 (칩 여러 줄 대비) */
+    gap: 12px;
+    padding: 6px 0;
+    color: #444;
+
+    span {
+      min-width: 60px;             /* 라벨 고정 폭 */
+      font-weight: 600;
+      font-size: 1.2rem;
+      color: #333;
+      white-space: nowrap;         /* '태그' 줄바꿈 방지 */
+      flex-shrink: 0;
+      line-height: 1.8;
+      display: flex;
+      align-items: center;
+    }
+  }
+`;
+
+/* 태그 래퍼 */
+export const TagsWrap = styled.div`
+  flex: 1;
+  display: flex;
+  flex-wrap: wrap;     /* 줄바꿈 허용 */
+  gap: 8px;            /* 칩 간격 */
+`;
+
+/* 태그 칩 */
+export const TagChip = styled.span`
+  display: inline-flex;
+  align-items: center;
+  padding: 6px 10px;
+  font-size: 0.9rem !important;
+  line-height: 1;             /* 세로 가운데 */
+  background-color: #f1f3f5;
+  color: #495057;
+  border-radius: 9999px;
+  cursor: pointer;
+  transition: background-color .15s ease, transform .05s ease;
+
+  &:hover { background-color: #e9ecef; }
+  &:active { transform: scale(0.98); }
+`;
