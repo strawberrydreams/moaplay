@@ -1,5 +1,5 @@
 // 폼 유효성 검사를 처리하는 유틸 함수들의 모음
-// 폼 유효성 검사를 처리하는 유틸 함수들의 모음
+
 import type {ValidationResult, FieldError} from '../types/index';
 
 // 이메일 주소 입력 형식을 검증하는 함수

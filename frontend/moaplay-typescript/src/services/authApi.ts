@@ -16,10 +16,10 @@ export const loginUser = async (
 export const logoutUser = async (): Promise<{ success: boolean }> => {
     const { data } = await axiosInstance.post<{ success: boolean }>('/auth/logout');
     return data;
-};  
+};
 
 // (GET) 현재 로그인한 사용자 정보 요청
-export const checkLoginStatus = async (): Promise<{ 
+export const checkLoginStatus = async (): Promise<{
     id: number;
 }> => {
     const { data } = await axiosInstance.get('/auth/login_test');

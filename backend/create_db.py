@@ -1,347 +1,522 @@
 """
-테스트 데이터 생성 스크립트
-- 일반 사용자 10명
-- Host 3명
-- Admin 1명
-- 행사 10개
+데이터베이스 초기화 및 샘플 데이터 생성 스크립트
+- 기존 DB 삭제 후 재생성
+- Admin, Host, User 생성
+- Event, Tag, Review, Schedule, Favorite 생성
 """
+
+import json
+import random
+from datetime import datetime, timedelta
+from typing import List, Dict, Optional
+import sys
+import os
+
+# Flask 앱 경로 추가
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
 from app import create_app, db
 from app.models.user import User
 from app.models.event import Event
 from app.models.tag import Tag
 from app.models.event_tag import EventTag
+from app.models.review import Review
+from app.models.schedule import Schedule
+from app.models.favorite import Favorite
 from app.models.enums import UserRole, EventStatus
-from datetime import date, datetime
 
-def create_users():
-    """사용자 생성"""
-    users_data = [
-        # 일반 사용자 10명
-        {"user_id": "user001", "nickname": "김민준", "email": "minjun@example.com", "phone": "010-1111-1111", "role": UserRole.USER, "password": "password123!"},
-        {"user_id": "user002", "nickname": "이서윤", "email": "seoyun@example.com", "phone": "010-2222-2222", "role": UserRole.USER, "password": "password123!"},
-        {"user_id": "user003", "nickname": "박지우", "email": "jiwoo@example.com", "phone": "010-3333-3333", "role": UserRole.USER, "password": "password123!"},
-        {"user_id": "user004", "nickname": "최하준", "email": "hajun@example.com", "phone": "010-4444-4444", "role": UserRole.USER, "password": "password123!"},
-        {"user_id": "user005", "nickname": "정서준", "email": "seojun@example.com", "phone": "010-5555-5555", "role": UserRole.USER, "password": "password123!"},
-        {"user_id": "user006", "nickname": "강예은", "email": "yeeun@example.com", "phone": "010-6666-6666", "role": UserRole.USER, "password": "password123!"},
-        {"user_id": "user007", "nickname": "조시우", "email": "siwoo@example.com", "phone": "010-7777-7777", "role": UserRole.USER, "password": "password123!"},
-        {"user_id": "user008", "nickname": "윤지안", "email": "jian@example.com", "phone": "010-8888-8888", "role": UserRole.USER, "password": "password123!"},
-        {"user_id": "user009", "nickname": "임도윤", "email": "doyun@example.com", "phone": "010-9999-9999", "role": UserRole.USER, "password": "password123!"},
-        {"user_id": "user010", "nickname": "한서연", "email": "seoyeon@example.com", "phone": "010-1010-1010", "role": UserRole.USER, "password": "password123!"},
+
+# 지역 리스트
+REGIONS = [
+    '서울', '부산', '대구', '인천', '광주', '대전', '울산', '세종',
+    '경기', '강원', '충북', '충남', '전북', '전남', '경북', '경남', '제주'
+]
+
+# 지역 영어 매핑
+REGION_ENGLISH = {
+    '서울': 'seoul',
+    '부산': 'busan',
+    '대구': 'daegu',
+    '인천': 'incheon',
+    '광주': 'gwangju',
+    '대전': 'daejeon',
+    '울산': 'ulsan',
+    '세종': 'sejong',
+    '경기': 'gyeonggi',
+    '강원': 'gangwon',
+    '충북': 'chungbuk',
+    '충남': 'chungnam',
+    '전북': 'jeonbuk',
+    '전남': 'jeonnam',
+    '경북': 'gyeongbuk',
+    '경남': 'gyeongnam',
+    '제주': 'jeju',
+    '기타': 'etc'
+}
+
+# 샘플 리뷰 내용
+SAMPLE_REVIEWS = [
+    "정말 좋은 행사였어요! 다음에도 참여하고 싶습니다.",
+    "가족들과 함께 즐거운 시간 보냈습니다. 추천해요!",
+    "기대 이상이었습니다. 특히 프로그램 구성이 알찼어요.",
+    "아이들이 정말 좋아했어요. 체험 프로그램이 다양했습니다.",
+    "날씨도 좋고 분위기도 좋았어요. 만족스러운 하루였습니다.",
+    "주차 공간이 협소했지만 행사 자체는 훌륭했습니다.",
+    "친구들과 함께 갔는데 모두 만족했어요!",
+    "음식도 맛있고 볼거리도 많았어요.",
+    "생각보다 규모가 커서 놀랐습니다. 잘 구경했어요.",
+    "다음 시즌에도 꼭 다시 방문하고 싶네요.",
+    "사진 찍기 좋은 곳이 많았어요. 인스타 감성 가득!",
+    "교통편이 편리해서 접근성이 좋았습니다.",
+    "프로그램이 다채로워서 지루할 틈이 없었어요.",
+    "직원분들이 친절하셨습니다. 감사합니다!",
+    "기대했던 것보다는 조금 아쉬웠지만 괜찮았어요.",
+]
+
+
+class DatabaseSeeder:
+    """DB 초기화 및 샘플 데이터 생성 클래스"""
+    
+    def __init__(self, app, json_file='festivals_data.json'):
+        self.app = app
+        self.json_file = json_file
+        self.users = {}  # role별 사용자 저장
+        self.region_hosts = {}  # 지역별 Host 저장
+        self.events_by_host = {}  # Host별 이벤트 저장
+        self.all_events = []
+    
+    def run(self):
+        """전체 시딩 실행"""
+        with self.app.app_context():
+            print("\n" + "=" * 60)
+            print("데이터베이스 초기화 시작")
+            print("=" * 60)
+            
+            # 1. DB 초기화
+            self.drop_and_create_db()
+            
+            # 2. User 생성
+            self.create_users()
+            
+            # 3. JSON 데이터 로드
+            events_data = self.load_json_data()
+            
+            # 4. Tag 생성
+            self.create_tags(events_data)
+            
+            # 5. Event 생성
+            self.create_events(events_data)
+            
+            # 6. Review 생성
+            self.create_reviews()
+            
+            # 7. Schedule 생성
+            self.create_schedules()
+            
+            # 8. Favorite 생성
+            self.create_favorites()
+            
+            print("\n" + "=" * 60)
+            print("✓ 데이터베이스 초기화 완료!")
+            print("=" * 60)
+            self.print_summary()
+    
+    def drop_and_create_db(self):
+        """기존 DB 삭제 후 재생성"""
+        print("\n1. 데이터베이스 초기화 중...")
         
-        # Host 3명
-        {"user_id": "host001", "nickname": "서울문화재단", "email": "seoul_culture@example.com", "phone": "02-1111-1111", "role": UserRole.HOST, "password": "password123!"},
-        {"user_id": "host002", "nickname": "부산축제기획", "email": "busan_festival@example.com", "phone": "051-2222-2222", "role": UserRole.HOST, "password": "password123!"},
-        {"user_id": "host003", "nickname": "제주이벤트", "email": "jeju_event@example.com", "phone": "064-3333-3333", "role": UserRole.HOST, "password": "password123!"},
+        # 모든 테이블 삭제
+        db.drop_all()
+        print("  ✓ 기존 테이블 삭제 완료")
+        
+        # 테이블 생성
+        db.create_all()
+        print("  ✓ 새 테이블 생성 완료")
+    
+    def create_users(self):
+        """Admin, Host, User 생성"""
+        print("\n2. 사용자 생성 중...")
         
         # Admin 1명
-        {"user_id": "admin", "nickname": "관리자", "email": "admin@example.com", "phone": "02-9999-9999", "role": UserRole.ADMIN, "password": "admin123!"},
-    ]
-    
-    users = []
-    for data in users_data:
-        user = User(
-            user_id=data["user_id"],
-            nickname=data["nickname"],
-            email=data["email"],
-            phone=data["phone"],
-            role=data["role"]
+        admin = User(
+            user_id='admin',
+            nickname='관리자',
+            email='admin@festival.com',
+            role=UserRole.ADMIN
         )
-        user.set_password(data["password"])
-        users.append(user)
-        db.session.add(user)
-    
-    db.session.commit()
-    print(f"✅ {len(users)}명의 사용자 생성 완료")
-    return users
-
-
-def create_tags():
-    """태그 생성"""
-    tag_names = [
-        # 기본
-        "행사", "이벤트", "온라인", "오프라인", "가볼만한곳", "주말에뭐하지",
+        admin.set_password('password123')
+        db.session.add(admin)
+        self.users['admin'] = admin
+        print("  ✓ Admin 생성: admin")
         
-        # 행사 종류별 - 문화예술
-        "전시회", "콘서트", "페스티벌", "공연", "팬미팅", "영화",
+        # Host 18명 (17개 지역 + 기타)
+        for region in REGIONS:
+            region_eng = REGION_ENGLISH[region]
+            host = User(
+                user_id=f'host_{region_eng}',
+                nickname=f'{region}호스트',
+                email=f'host_{region_eng}@festival.com',
+                role=UserRole.HOST
+            )
+            host.set_password('password123')
+            db.session.add(host)
+            self.region_hosts[region] = host
+            self.events_by_host[host.id] = []
         
-        # 행사 종류별 - 상업/마켓
-        "팝업스토어", "플리마켓", "박람회", "세일",
-        
-        # 행사 종류별 - 학습
-        "세미나", "컨퍼런스", "강연", "워크숍", "클래스",
-        
-        # 행사 종류별 - 소셜
-        "네트워킹", "파티", "소모임", "정모",
-        
-        # 행사 종류별 - 활동
-        "원데이클래스", "스포츠", "게임", "여행", "봉사활동",
-        
-        # 행사 분위기별
-        "힐링", "감성", "신나는", "액티비티", "조용한", "로맨틱", 
-        "핫플", "힙스터", "이색체험", "인생샷",
-        
-        # 행사 참여 대상
-        "누구나", "가족나들이", "아이와함께", "커플추천", "친구랑", 
-        "혼자서도좋아", "직장인", "대학생", "반려동물동반"
-    ]
-    
-    tags = []
-    for name in tag_names:
-        tag = Tag(name=name)
-        tags.append(tag)
-        db.session.add(tag)
-    
-    db.session.commit()
-    print(f"✅ {len(tags)}개의 태그 생성 완료")
-    return tags
-
-
-def create_events(users, tags):
-    """행사 생성"""
-    # Host 사용자만 필터링
-    hosts = [u for u in users if u.role == UserRole.HOST]
-    
-    events_data = [
-        {
-            "title": "서울 재즈 페스티벌 2025",
-            "summary": "도심 속에서 즐기는 세계적인 재즈 공연",
-            "organizer": "서울시",
-            "hosted_by": "서울문화재단",
-            "start_date": date(2025, 5, 15),
-            "end_date": date(2025, 5, 17),
-            "location": "올림픽공원",
-            "description": "국내외 유명 재즈 뮤지션들이 한자리에 모이는 아시아 최대 규모의 재즈 페스티벌입니다. 3일간 펼쳐지는 화려한 공연과 함께 재즈의 매력에 빠져보세요.",
-            "phone": "02-1234-5678",
-            "image_urls": ["https://example.com/jazz1.jpg", "https://example.com/jazz2.jpg"],
-            "host_index": 0,
-            "status": EventStatus.APPROVED,
-            "tags": ["행사", "오프라인", "페스티벌", "콘서트", "신나는", "핫플", "친구랑", "누구나"],
-            "view_count": 1542
-        },
-        {
-            "title": "부산 국제 영화제",
-            "summary": "아시아를 대표하는 영화 축제",
-            "organizer": "부산광역시",
-            "hosted_by": "부산국제영화제 조직위원회",
-            "start_date": date(2025, 10, 2),
-            "end_date": date(2025, 10, 11),
-            "location": "부산 영화의전당",
-            "description": "세계 각국의 우수한 영화를 만날 수 있는 아시아 최대 영화 축제입니다.",
-            "phone": "051-1234-5678",
-            "image_urls": ["https://example.com/biff1.jpg"],
-            "host_index": 1,
-            "status": EventStatus.APPROVED,
-            "tags": ["행사", "오프라인", "영화", "페스티벌", "감성", "친구랑", "커플추천", "대학생"],
-            "view_count": 2341
-        },
-        {
-            "title": "제주 감귤 축제",
-            "summary": "제주의 맛과 향을 느끼는 특별한 시간",
-            "organizer": "제주특별자치도",
-            "hosted_by": "제주관광공사",
-            "start_date": date(2025, 11, 1),
-            "end_date": date(2025, 11, 3),
-            "location": "제주시 탑동광장",
-            "description": "제주의 대표 특산물인 감귤을 주제로 한 축제입니다. 감귤 따기 체험, 감귤 요리 시연 등 다양한 프로그램이 준비되어 있습니다.",
-            "phone": "064-1234-5678",
-            "image_urls": ["https://example.com/jeju1.jpg", "https://example.com/jeju2.jpg"],
-            "host_index": 2,
-            "status": EventStatus.APPROVED,
-            "tags": ["이벤트", "오프라인", "가볼만한곳", "여행", "가족나들이", "아이와함께", "힐링"],
-            "view_count": 892
-        },
-        {
-            "title": "서울 빛초롱 축제",
-            "summary": "화려한 등불이 수놓는 겨울 밤",
-            "organizer": "서울시",
-            "hosted_by": "서울문화재단",
-            "start_date": date(2025, 12, 15),
-            "end_date": date(2026, 1, 15),
-            "location": "청계천 일대",
-            "description": "형형색색의 아름다운 등불로 꾸며진 청계천에서 특별한 겨울 추억을 만들어보세요.",
-            "phone": "02-2345-6789",
-            "image_urls": ["https://example.com/light1.jpg"],
-            "host_index": 0,
-            "status": EventStatus.APPROVED,
-            "tags": ["행사", "오프라인", "페스티벌", "전시회", "감성", "로맨틱", "인생샷", "커플추천", "가족나들이"],
-            "view_count": 3421
-        },
-        {
-            "title": "부산 바다 축제",
-            "summary": "여름 바다에서 즐기는 신나는 축제",
-            "organizer": "부산광역시",
-            "hosted_by": "부산관광공사",
-            "start_date": date(2025, 7, 25),
-            "end_date": date(2025, 7, 28),
-            "location": "해운대 해수욕장",
-            "description": "시원한 바다와 함께하는 여름 축제! 수상 스포츠, 비치 파티, 불꽃놀이 등 다채로운 이벤트가 펼쳐집니다.",
-            "phone": "051-2345-6789",
-            "image_urls": ["https://example.com/sea1.jpg", "https://example.com/sea2.jpg"],
-            "host_index": 1,
-            "status": EventStatus.APPROVED,
-            "tags": ["이벤트", "오프라인", "페스티벌", "스포츠", "신나는", "액티비티", "친구랑", "가족나들이"],
-            "view_count": 2156
-        },
-        {
-            "title": "서울 클래식 음악회",
-            "summary": "세계적인 오케스트라의 감동적인 연주",
-            "organizer": "서울시립교향악단",
-            "hosted_by": "서울문화재단",
-            "start_date": date(2025, 9, 20),
-            "end_date": date(2025, 9, 22),
-            "location": "예술의전당 콘서트홀",
-            "description": "베토벤, 모차르트 등 클래식의 명곡들을 세계적인 오케스트라의 연주로 만나보세요.",
-            "phone": "02-3456-7890",
-            "image_urls": ["https://example.com/classic1.jpg"],
-            "host_index": 0,
-            "status": EventStatus.PENDING,
-            "tags": ["행사", "오프라인", "콘서트", "공연", "감성", "조용한", "커플추천", "직장인"],
-            "view_count": 0
-        },
-        {
-            "title": "제주 현대미술 전시회",
-            "summary": "제주의 자연을 담은 현대미술",
-            "organizer": "제주도립미술관",
-            "hosted_by": "제주이벤트",
-            "start_date": date(2025, 8, 1),
-            "end_date": date(2025, 8, 31),
-            "location": "제주도립미술관",
-            "description": "제주의 아름다운 자연을 현대적인 시각으로 재해석한 작품들을 만나보실 수 있습니다.",
-            "phone": "064-2345-6789",
-            "image_urls": ["https://example.com/art1.jpg", "https://example.com/art2.jpg"],
-            "host_index": 2,
-            "status": EventStatus.APPROVED,
-            "tags": ["이벤트", "오프라인", "전시회", "가볼만한곳", "감성", "힙스터", "인생샷", "혼자서도좋아"],
-            "view_count": 674
-        },
-        {
-            "title": "부산 푸드 마켓",
-            "summary": "전국 맛집이 모인 미식 천국",
-            "organizer": "부산광역시",
-            "hosted_by": "부산축제기획",
-            "start_date": date(2025, 6, 10),
-            "end_date": date(2025, 6, 12),
-            "location": "부산 벡스코",
-            "description": "전국의 유명 맛집과 셰프들이 한자리에! 다양한 음식을 맛보고 요리 시연도 관람할 수 있습니다.",
-            "phone": "051-3456-7890",
-            "image_urls": ["https://example.com/food1.jpg"],
-            "host_index": 1,
-            "status": EventStatus.APPROVED,
-            "tags": ["이벤트", "오프라인", "플리마켓", "가볼만한곳", "신나는", "핫플", "친구랑", "가족나들이"],
-            "view_count": 1893
-        },
-        {
-            "title": "서울 전통공예 박람회",
-            "summary": "우리의 아름다운 전통 공예를 만나다",
-            "organizer": "문화체육관광부",
-            "hosted_by": "한국공예디자인문화진흥원",
-            "start_date": date(2025, 4, 5),
-            "end_date": date(2025, 4, 7),
-            "location": "코엑스",
-            "description": "도자기, 자수, 목공예 등 전통 공예 작품 전시 및 체험 프로그램을 운영합니다.",
-            "phone": "02-4567-8901",
-            "image_urls": ["https://example.com/craft1.jpg", "https://example.com/craft2.jpg"],
-            "host_index": 0,
-            "status": EventStatus.PENDING,
-            "tags": ["행사", "오프라인", "박람회", "전시회", "이색체험", "원데이클래스", "누구나", "가족나들이"],
-            "view_count": 0
-        },
-        {
-            "title": "제주 힐링 음악회",
-            "summary": "자연 속에서 듣는 힐링 멜로디",
-            "organizer": "제주특별자치도",
-            "hosted_by": "제주이벤트",
-            "start_date": date(2025, 10, 20),
-            "end_date": date(2025, 10, 20),
-            "location": "제주 애월 해변",
-            "description": "제주의 아름다운 해변을 배경으로 펼쳐지는 특별한 음악회입니다. 일몰과 함께하는 힐링 콘서트를 즐겨보세요.",
-            "phone": "064-3456-7890",
-            "image_urls": ["https://example.com/healing1.jpg"],
-            "host_index": 2,
-            "status": EventStatus.REJECTED,
-            "rejection_reason": "행사 장소에 대한 허가가 필요합니다. 관련 서류를 보완하여 다시 신청해주세요.",
-            "tags": ["이벤트", "오프라인", "콘서트", "힐링", "감성", "로맨틱"],
-            "view_count": 0
-        }
-    ]
-    
-    events = []
-    tag_dict = {tag.name: tag for tag in tags}
-    
-    for data in events_data:
-        event = Event(
-            title=data["title"],
-            summary=data["summary"],
-            organizer=data["organizer"],
-            hosted_by=data["hosted_by"],
-            start_date=data["start_date"],
-            end_date=data["end_date"],
-            location=data["location"],
-            description=data["description"],
-            phone=data["phone"],
-            image_urls=data["image_urls"],
-            host_id=hosts[data["host_index"]].id,
-            status=data["status"],
-            view_count=data["view_count"]
+        # 기타 Host
+        host_etc = User(
+            user_id='host_etc',
+            nickname='기타호스트',
+            email='host_etc@festival.com',
+            role=UserRole.HOST
         )
+        host_etc.set_password('password123')
+        db.session.add(host_etc)
+        self.region_hosts['기타'] = host_etc
+        self.events_by_host[host_etc.id] = []
         
-        if data["status"] == EventStatus.REJECTED and "rejection_reason" in data:
-            event.rejection_reason = data["rejection_reason"]
+        print(f"  ✓ Host 생성: {len(REGIONS) + 1}명")
         
-        events.append(event)
-        db.session.add(event)
-        db.session.flush()  # ID 할당을 위해 flush
+        # 일반 User 20명
+        for i in range(1, 21):
+            user = User(
+                user_id=f'user{i:02d}',
+                nickname=f'사용자{i:02d}',
+                email=f'user{i:02d}@example.com',
+                role=UserRole.USER
+            )
+            user.set_password('password123')
+            db.session.add(user)
         
-        # 태그 연결
-        for tag_name in data["tags"]:
-            if tag_name in tag_dict:
-                event_tag = EventTag(
-                    event_id=event.id,
-                    tag_id=tag_dict[tag_name].id
+        print("  ✓ 일반 User 생성: 20명")
+        
+        db.session.commit()
+        print(f"  ✓ 총 {1 + len(REGIONS) + 1 + 20}명 생성 완료")
+        print(f"  📝 모든 계정 비밀번호: password123")
+    
+    def load_json_data(self) -> List[Dict]:
+        """JSON 파일에서 이벤트 데이터 로드"""
+        print("\n3. JSON 데이터 로드 중...")
+        
+        try:
+            with open(self.json_file, 'r', encoding='utf-8') as f:
+                data = json.load(f)
+            print(f"  ✓ {len(data)}개 이벤트 데이터 로드 완료")
+            return data
+        except FileNotFoundError:
+            print(f"  ✗ 파일을 찾을 수 없습니다: {self.json_file}")
+            return []
+        except json.JSONDecodeError as e:
+            print(f"  ✗ JSON 파싱 오류: {e}")
+            return []
+    
+    def match_region(self, location: str) -> str:
+        """location 문자열에서 지역 매칭"""
+        if not location:
+            return '기타'
+        
+        # 우선순위: 광역시/특별시 → 도
+        location_lower = location.lower()
+        
+        # 특별시/광역시 먼저 확인
+        if '서울특별시' in location or '서울' in location:
+            return '서울'
+        if '부산광역시' in location or '부산' in location:
+            return '부산'
+        if '대구광역시' in location or '대구' in location:
+            return '대구'
+        if '인천광역시' in location or '인천' in location:
+            return '인천'
+        if '대전광역시' in location or '대전' in location:
+            return '대전'
+        if '울산광역시' in location or '울산' in location:
+            return '울산'
+        if '세종특별자치시' in location or '세종' in location:
+            return '세종'
+        
+        # 도 확인 (광주는 경기도 광주시와 구분)
+        if '경기도' in location:
+            return '경기'
+        if '광주광역시' in location:
+            return '광주'
+        if '강원특별자치도' in location or '강원도' in location or '강원' in location:
+            return '강원'
+        if '충청북도' in location or '충북' in location:
+            return '충북'
+        if '충청남도' in location or '충남' in location:
+            return '충남'
+        if '전북특별자치도' in location or '전라북도' in location or '전북' in location:
+            return '전북'
+        if '전라남도' in location or '전남' in location:
+            return '전남'
+        if '경상북도' in location or '경북' in location:
+            return '경북'
+        if '경상남도' in location or '경남' in location:
+            return '경남'
+        if '제주특별자치도' in location or '제주도' in location or '제주' in location:
+            return '제주'
+        
+        return '기타'
+    
+    def create_tags(self, events_data: List[Dict]):
+        """태그 생성"""
+        print("\n4. 태그 생성 중...")
+        
+        tag_set = set()
+        for event_data in events_data:
+            tags = event_data.get('tags', [])
+            tag_set.update(tags)
+        
+        tag_objects = {}
+        for tag_name in tag_set:
+            if tag_name and len(tag_name) <= 50:
+                tag = Tag(name=tag_name)
+                db.session.add(tag)
+                tag_objects[tag_name] = tag
+        
+        db.session.commit()
+        print(f"  ✓ {len(tag_objects)}개 태그 생성 완료")
+        
+        # 나중에 사용하기 위해 저장
+        self.tag_objects = tag_objects
+    
+    def create_events(self, events_data: List[Dict]):
+        """이벤트 생성"""
+        print("\n5. 이벤트 생성 중...")
+        
+        for idx, event_data in enumerate(events_data, 1):
+            # 지역 매칭
+            region = self.match_region(event_data.get('location', ''))
+            host = self.region_hosts.get(region, self.region_hosts['기타'])
+            
+            # 날짜 파싱
+            start_date = self._parse_date(event_data.get('start_date'))
+            end_date = self._parse_date(event_data.get('end_date'))
+            
+            # Event 생성
+            event = Event(
+                title=event_data.get('title', '제목 없음')[:255],
+                summary=event_data.get('summary'),
+                organizer=event_data.get('organizer'),
+                hosted_by=event_data.get('hosted_by'),
+                start_date=start_date,
+                end_date=end_date,
+                location=event_data.get('location', '미정')[:255],
+                description=event_data.get('description') or '상세 설명이 준비중입니다.',
+                phone=event_data.get('phone'),
+                image_urls=event_data.get('image_urls', []),
+                host_id=host.id,
+                status=EventStatus.APPROVED  # 일단 모두 승인
+            )
+            
+            db.session.add(event)
+            db.session.flush()  # ID 생성
+            
+            # Host별 이벤트 기록
+            if host.id not in self.events_by_host:
+                self.events_by_host[host.id] = []
+            self.events_by_host[host.id].append(event)
+            self.all_events.append(event)
+            
+            # 태그 연결
+            tags = event_data.get('tags', [])
+            for tag_name in tags:
+                tag = self.tag_objects.get(tag_name)
+                if tag:
+                    event_tag = EventTag(
+                        event_id=event.id,
+                        tag_id=tag.id
+                    )
+                    db.session.add(event_tag)
+            
+            if idx % 10 == 0:
+                print(f"  - {idx}/{len(events_data)} 처리 중...")
+        
+        db.session.commit()
+        print(f"  ✓ {len(events_data)}개 이벤트 생성 완료")
+        
+        # 각 Host별로 1개씩 PENDING 설정
+        self.set_pending_events()
+    
+    def set_pending_events(self):
+        """각 Host별로 1개 이벤트를 PENDING 상태로 변경"""
+        print("\n  - 각 Host별 1개 이벤트를 PENDING으로 설정 중...")
+        
+        pending_count = 0
+        for host_id, events in self.events_by_host.items():
+            if events:
+                # 랜덤으로 1개 선택
+                pending_event = random.choice(events)
+                pending_event.status = EventStatus.PENDING
+                pending_count += 1
+        
+        db.session.commit()
+        print(f"  ✓ {pending_count}개 이벤트 PENDING 설정 완료")
+    
+    def create_reviews(self):
+        """리뷰 생성"""
+        print("\n6. 리뷰 생성 중...")
+        
+        # 일반 User만 가져오기
+        users = User.query.filter_by(role=UserRole.USER).all()
+        
+        total_reviews = 0
+        for user in users:
+            # 유저당 2~5개 랜덤
+            num_reviews = random.randint(2, 5)
+            
+            # 랜덤 이벤트 선택 (중복 없이)
+            selected_events = random.sample(self.all_events, min(num_reviews, len(self.all_events)))
+            
+            for event in selected_events:
+                review = Review(
+                    title=f"{event.title} 후기",
+                    content=random.choice(SAMPLE_REVIEWS),
+                    rating=random.randint(3, 5),  # 3~5점
+                    user_id=user.id,
+                    event_id=event.id
                 )
-                db.session.add(event_tag)
+                db.session.add(review)
+                total_reviews += 1
+        
+        db.session.commit()
+        print(f"  ✓ {total_reviews}개 리뷰 생성 완료")
     
-    db.session.commit()
-    print(f"✅ {len(events)}개의 행사 생성 완료")
-    return events
+    def create_schedules(self):
+        """일정 생성"""
+        print("\n7. 일정 생성 중...")
+        
+        users = User.query.filter_by(role=UserRole.USER).all()
+        
+        total_schedules = 0
+        for user in users:
+            # 유저당 3~8개 랜덤
+            num_schedules = random.randint(3, 8)
+            
+            # 랜덤 이벤트 선택 (중복 없이)
+            selected_events = random.sample(self.all_events, min(num_schedules, len(self.all_events)))
+            
+            for event in selected_events:
+                schedule = Schedule(
+                    user_id=user.id,
+                    event_id=event.id
+                )
+                db.session.add(schedule)
+                total_schedules += 1
+        
+        db.session.commit()
+        print(f"  ✓ {total_schedules}개 일정 생성 완료")
+    
+    def create_favorites(self):
+        """찜 생성"""
+        print("\n8. 찜 생성 중...")
+        
+        users = User.query.filter_by(role=UserRole.USER).all()
+        
+        total_favorites = 0
+        for user in users:
+            # 유저당 3~7개 랜덤
+            num_favorites = random.randint(3, 7)
+            
+            # 랜덤 이벤트 선택 (중복 없이)
+            selected_events = random.sample(self.all_events, min(num_favorites, len(self.all_events)))
+            
+            for event in selected_events:
+                favorite = Favorite(
+                    user_id=user.id,
+                    event_id=event.id
+                )
+                db.session.add(favorite)
+                total_favorites += 1
+        
+        db.session.commit()
+        print(f"  ✓ {total_favorites}개 찜 생성 완료")
+    
+    def _parse_date(self, date_str: str) -> Optional[datetime]:
+        """날짜 문자열을 date 객체로 변환"""
+        if not date_str:
+            return None
+        
+        try:
+            return datetime.strptime(date_str, '%Y-%m-%d').date()
+        except ValueError:
+            return None
+    
+    def print_summary(self):
+        """생성 결과 요약 출력"""
+        print("\n📊 생성 결과 요약:")
+        print("-" * 60)
+        
+        # User 통계
+        admin_count = User.query.filter_by(role=UserRole.ADMIN).count()
+        host_count = User.query.filter_by(role=UserRole.HOST).count()
+        user_count = User.query.filter_by(role=UserRole.USER).count()
+        
+        print(f"👤 사용자:")
+        print(f"   - Admin: {admin_count}명")
+        print(f"   - Host: {host_count}명")
+        print(f"   - User: {user_count}명")
+        print(f"   - 총계: {admin_count + host_count + user_count}명")
+        
+        # Event 통계
+        approved_count = Event.query.filter_by(status=EventStatus.APPROVED).count()
+        pending_count = Event.query.filter_by(status=EventStatus.PENDING).count()
+        
+        print(f"\n🎪 이벤트:")
+        print(f"   - APPROVED: {approved_count}개")
+        print(f"   - PENDING: {pending_count}개")
+        print(f"   - 총계: {approved_count + pending_count}개")
+        
+        # Tag 통계
+        tag_count = Tag.query.count()
+        print(f"\n🏷️  태그: {tag_count}개")
+        
+        # Review 통계
+        review_count = Review.query.count()
+        avg_rating = db.session.query(db.func.avg(Review.rating)).scalar()
+        print(f"\n⭐ 리뷰: {review_count}개")
+        if avg_rating:
+            print(f"   - 평균 평점: {avg_rating:.1f}점")
+        
+        # Schedule 통계
+        schedule_count = Schedule.query.count()
+        print(f"\n📅 일정: {schedule_count}개")
+        
+        # Favorite 통계
+        favorite_count = Favorite.query.count()
+        print(f"\n❤️  찜: {favorite_count}개")
+        
+        print("-" * 60)
 
 
-def seed_database():
-    """전체 시드 데이터 생성"""
+def main():
+    """메인 함수"""
+    import argparse
+    
+    parser = argparse.ArgumentParser(description='데이터베이스 초기화 및 샘플 데이터 생성')
+    parser.add_argument('--file', '-f', default='festivals_data.json',
+                        help='이벤트 JSON 파일 경로 (기본: festivals_data.json)')
+    parser.add_argument('--yes', '-y', action='store_true',
+                        help='확인 없이 바로 실행')
+    
+    args = parser.parse_args()
+    
+    # 경고 메시지
+    if not args.yes:
+        print("\n⚠️  경고: 이 스크립트는 기존 데이터베이스를 완전히 삭제합니다!")
+        print("모든 테이블과 데이터가 제거되고 새로 생성됩니다.")
+        response = input("\n계속하시겠습니까? (yes 입력): ")
+        if response.lower() != 'yes':
+            print("취소되었습니다.")
+            return
+    
+    # 앱 생성 및 시딩 실행
     app = create_app()
+    seeder = DatabaseSeeder(app, json_file=args.file)
+    seeder.run()
     
-    with app.app_context():
-        # 기존 데이터 삭제 (개발 환경에서만!)
-        print("⚠️  기존 데이터 삭제 중...")
-        db.drop_all()
-        db.create_all()
-        print("✅ 테이블 재생성 완료")
-        
-        # 데이터 생성
-        print("\n📝 테스트 데이터 생성 시작...")
-        users = create_users()
-        tags = create_tags()
-        events = create_events(users, tags)
-        
-        print("\n" + "="*50)
-        print("✅ 모든 테스트 데이터 생성 완료!")
-        print("="*50)
-        print(f"\n📊 생성된 데이터:")
-        print(f"  - 사용자: {len(users)}명")
-        print(f"    • 일반 사용자(USER): 10명")
-        print(f"    • 행사 주최자(HOST): 3명")
-        print(f"    • 관리자(ADMIN): 1명")
-        print(f"  - 행사: {len(events)}개")
-        print(f"    • 승인됨(APPROVED): {sum(1 for e in events if e.status == EventStatus.APPROVED)}개")
-        print(f"    • 대기중(PENDING): {sum(1 for e in events if e.status == EventStatus.PENDING)}개")
-        print(f"    • 거절됨(REJECTED): {sum(1 for e in events if e.status == EventStatus.REJECTED)}개")
-        print(f"  - 태그: {len(tags)}개")
-        print("\n🔐 테스트 계정 정보:")
-        print("  일반 사용자: user001 ~ user010 / password123!")
-        print("  Host: host001 ~ host003 / password123!")
-        print("  Admin: admin / admin123!")
+    print("\n✅ 완료! 이제 애플리케이션을 시작할 수 있습니다.")
 
 
 if __name__ == '__main__':
-    seed_database()
+    main()

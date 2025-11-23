@@ -1,11 +1,9 @@
 // frontend/hooks/useSignupFlow.ts
 import { useState } from 'react';
 
-type Step = 'signup' | 'tags';
-
 export function useModal() {
     const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
-    const [isSignupModalOpen, setIsSignupModalOpen] = useState(false); 
+    const [isSignupModalOpen, setIsSignupModalOpen] = useState(false);
     const [isSelectTagsModalOpen, setisSelectTagsModalOpen] = useState(false);
     const [isReviewModalOpen, setIsReviewModalOpen] = useState(false);
     const [isReviewDetailModalOpen, setReviewDetailModalOpen] = useState(false);
@@ -35,12 +33,12 @@ export function useModal() {
         setIsDeleteAccountModalOpen(false);
         setIsHostApplyModalOpen(false);
     };
-    
+
     const loginToSignUp = () => {
         setIsLoginModalOpen(false);
         openSignupModal();
     };
-    
+
     const signUpToLogin = () => {
         setIsSignupModalOpen(false);
         openLoginModal();
@@ -51,7 +49,7 @@ export function useModal() {
         openSelectTagsModal();
     }
 
-    return { 
+    return {
         setReviewDetailModalOpen,
         setIsProfileModalOpen,
         setIsHostApplyModalOpen,
@@ -74,7 +72,7 @@ export function useModal() {
         closeReviewModal,
         closeReviewDetailModal,
         closeDeleteAccountModal,
-        loginToSignUp, 
-        signUpToLogin, 
+        loginToSignUp,
+        signUpToLogin,
         signUpToTags,  };
 }

@@ -36,10 +36,10 @@ axiosInstance.interceptors.request.use(
 axiosInstance.interceptors.response.use(
     (response) => response,
     (error) => {
-        // 401 에러 시 로그인 페이지로 보냄
+        // 401 에러 시 메인 페이지로 보냄
         if (error.response?.status === 401) {
             console.error('Unauthorized! Redirecting to login...');
-            // window.location.href = '/login';
+            // window.location.href = '/';
         }
         return Promise.reject(error);
     }

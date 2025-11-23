@@ -8,26 +8,22 @@ import * as R from '../../types/reviews';
 import * as ReviewApi from '../../services/reviewsApi';
 import * as EventApi from '../../services/eventsApi';
 import * as ScheduleApi from '../../services/schedulesApi';
-import * as FavoriteApi from '../../services/favoritesApi'
 
-import * as S from '../../styles/EventDetail.styles';
-import { FaImage, FaHeart, FaRegHeart, FaRegCalendarPlus, FaEdit, FaTrash } from 'react-icons/fa';
+import * as S from '../../styles/components/EventDetail.styles';
+import { FaHeart, FaRegHeart, FaRegCalendarPlus, FaEdit, FaTrash } from 'react-icons/fa';
 
 import Modal from '../../components/common/Modal'
 import {useModal} from '../../hooks/useModal';
 import {useReview} from '../../hooks/useReview';
 import { useFavorite } from '../../hooks/useFavorite';
-import ReviewForm from '../../components/ReviewForm';
-import ReviewDetail from '../../components/ReviewDetail';
-import ReviewCard from '../../components/ReviewCard';
+import ReviewForm from '../../components/reviews/ReviewForm';
+import ReviewDetail from '../../components/reviews/ReviewDetail';
+import ReviewCard from '../../components/reviews/ReviewCard';
 
 import {useAuthContext} from '../../contexts/AuthContext';
-import LoginForm from '../../components/auth/LoginForm';
-import { NotificationFormDropdown } from '../../components/NotificationFormDropdown';
+import { NotificationFormDropdown } from '../../components/notifications/NotificationFormDropdown';
 
-
-
-  // 리뷰 배열을 받아 평균 평점을 계산하는 함수
+// 리뷰 배열을 받아 평균 평점을 계산하는 함수
 const calculateAverageRating = (reviews: R.Review[]): number => {
   // 👇 reviews가 배열이 아니면 0점 반환
   if (!Array.isArray(reviews) || reviews.length === 0) {
@@ -64,8 +60,6 @@ const EventDetailPage: React.FC = () => {
       closeReviewModal,
       closeReviewDetailModal,
       openLoginModal,
-      loginToSignUp,
-      closeAllModals
   } = useModal();
 
   const {
@@ -116,13 +110,7 @@ const EventDetailPage: React.FC = () => {
   const prevImage = (): void => {
     setCurrentImageIndex((prev) => (prev - 1 + (images.length || 1)) % (images.length || 1));
   };
-
-  const renderStars = (rating: number): string => {
-    const r = Math.max(0, Math.min(5, Math.floor(rating)));
-    return '★'.repeat(r) + '☆'.repeat(5 - r);
-  };
-
-  const loadEventDetails = async () => {
+    const loadEventDetails = async () => {
     try {
       const response = await ReviewApi.getReviews({ event_id: numericEventId });
       setEventReview(Array.isArray(response) ? response : []);
@@ -210,21 +198,7 @@ const EventDetailPage: React.FC = () => {
               {/* 알림 드롭다운 */}
                <NotificationFormDropdown
                   eventId={eventDetail?.id}
-                  onSend={async () => {
-                    // { title, content }
-                    // try {
-                    //   // 실제 알림 전송 API 연결
-                    //   await NotificationApi.sendNotification({
-                    //     event_id: eventDetail?.id,
-                    //     title,
-                    //     content,
-                    //   });
-                      alert('알림이 전송되었습니다!');
-                    // } catch (error) {
-                    //   console.error('알림 전송 실패:', error);
-                    //   alert('알림 전송에 실패했습니다.');
-                    // }
-                  }}
+                  position={"left"}
                 />
                 <button onClick={handleEditEvent} title="행사 수정">
                   <FaEdit color="#4C8DFF" size={20} />
@@ -291,7 +265,19 @@ const EventDetailPage: React.FC = () => {
             <li><span>주최 <p>{eventDetail?.organizer}</p></span></li>
           </S.InfoList>
         </S.InfoGridContainer>
+        <S.TagInfoList style={{display: 'flex', color: '#333', textAlign: 'center'
+        }}>
+          <li>
+            <span>태그</span>
+            <S.TagsWrap>
+              {eventDetail?.tags.map(tag => (
+                <S.TagChip key={tag}>#{tag}</S.TagChip>
+              ))}
+            </S.TagsWrap>
+          </li>
+        </S.TagInfoList>
       </S.MapInfoSection>
+      
 
       {/* 5. 리뷰 섹션 (집계만 표시) */}
       <S.SectionTitle>리뷰</S.SectionTitle>

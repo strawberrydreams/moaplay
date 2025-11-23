@@ -178,28 +178,29 @@ export const useAdminDashboard = (): UseAdminDashboardReturn => {
     }, [refreshStats, loadPendingEvents]);
 
     // 사용자 목록 조회 (role, user_id 필터 + pagination)
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const loadUsers = useCallback(
         async (page: number = 1, role?: string, userId?: string) => {
-        try {
-            setUsersLoading(true);
-            setUsersError(null);
+            try {
+                setUsersLoading(true);
+                setUsersError(null);
 
-            const params = {
-            page,
-            per_page: 10,
-            role: role || undefined,
-            user_id: userId?.trim() || undefined,
-            };
+                const params = {
+                    page,
+                    per_page: 10,
+                    role: role || undefined,
+                    user_id: userId?.trim() || undefined,
+                };
 
-            const result = await getUsers(params);
-            setUsers(result.users ?? []);
-            setUsersPagination(result.pagination ?? null);
-        } catch (err) {
-            console.error('사용자 목록 조회 실패:', err);
-            setUsersError('사용자 목록을 불러오는데 실패했습니다.');
-        } finally {
-            setUsersLoading(false);
-        }
+                const result = await getUsers(params);
+                setUsers(result.users ?? []);
+                setUsersPagination(result.pagination ?? null);
+            } catch (err) {
+                console.error('사용자 목록 조회 실패:', err);
+                setUsersError('사용자 목록을 불러오는데 실패했습니다.');
+            } finally {
+                setUsersLoading(false);
+            }
         },
         []
     );

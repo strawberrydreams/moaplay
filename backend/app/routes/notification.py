@@ -12,7 +12,7 @@ from app.models.notification import Notification
 from app.models.notification_recipient import NotificationRecipient
 from app.models.event import Event
 from app.models.schedule import Schedule
-from app.models.enums import NotificationType
+from app.models.enums import NotificationType, UserRole
 
 noti_bp = Blueprint('notifications', __name__)
 
@@ -62,12 +62,13 @@ def send_notification():
     if not event:
         return {'error_code': 'EVENT_NOT_FOUND', 'message': '행사를 찾을 수 없습니다.'}, 404
     
-    # 권한 체크: 본인이 주최한 행사인가?
-    if event.host_id != current_user.id:
-        return {
-            'error_code': 'PERMISSION_DENIED',
-            'message': '본인이 주최한 행사에만 알림을 발송할 수 있습니다.'
-        }, 403
+    # 권한 체크(Admin, Host)
+    if current_user.role != UserRole.ADMIN:
+        if event.host_id != current_user.id:
+            return {
+                'error_code': 'PERMISSION_DENIED',
+                'message': '관리자와 본인이 주최한 행사에만 알림을 발송할 수 있습니다.'
+            }, 403
     
     # 수신 대상 조회 (해당 행사를 일정에 추가한 사용자)
     recipients = db.session.query(Schedule.user_id)\

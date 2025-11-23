@@ -78,21 +78,21 @@ export const useEventCreate = (): UseEventCreateReturn => {
 
             // 안전 장치 설정 (hosted_by가 문자열이 아니라서 500 오류 터지는 거 방지)
             const toStr = (v: any): string | undefined => {
-              if (v == null) return undefined;
-              if (Array.isArray(v)) return v.filter(Boolean).map(String).join(', ');
-              if (typeof v === 'string') return v.trim();
-              return String(v);
+                if (v == null) return undefined;
+                if (Array.isArray(v)) return v.filter(Boolean).map(String).join(', ');
+                if (typeof v === 'string') return v.trim();
+                return String(v);
             };
             const toYMD = (v: any): string | undefined => {
-              if (!v) return undefined;
-              if (typeof v === 'string') return v.slice(0, 10); // assume 'YYYY-MM-DD' or ISO
-              if (v instanceof Date) {
-                const y = v.getFullYear();
-                const m = String(v.getMonth() + 1).padStart(2, '0');
-                const d = String(v.getDate()).padStart(2, '0');
-                return `${y}-${m}-${d}`;
-              }
-              return undefined;
+                if (!v) return undefined;
+                if (typeof v === 'string') return v.slice(0, 10); // assume 'YYYY-MM-DD' or ISO
+                if (v instanceof Date) {
+                    const y = v.getFullYear();
+                    const m = String(v.getMonth() + 1).padStart(2, '0');
+                    const d = String(v.getDate()).padStart(2, '0');
+                    return `${y}-${m}-${d}`;
+                }
+                return undefined;
             };
 
             // 4. 행사 생성 API 호출 (이미지 URL 포함)
@@ -101,22 +101,22 @@ export const useEventCreate = (): UseEventCreateReturn => {
                 start_date, end_date, location, description, phone,
             } = eventData as any;
             const createRequest: E.CreateEventPayload = {
-              title: toStr(title)!,
-              summary: toStr(summary),
-              organizer: toStr(organizer),
-              hosted_by: toStr(hosted_by ?? (eventData as any).hostedBy ?? (eventData as any).host),
-              start_date: toYMD(start_date ?? (eventData as any).startDate)!,
-              end_date: toYMD(end_date ?? (eventData as any).endDate)!,
-              location: toStr(location)!,
-              description: toStr(description)!,
-              phone: toStr(phone ?? (eventData as any).phoneNumber)!,
-              image_urls: imageUrls,
-              tag_names: cleanedTags,
+                title: toStr(title)!,
+                summary: toStr(summary),
+                organizer: toStr(organizer),
+                hosted_by: toStr(hosted_by ?? (eventData as any).hostedBy ?? (eventData as any).host),
+                start_date: toYMD(start_date ?? (eventData as any).startDate)!,
+                end_date: toYMD(end_date ?? (eventData as any).endDate)!,
+                location: toStr(location)!,
+                description: toStr(description)!,
+                phone: toStr(phone ?? (eventData as any).phoneNumber)!,
+                image_urls: imageUrls,
+                tag_names: cleanedTags,
             };
 
             // quick client-side guard for required fields
             if (!createRequest.title || !createRequest.start_date || !createRequest.end_date || !createRequest.location || !createRequest.description || !createRequest.phone) {
-              throw new Error('필수 항목이 비었습니다. 제목, 시작일, 종료일, 장소, 설명, 연락처를 다시 확인해줘.');
+                throw new Error('필수 항목이 비었습니다. 제목, 시작일, 종료일, 장소, 설명, 연락처를 다시 확인해줘.');
             }
 
             setUploadProgress(80);

@@ -32,7 +32,7 @@ import {
     SubmitButton,
     ErrorAlert,
     RequiredMark,
-} from '../../styles/EventCreatePage.styles'; // 스타일을 CreatePage와 동일하게 사용
+} from '../../styles/pages/EventCreatePage.styles'; // 스타일을 CreatePage와 동일하게 사용
 
 export const EventUpdatePage: React.FC = () => {
     const params = useParams<{ id?: string; eventId?: string; event_id?: string }>();
@@ -60,7 +60,7 @@ export const EventUpdatePage: React.FC = () => {
     });
 
     const [existingImageUrls, setExistingImageUrls] = useState<string[]>([]);
-    const [removedImageUrls, setRemovedImageUrls] = useState<string[]>([]);
+    const [removedImageUrls] = useState<string[]>([]);
     const [validationErrors, setValidationErrors] = useState<Record<string, string>>({});
     const [event, setEvent] = useState<E.Event | null>(null);
     const [loading, setLoading] = useState<boolean>(true);
@@ -127,30 +127,24 @@ export const EventUpdatePage: React.FC = () => {
 
     // 기존 이미지 URL을 미리보기용 객체로 변환하는 헬퍼
     const urlToFile = async (url: string, filename: string): Promise<File> => {
-    const response = await fetch(url);
-    const blob = await response.blob();
-    return new File([blob], filename, { type: blob.type });
+        const response = await fetch(url);
+        const blob = await response.blob();
+        return new File([blob], filename, { type: blob.type });
     };
 
     useEffect(() => {
-    // 기존 이미지 URL을 File 객체로 변환해서 images 상태에 포함
-    (async () => {
-        const files = await Promise.all(
-        existingImageUrls.map((url, idx) => urlToFile(url, `existing_${idx}.jpg`))
-        );
-        // 기존 이미지 + 새로 업로드한 이미지 합치기
-        setFormData(prev => ({
-        ...prev,
-        images: [...files, ...prev.images]
-        }));
-    })();
+        // 기존 이미지 URL을 File 객체로 변환해서 images 상태에 포함
+        (async () => {
+            const files = await Promise.all(
+                existingImageUrls.map((url, idx) => urlToFile(url, `existing_${idx}.jpg`))
+            );
+            // 기존 이미지 + 새로 업로드한 이미지 합치기
+            setFormData(prev => ({
+                ...prev,
+                images: [...files, ...prev.images]
+            }));
+        })();
     }, [existingImageUrls]);
-
-    const handleRemoveExistingImage = (url: string) => {
-        setExistingImageUrls(prev => prev.filter(u => u !== url));
-        setRemovedImageUrls(prev => [...prev, url]);
-    };
-
     const handleDateRangeChange = (startDate: string, endDate: string) => {
         handleFieldChange('startDate', startDate);
         handleFieldChange('endDate', endDate);
@@ -319,12 +313,12 @@ export const EventUpdatePage: React.FC = () => {
                             <SectionDescription>
                                 기존 업로드된 이미지를 확인 및 제거할 수 있습니다.
                             </SectionDescription>
-                        <ImageUploader
-                            images={formData.images}
-                            onImagesChange={handleImagesChange}
-                            maxImages={5}
-                            error={validationErrors.images}
-                        />
+                            <ImageUploader
+                                images={formData.images}
+                                onImagesChange={handleImagesChange}
+                                maxImages={5}
+                                error={validationErrors.images}
+                            />
                         </FormSection>
 
                         <FormSection>
@@ -349,118 +343,118 @@ export const EventUpdatePage: React.FC = () => {
                                 <CharacterCount>{formData.title.length}/255</CharacterCount>
                             </InputGroup>
 
-                                <InputGroup>
-                                    <InputLabel htmlFor="summary">한 줄 소개</InputLabel>
-                                    <TextInput
-                                        id="summary"
-                                        type="text"
-                                        value={formData.summary}
-                                        onChange={(e) => handleFieldChange('summary', e.target.value)}
-                                        placeholder="행사를 한 줄로 소개해주세요"
-                                        hasError={!!validationErrors.summary}
-                                        maxLength={500}
-                                    />
-                                    {validationErrors.summary && (
-                                        <ErrorMessage>{validationErrors.summary}</ErrorMessage>
-                                    )}
-                                    <CharacterCount>{formData.summary ? formData.summary.length : 0}/500</CharacterCount>
-                                </InputGroup>
-
-                                <InputGroup>
-                                    <InputLabel htmlFor="phone">연락처(전화번호) <RequiredMark>*</RequiredMark></InputLabel>
-                                    <TextInput
-                                        id="phone"
-                                        type="text"
-                                        value={formData.phone}
-                                        onChange={(e) => handleFieldChange('phone', e.target.value)}
-                                        placeholder="예: 010-1234-5678"
-                                        hasError={!!validationErrors.phone}
-                                    />
-                                    {validationErrors.phone && (
-                                        <ErrorMessage>{validationErrors.phone}</ErrorMessage>
-                                    )}
-                                </InputGroup>
-
-                                <InputGroup>
-                                    <InputLabel htmlFor="organizer">주최자</InputLabel>
-                                    <TextInput
-                                        id="organizer"
-                                        type="text"
-                                        value={formData.organizer || ''}
-                                        onChange={(e) => handleFieldChange('organizer', e.target.value)}
-                                    />
-                                </InputGroup>
-
-                                <InputGroup>
-                                    <InputLabel htmlFor="hostedBy">주관</InputLabel>
-                                    <TextInput
-                                        id="hosted_By"
-                                        type="text"
-                                        value={formData.hosted_By || ''}
-                                        onChange={(e) => handleFieldChange('hosted_By', e.target.value)}
-                                    />
-                                </InputGroup>
-                            </FormSection>
-
-                            {/* 일정 및 장소 */}
-                            <FormSection>
-                                <SectionTitle>일정 및 장소</SectionTitle>
-
-                                <DateRangeSelector
-                                    startDate={formData.startDate}
-                                    endDate={formData.endDate}
-                                    onChange={handleDateRangeChange}
-                                    startDateError={validationErrors.startDate}
-                                    endDateError={validationErrors.endDate}
+                            <InputGroup>
+                                <InputLabel htmlFor="summary">한 줄 소개</InputLabel>
+                                <TextInput
+                                    id="summary"
+                                    type="text"
+                                    value={formData.summary}
+                                    onChange={(e) => handleFieldChange('summary', e.target.value)}
+                                    placeholder="행사를 한 줄로 소개해주세요"
+                                    hasError={!!validationErrors.summary}
+                                    maxLength={500}
                                 />
+                                {validationErrors.summary && (
+                                    <ErrorMessage>{validationErrors.summary}</ErrorMessage>
+                                )}
+                                <CharacterCount>{formData.summary ? formData.summary.length : 0}/500</CharacterCount>
+                            </InputGroup>
 
-                                <InputGroup>
-                                    <InputLabel htmlFor="location">개최 주소 <RequiredMark>*</RequiredMark></InputLabel>
-                                    <TextInput
-                                        id="location"
-                                        type="text"
-                                        value={formData.location}
-                                        onChange={(e) => handleFieldChange('location', e.target.value)}
-                                        placeholder="행사가 열리는 정확한 주소를 입력해주세요"
-                                        hasError={!!validationErrors.location}
-                                    />
-                                    {validationErrors.location && (
-                                        <ErrorMessage>{validationErrors.location}</ErrorMessage>
-                                    )}
-                                </InputGroup>
-                            </FormSection>
+                            <InputGroup>
+                                <InputLabel htmlFor="phone">연락처(전화번호) <RequiredMark>*</RequiredMark></InputLabel>
+                                <TextInput
+                                    id="phone"
+                                    type="text"
+                                    value={formData.phone}
+                                    onChange={(e) => handleFieldChange('phone', e.target.value)}
+                                    placeholder="예: 010-1234-5678"
+                                    hasError={!!validationErrors.phone}
+                                />
+                                {validationErrors.phone && (
+                                    <ErrorMessage>{validationErrors.phone}</ErrorMessage>
+                                )}
+                            </InputGroup>
 
-                            {/* 상세 정보 */}
-                            <FormSection>
-                                <SectionTitle>상세 정보</SectionTitle>
+                            <InputGroup>
+                                <InputLabel htmlFor="organizer">주최자</InputLabel>
+                                <TextInput
+                                    id="organizer"
+                                    type="text"
+                                    value={formData.organizer || ''}
+                                    onChange={(e) => handleFieldChange('organizer', e.target.value)}
+                                />
+                            </InputGroup>
 
-                                <InputGroup>
-                                    <InputLabel htmlFor="description">상세 설명 <RequiredMark>*</RequiredMark></InputLabel>
-                                    <TextArea
-                                        id="description"
-                                        value={formData.description}
-                                        onChange={(e) => handleFieldChange('description', e.target.value)}
-                                        placeholder="행사에 대한 자세한 설명을 입력해주세요"
-                                        hasError={!!validationErrors.description}
-                                        rows={8}
-                                        maxLength={5000}
-                                    />
-                                    {validationErrors.description && (
-                                        <ErrorMessage>{validationErrors.description}</ErrorMessage>
-                                    )}
-                                    <CharacterCount>{formData.description.length}/5000</CharacterCount>
-                                </InputGroup>
+                            <InputGroup>
+                                <InputLabel htmlFor="hostedBy">주관</InputLabel>
+                                <TextInput
+                                    id="hosted_By"
+                                    type="text"
+                                    value={formData.hosted_By || ''}
+                                    onChange={(e) => handleFieldChange('hosted_By', e.target.value)}
+                                />
+                            </InputGroup>
+                        </FormSection>
 
-                                <InputGroup>
-                                    <InputLabel>태그 <RequiredMark>*</RequiredMark></InputLabel>
-                                    <TagSelector
-                                        selectedTags={formData.tags}
-                                        onTagsChange={handleTagsChange}
-                                        maxTags={10}
-                                        error={validationErrors.tags}
-                                    />
-                                </InputGroup>
-                            </FormSection>
+                        {/* 일정 및 장소 */}
+                        <FormSection>
+                            <SectionTitle>일정 및 장소</SectionTitle>
+
+                            <DateRangeSelector
+                                startDate={formData.startDate}
+                                endDate={formData.endDate}
+                                onChange={handleDateRangeChange}
+                                startDateError={validationErrors.startDate}
+                                endDateError={validationErrors.endDate}
+                            />
+
+                            <InputGroup>
+                                <InputLabel htmlFor="location">개최 주소 <RequiredMark>*</RequiredMark></InputLabel>
+                                <TextInput
+                                    id="location"
+                                    type="text"
+                                    value={formData.location}
+                                    onChange={(e) => handleFieldChange('location', e.target.value)}
+                                    placeholder="행사가 열리는 정확한 주소를 입력해주세요"
+                                    hasError={!!validationErrors.location}
+                                />
+                                {validationErrors.location && (
+                                    <ErrorMessage>{validationErrors.location}</ErrorMessage>
+                                )}
+                            </InputGroup>
+                        </FormSection>
+
+                        {/* 상세 정보 */}
+                        <FormSection>
+                            <SectionTitle>상세 정보</SectionTitle>
+
+                            <InputGroup>
+                                <InputLabel htmlFor="description">상세 설명 <RequiredMark>*</RequiredMark></InputLabel>
+                                <TextArea
+                                    id="description"
+                                    value={formData.description}
+                                    onChange={(e) => handleFieldChange('description', e.target.value)}
+                                    placeholder="행사에 대한 자세한 설명을 입력해주세요"
+                                    hasError={!!validationErrors.description}
+                                    rows={8}
+                                    maxLength={5000}
+                                />
+                                {validationErrors.description && (
+                                    <ErrorMessage>{validationErrors.description}</ErrorMessage>
+                                )}
+                                <CharacterCount>{formData.description.length}/5000</CharacterCount>
+                            </InputGroup>
+
+                            <InputGroup>
+                                <InputLabel>태그 <RequiredMark>*</RequiredMark></InputLabel>
+                                <TagSelector
+                                    selectedTags={formData.tags}
+                                    onTagsChange={handleTagsChange}
+                                    maxTags={10}
+                                    error={validationErrors.tags}
+                                />
+                            </InputGroup>
+                        </FormSection>
                         {/* 제출 버튼 */}
                         <FormActions>
                             <CancelButton type="button" onClick={handleCancel}>취소</CancelButton>
