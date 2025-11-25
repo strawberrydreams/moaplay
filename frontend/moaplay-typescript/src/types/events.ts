@@ -115,3 +115,27 @@ export interface EventReadListResponse {
         total_pages: number;
     };
 }
+
+// ===============================================================
+// == 크롤링 관련 별도 타입 ==
+// ===============================================================
+
+// 크롤링 대상 사이트 설정 타입
+export type EventSourceProvider =
+    | 'NAVER'
+    | 'YES24'
+    | 'INTERPARK'
+    | 'TICKETLINK'
+    | 'LOCAL_GOV'
+    | 'ETC'; // 기타 확장
+
+// 크롤링 조건 설정 타입
+export interface StartCrawlingPayload {
+    provider: EventSourceProvider; // 사이트 선택
+    category?: string;
+    date_from: string;
+    date_to: string;
+    keyword?: string;
+    page: number;
+    limit: number;
+}
