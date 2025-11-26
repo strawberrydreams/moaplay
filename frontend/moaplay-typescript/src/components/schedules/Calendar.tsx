@@ -12,9 +12,15 @@ interface ICalendarProps {
     events?: E.Event[];
     onEventClick: (on:boolean, event?: E.Event) => void;
     CalendarEvent?: E.Event;
+    onSyncClick?: () => void;
 }
 
-const Calendar: React.FC<ICalendarProps> = ({ events = [], onEventClick, CalendarEvent }) => {
+const Calendar: React.FC<ICalendarProps> = ({ 
+    events = [], 
+    onEventClick, 
+    CalendarEvent, 
+    onSyncClick, 
+}) => {
     // console.log('CalendarEventDetail 렌더링, event prop:', events);
     const [clickedEventId, setClickedEventId] = useState<string | null>(null);
     const [hoveredEventId, setHoveredEventId] = useState<string | null>(null);
@@ -118,9 +124,17 @@ const Calendar: React.FC<ICalendarProps> = ({ events = [], onEventClick, Calenda
                 eventClassNames={handleEventClassNames}
                 dayCellContent={handleDayCellContent}
                 dateClick={handleDateClick}
+                customButtons={{
+                    googleSync: {
+                        text: 'Google 캘린더로 동기화',
+                        click: () => {
+                            if (onSyncClick) onSyncClick();
+                        },
+                    },
+                }}
                 headerToolbar={{
                     left: 'title',
-                    right: 'prev next'
+                    right: 'googleSync prev next'
                 }}
                 locale="ko"
                 height="auto"

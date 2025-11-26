@@ -16,6 +16,8 @@ interface AuthContextType {
     logout: () => Promise<void>;
     checkAuthStatus: () => Promise<void>;
     fetchSchedules: () => Promise<void>; // 찜 목록 새로고침
+    isGoogleConnected: boolean;
+    fetchGoogleStatus: () => Promise<void>;
 }
 
 // 4. Context를 생성합니다. (초기값은 undefined)
@@ -36,14 +38,21 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         error: auth.error,
         schedules: auth.schedules,
         schedulesLoading: auth.schedulesLoading,
+        isGoogleConnected: auth.isGoogleConnected,
         login: auth.login,
         logout: auth.logout,
         checkAuthStatus: auth.checkAuthStatus,
-        fetchSchedules: auth.fetchSchedules
+        fetchSchedules: auth.fetchSchedules,
+        fetchGoogleStatus: auth.fetchGoogleStatus,
     }), [
         auth.user, auth.loading, auth.error,
         auth.schedules, auth.schedulesLoading,
-        auth.login, auth.logout, auth.checkAuthStatus, auth.fetchSchedules
+        auth.isGoogleConnected,
+        auth.login, 
+        auth.logout, 
+        auth.checkAuthStatus, 
+        auth.fetchSchedules,
+        auth.fetchGoogleStatus
     ]);
 
     // 7. Provider로 자식 컴포넌트들을 감싸고 value를 전달합니다.

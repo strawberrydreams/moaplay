@@ -5,6 +5,7 @@ import * as UserApi from '../services/usersApi';
 import type { LoginPayload } from '../types/auth';
 import type { Users } from '../types/users';
 import type { Schedule } from '../types/schedules';
+import googleApi from "../services/googleApi";
 
 export type AuthenticatedUser = Users;
 
@@ -14,6 +15,7 @@ export function useAuth() {
     const [error, setError] = useState<string | null>(null);
     const [schedules, setSchedules] = useState<Schedule[]>([]);
     const [schedulesLoading, setSchedulesLoading] = useState(false);
+    const [isGoogleConnected, setIsGoogleConnected] = useState(false);
 
     /** 찜 목록 새로고침 */
     const fetchSchedules = useCallback(async () => {
@@ -32,6 +34,18 @@ export function useAuth() {
         }
     }, []);
 
+    /** 구글 연동 상태 확인 */
+    const fetchGoogleStatus = useCallback(async () => {
+        try {
+            const res = await googleApi.checkConnected();
+            setIsGoogleConnected(res.connected);
+        } catch (err) {
+            // 로그인 안 됐거나 에러일 때는 false
+            console.warn('구글 연동 상태 확인 실패:', err);
+            setIsGoogleConnected(false);
+        }
+    }, []);
+
     /** 인증 상태 확인 */
     const checkAuthStatus = useCallback(async () => {
         setLoading(true);
@@ -42,10 +56,12 @@ export function useAuth() {
                 setUser(userData);
                 localStorage.setItem('user', JSON.stringify(userData));
                 await fetchSchedules();
+                await fetchGoogleStatus();   // 🔹 유저가 있으면 구글 연동 상태도 같이 갱신
             } else {
                 setUser(null);
                 localStorage.removeItem('user');
                 setSchedules([]);
+                setIsGoogleConnected(false);
             }
         } catch (err: any) {
             if (err.response?.status === 401) {
@@ -53,15 +69,18 @@ export function useAuth() {
                 localStorage.removeItem('user');
                 setSchedules([]);
                 localStorage.removeItem('schedules');
+                setIsGoogleConnected(false); // 🔹 401이면 연동도 당연히 false
             } else {
                 console.error('인증 상태 확인 실패:', err);
                 setError('로그인 상태 확인 중 오류 발생');
                 setUser(null);
+                setIsGoogleConnected(false);
             }
         } finally {
             setLoading(false);
         }
-    }, [fetchSchedules]);
+    }, [fetchSchedules, fetchGoogleStatus]);
+
 
     /** 앱 최초 실행 시 저장된 로그인 정보 복원 */
     useEffect(() => {
@@ -73,6 +92,7 @@ export function useAuth() {
         if (savedSchedules) {
             setSchedules(JSON.parse(savedSchedules));
         }
+        // 실제 서버 기준으로 다시 확인 (user / 구글 연동 모두)
         checkAuthStatus();
     }, [checkAuthStatus]);
 
@@ -166,6 +186,8 @@ export function useAuth() {
         error,
         schedules,
         schedulesLoading,
+        isGoogleConnected,
+        fetchGoogleStatus,
         login,
         logout,
         checkAuthStatus,

@@ -10,6 +10,7 @@ import {
     LinksContainer,
     ErrorMessage
 } from '../../styles/components/LoginForm.styles';
+import ConnectGoogleButton from './ConnectGoogleButton';
 
 // --- 1. 로그인 폼 전용 설정 ---
 const initialLoginValues: LoginPayload = { user_id: '', password: '' };

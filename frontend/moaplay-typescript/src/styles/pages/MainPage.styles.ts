@@ -39,8 +39,9 @@ export const CalendarSection = styled.section`
 `;
 
 export const CalendarWrapper = styled.div`
+  position: relative;   /* 버튼 기준점 */
   flex: 2;
-  min-width: 0; /* flex overflow 방지 */
+  min-width: 0;
   background-color: #fff;
 
   @media (max-width: 768px) {
@@ -97,5 +98,16 @@ export const BannerImage = styled.img`
   /* ✅ 반응형 크기 조정 */
   @media (max-width: 768px) {
     max-height: 180px;
+  }
+`;
+
+export const SyncButtonWrapper = styled.div`
+  margin-left: 59%;
+  margin-bottom: 10px;
+  z-index: 10;
+
+  @media (max-width: 768px) {
+    top: 10px;
+    left: 60%;
   }
 `;

@@ -232,4 +232,20 @@ export const StyledCalendarWrapper = styled.div`
       min-width: 450px;
     }
   }
+
+  .fc-toolbar-chunk .fc-googleSync-button {
+    border-radius: 999px;
+    background: linear-gradient(135deg, #4285f4, #5c9dff);
+    color: #fff;
+    font-size: 0.8rem;
+    font-weight: 600;
+    padding: 0.35rem 0.9rem;
+    border: none;
+    box-shadow: 0 3px 8px rgba(66, 133, 244, 0.3);
+  }
+
+  .fc-toolbar-chunk .fc-googleSync-button:hover {
+    background: linear-gradient(135deg, #2f6ad6, #4a8cff);
+    box-shadow: 0 4px 10px rgba(66, 133, 244, 0.4);
+  }
 `;

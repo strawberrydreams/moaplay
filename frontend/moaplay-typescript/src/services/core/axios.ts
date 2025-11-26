@@ -17,20 +17,21 @@ const axiosInstance: AxiosInstance = axios.create({
 });
 
 // 요청 인터셉터: 모든 API 요청에 인증 토큰 추가
-axiosInstance.interceptors.request.use(
+axiosInstance.interceptors.request.use( 
     (config: InternalAxiosRequestConfig) => {
-        // JWT 토큰 가져오기
-        const token = localStorage.getItem('jwt_token');
-
-        if (token) {
-            config.headers.Authorization = `Bearer ${token}`;
-        }
-        return config;
-    },
-    (error) => {
-        return Promise.reject(error);
-    }
+        // JWT 토큰 가져오기 
+        const token = localStorage.getItem('jwt_token'); 
+        
+        if (token) { 
+            config.headers.Authorization = `Bearer ${token}`; 
+        } 
+        return config; 
+    }, 
+    (error) => { 
+        return Promise.reject(error); 
+    } 
 );
+
 
 // 응답 인터셉터 (옵션): 에러 처리 등 수행
 axiosInstance.interceptors.response.use(

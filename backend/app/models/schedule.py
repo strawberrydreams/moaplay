@@ -13,7 +13,7 @@ class Schedule(db.Model):
     
     # 기본 필드
     id: Mapped[int] = mapped_column(primary_key=True)
-    
+
     # 외래키
     user_id: Mapped[int] = mapped_column(ForeignKey('users.id'), nullable=False)
     event_id: Mapped[int] = mapped_column(ForeignKey('events.id'), nullable=False)

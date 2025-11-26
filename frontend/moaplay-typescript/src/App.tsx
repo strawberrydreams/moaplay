@@ -29,6 +29,7 @@ import { GlobalStyle } from './styles/components/Header.styles';
 import { useModal } from './hooks/useModal';
 import { AuthProvider } from './contexts/AuthContext';
 import  { NotificationsProvider } from './contexts/NotificationsContext';
+import GoogleLinkedSuccess from './pages/GoogleLinkedSuccess';
 
 const App: React.FC = () => {
     const {
@@ -64,6 +65,7 @@ const App: React.FC = () => {
                             <Route path='/users/:userId' element={<OtherProfilePage/>}/>
                             <Route path='/users/reviews/:userId' element={<UserReviewsPage/>}/>
                             <Route path='/admin/dashboard' element={<AdminDashboardPage/>}/>
+                            <Route path="/google-linked-success" element={<GoogleLinkedSuccess />} />
                             <Route path="/faq" element={<FAQPage />} />
                         </Routes>
                     </main>

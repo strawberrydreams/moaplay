@@ -27,7 +27,8 @@ class User(UserMixin, db.Model):
     phone: Mapped[str] = mapped_column(String(20), nullable=True)
     password_hash: Mapped[str] = mapped_column(String(255), nullable=False)
     profile_image: Mapped[str] = mapped_column(String(500), nullable=True, default="http://localhost:5000/static/images/profiles/default_profile_image.jpg")
-    
+    google_refresh_token = db.Column(db.String(512), nullable=True)
+
     # 권한
     role: Mapped[UserRole] = mapped_column(Enum(UserRole), default=UserRole.USER)
     

@@ -4,9 +4,13 @@ from .models import db
 from flask_migrate import Migrate
 from flask_cors import CORS
 from flask_login import LoginManager
+from dotenv import load_dotenv
+
 
 # LoginManager 인스턴스 생성
 login_manager = LoginManager()
+
+load_dotenv()
 
 
 def create_app(test_config=None):

@@ -29,7 +29,7 @@ class Event(db.Model):
     phone: Mapped[str] = mapped_column(String(20), nullable=False)
     organizer: Mapped[Optional[str]] = mapped_column(String(255), nullable=True)
     hosted_by: Mapped[Optional[str]] = mapped_column(String(255), nullable=True)
-    
+
     # JSON 필드 (이미지 URL 배열)
     image_urls: Mapped[Optional[List[str]]] = mapped_column(JSON, default=list, nullable=True)
     
