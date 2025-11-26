@@ -24,7 +24,7 @@ export const CrawlingEventsModal: React.FC<CrawlingEventsModalProps> = ({
                                                                             onClose,
                                                                             onCrawlingCompleted,
                                                                         }) => {
-    const [provider, setProvider] = useState<EventSourceProvider>('NAVER');
+    const [provider, setProvider] = useState<EventSourceProvider>('VISITKOREA');
     const [category, setCategory] = useState('');
     const [dateFrom, setDateFrom] = useState('');
     const [dateTo, setDateTo] = useState('');
@@ -39,7 +39,7 @@ export const CrawlingEventsModal: React.FC<CrawlingEventsModalProps> = ({
     // 모달 열릴 때마다 폼/상태 초기화
     useEffect(() => {
         if (isOpen) {
-            setProvider('NAVER');
+            setProvider('VISITKOREA');
             setCategory('');
             setDateFrom('');
             setDateTo('');
@@ -123,11 +123,12 @@ export const CrawlingEventsModal: React.FC<CrawlingEventsModalProps> = ({
                                         setProvider(e.target.value as EventSourceProvider)
                                     }
                                 >
+                                    <option value="VISITKOREA">VISITKOREA</option>
                                     <option value="NAVER">NAVER</option>
                                     <option value="YES24">YES24</option>
-                                    <option value="INTERPARK">INTERPARK</option>
-                                    <option value="TICKETLINK">TICKETLINK</option>
-                                    <option value="LOCAL_GOV">LOCAL_GOV</option>
+                                    <option value="INTERPARK">인터파크</option>
+                                    <option value="TICKETLINK">티켓링크</option>
+                                    <option value="LOCAL_GOV">지역 공식 사이트 (추후 명시)</option>
                                     <option value="ETC">기타(ETC)</option>
                                 </Select>
                             </FormGroup>
@@ -219,13 +220,14 @@ export const CrawlingEventsModal: React.FC<CrawlingEventsModalProps> = ({
                             크롤링되어 신규 행사로 추가되었습니다.
                         </SuccessMessage>
                     )}
+                    <LegalNotice>
+                        본 서비스는 대한민국 개인정보보호법 및 저작권법을 준수합니다.
+                    </LegalNotice>
                 </ModalBody>
             </ModalContent>
         </ModalOverlay>
     );
 };
-
-// ===== 스타일 컴포넌트들 (ApprovedEventsModal 과 유사하게 구성) =====
 
 const ModalOverlay = styled.div`
     position: fixed;
@@ -388,4 +390,11 @@ const SuccessMessage = styled.div`
     strong {
         font-weight: 600;
     }
+`;
+
+const LegalNotice = styled.p`
+    margin-top: 2rem;
+    font-size: 0.75rem;
+    color: #777;
+    text-align: center;
 `;

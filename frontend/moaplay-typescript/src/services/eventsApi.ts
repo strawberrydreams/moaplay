@@ -53,5 +53,5 @@ export const updateEventStatus = async (
 export const startCrawling = async (
     payload: E.StartCrawlingPayload
 ) => {
-    return axiosInstance.post('/events/crawling', payload);
+    return axiosInstance.post('/crawler/', payload);
 };

@@ -122,6 +122,7 @@ export interface EventReadListResponse {
 
 // 크롤링 대상 사이트 설정 타입
 export type EventSourceProvider =
+    | 'VISITKOREA'
     | 'NAVER'
     | 'YES24'
     | 'INTERPARK'

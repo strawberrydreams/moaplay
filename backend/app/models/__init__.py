@@ -23,3 +23,4 @@ from app.models.event_tag import EventTag
 from app.models.user_tag import UserTag
 from app.models.notification import Notification
 from app.models.notification_recipient import NotificationRecipient
+from app.models.crawler import Crawler

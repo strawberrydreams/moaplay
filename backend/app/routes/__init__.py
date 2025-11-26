@@ -12,7 +12,7 @@ from .admin import admin_bp
 from .upload import upload_bp
 from .tag import tag_bp
 from .notification import noti_bp
-from .google import google_bp
+from .crawler import crawler_bp
 
 api_bp.register_blueprint(user_bp, url_prefix="/users")
 api_bp.register_blueprint(auth_bp, url_prefix="/auth")
@@ -24,4 +24,4 @@ api_bp.register_blueprint(admin_bp, url_prefix="/admin")
 api_bp.register_blueprint(upload_bp, url_prefix="/upload")
 api_bp.register_blueprint(tag_bp, url_prefix='/tags')
 api_bp.register_blueprint(noti_bp, url_prefix='/notifications')
-api_bp.register_blueprint(google_bp, url_prefix="/google")
+api_bp.register_blueprint(crawler_bp, url_prefix='/crawler')
