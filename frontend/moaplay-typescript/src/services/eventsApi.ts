@@ -47,3 +47,11 @@ export const updateEventStatus = async (
     const { data } = await axiosInstance.put<E.EventStatusUpdateResponse>(`/events/${id}/status`, payload);
     return data;
 };
+
+// (POST) 백엔드 API에 크롤링 작업을 요청
+// 크롤링된 행사 데이터는 백엔드에서 정제 후 DB에 추가, 이후 일반 행사 데이터와 동일하게 취급
+export const startCrawling = async (
+    payload: E.StartCrawlingPayload
+) => {
+    return axiosInstance.post('/events/crawling', payload);
+};

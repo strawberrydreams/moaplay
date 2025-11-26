@@ -4,10 +4,11 @@ import { useAdminDashboard } from "../../hooks/useAdminDashboard";
 import { ApprovedEventsModal } from "../../components/admin/ApprovedEventsModal";
 import { PendingEventsModal } from "../../components/admin/PendingEventsModal";
 import { UsersManagementModal } from "../../components/admin/UsersManagementModal";
+import { CrawlingEventsModal } from "../../components/admin/CrawlingEventsModal";
 import { getApprovedEvents, getPendingEvents } from "../../services/adminApi";
 import { updateEventStatus } from "../../services/eventsApi";
 import { useAuthContext } from "../../contexts/AuthContext";
-import { FaCheckCircle, FaClock, FaUsers, FaAngleRight } from 'react-icons/fa';
+import { FaCheckCircle, FaClock, FaUsers, FaAngleRight, FaGlobe } from 'react-icons/fa';
 import {
     PageContainer,
     MainContent,
@@ -189,6 +190,19 @@ export const AdminDashboardPage: React.FC = () => {
                             <FaAngleRight size={28} color="#757575" style={{ marginLeft: 'auto' }} />
                         </StatItem>
 
+                        <StatItem onClick={() => handleStatCardClick('crawling-events')}>
+                            <CardIconWrapper color="#8E44AD">
+                                <FaGlobe size={28} />
+                            </CardIconWrapper>
+
+                            <div style={{ display: 'flex', flexDirection: 'column', flex: 1 }}>
+                                <StatTitle>행사 데이터 크롤링</StatTitle>
+                                <StatValue>시작하기</StatValue>
+                            </div>
+
+                            <FaAngleRight size={28} color="#757575" style={{ marginLeft: 'auto' }} />
+                        </StatItem>
+
                         <StatItem onClick={() => handleStatCardClick('users')}>
                             <CardIconWrapper color="#2AC1BC">
                                 <FaUsers size={28} />
@@ -221,6 +235,12 @@ export const AdminDashboardPage: React.FC = () => {
                     onClose={handleCloseModal}
                     onApprove={handleApproveEvent}
                     onReject={handleRejectEvent}
+                />
+
+                <CrawlingEventsModal
+                    isOpen={activeModal === 'crawling-events'}
+                    onClose={handleCloseModal}
+                    onCrawlingCompleted={refreshAll}
                 />
 
                 {/* 사용자 관리 모달 */}
