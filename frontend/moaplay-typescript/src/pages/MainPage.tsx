@@ -16,7 +16,6 @@ import {
     BannerWrapper,
 } from '../styles/pages/MainPage.styles';
 import googleApi from '../services/googleApi';
-import ConnectGoogleButton from '../components/auth/ConnectGoogleButton';
 
 // --- MainPage 컴포넌트 ---
 function MainPage() {

@@ -11,11 +11,9 @@ interface CrawlingEventsModalProps {
     onCrawlingCompleted?: () => void;
 }
 
-// 백엔드에서 돌아올 것으로 기대하는 응답 타입
-// TODO: 백엔드 API에 맞게 조정
 interface CrawlingResult {
     provider: EventSourceProvider;
-    created_count: number; // 새로 추가된 행사 개수
+    created_count: number;
 }
 
 // 크롤링 조건 설정 + 결과 표시 모달
@@ -146,7 +144,7 @@ export const CrawlingEventsModal: React.FC<CrawlingEventsModalProps> = ({
 
                         <FormRow>
                             <FormGroup>
-                                <Label>시작일 (선택)</Label>
+                                <Label>시작일</Label>
                                 <Input
                                     type="date"
                                     value={dateFrom}
@@ -156,7 +154,7 @@ export const CrawlingEventsModal: React.FC<CrawlingEventsModalProps> = ({
                             </FormGroup>
 
                             <FormGroup>
-                                <Label>종료일 (선택)</Label>
+                                <Label>종료일</Label>
                                 <Input
                                     type="date"
                                     value={dateTo}
@@ -180,7 +178,7 @@ export const CrawlingEventsModal: React.FC<CrawlingEventsModalProps> = ({
 
                         <FormRow>
                             <FormGroup>
-                                <Label>시작 페이지 (선택)</Label>
+                                <Label>시작 페이지</Label>
                                 <Input
                                     type="number"
                                     min={1}
@@ -191,7 +189,7 @@ export const CrawlingEventsModal: React.FC<CrawlingEventsModalProps> = ({
                             </FormGroup>
 
                             <FormGroup>
-                                <Label>최대 개수 / 페이지 수 (선택)</Label>
+                                <Label>최대 개수 / 페이지 수</Label>
                                 <Input
                                     type="number"
                                     min={1}

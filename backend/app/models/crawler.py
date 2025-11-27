@@ -1,15 +1,13 @@
-import requests
-from bs4 import BeautifulSoup
+import mimetypes
+import os
 from datetime import datetime, date
 from typing import Dict, Any, List, Tuple, Optional
-from xml.etree import ElementTree as ET
 from urllib.parse import urlparse, parse_qs
-import os
-import mimetypes
-from . import Tag, EventTag
-import re
-import json
+from xml.etree import ElementTree as ET
 
+import requests
+
+from . import Tag, EventTag
 from . import db, Event
 
 # VISITKOREA 전용 크롤러 (다른 사이트 크롤링 시 해당 사이트의 robots.txt에 맞게 수정하기)
@@ -17,14 +15,11 @@ VISIT_KOREA_BASE = 'https://korean.visitkorea.or.kr'
 EVENTS_SITEMAP_URL = f'{VISIT_KOREA_BASE}/performances_events_sitemap.xml'
 
 # 업로드 경로 및 베이스 URL 설정
-# 현재 파일 위치가 backend/app/models/crawler.py 라는 가정 하에,
-# 세 단계 상위 디렉터리를 backend/ 루트로 사용한다.
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))  # backend/ 디렉터리
 UPLOAD_DIR = os.path.join(BASE_DIR, 'uploads')  # backend/uploads
 os.makedirs(UPLOAD_DIR, exist_ok=True)
 
 # Flask 쪽 업로드 라우트와 맞춰야 하는 베이스 URL
-# 예: http://localhost:5000/api/upload/63.jpg
 UPLOAD_BASE_URL = 'http://localhost:5000/api/upload'
 
 class Crawler:
@@ -74,11 +69,7 @@ class Crawler:
             'created_count': created_count,
         }
 
-
-    # ------------------------------------------------------------------------
-    # 1) Sitemap 파싱 관련 함수
-    # ------------------------------------------------------------------------
-
+    # Sitemap 파싱 관련 함수
     def fetch_events_from_sitemap(
             self,
             date_from: Optional[str] = None,
@@ -172,10 +163,7 @@ class Crawler:
         return [item for item in items if in_range(item.get('lastmod'))]
 
 
-    # ------------------------------------------------------------------------
-    # 2) 개별 이벤트 상세 페이지 파싱
-    # ------------------------------------------------------------------------
-
+    # 개별 이벤트 상세 페이지 파싱
     def fetch_and_parse_event_detail(self, detail_url: str) -> Optional[Dict[str, Any]]:
         # 1) detail_url에서 cotId 추출
         try:
@@ -275,6 +263,8 @@ class Crawler:
             'tags': tags,
         }
 
+
+    # 이미지 URL 변환 함수
     def resolve_visitkorea_image_url(self, img_path_or_url: str) -> Optional[str]:
         """
         VisitKorea API에서 내려오는 imgPath 또는 URL을 실제 다운로드 가능한 URL로 변환한다.
@@ -294,6 +284,8 @@ class Crawler:
         print('[resolve_visitkorea_image_url] imgPath =', img_path_or_url, '->', cdn_url)
         return cdn_url
 
+
+    # 이미지 다운로드 함수
     def download_and_save_image_with_event_id(self, remote_id_or_url: str, event_id: int) -> Optional[str]:
         """
         VisitKorea 이미지(식별자 또는 URL)를 다운로드해서
@@ -342,6 +334,8 @@ class Crawler:
 
         return f"{UPLOAD_BASE_URL}/{filename}"
 
+
+    # 날짜 형식 파싱
     def parse_period(self, period_text: str) -> Tuple[Optional[str], Optional[str]]:
         """
         "2025.10.18~2025.12.25" 또는 "2025.10.18 ~ 2025.12.25" 형태를
@@ -358,6 +352,8 @@ class Crawler:
 
         return normalize(start_str), normalize(end_str)
 
+
+    # 행사 태그 처리 함수 (긁어왔는데 없으면 새로 추가, 있으면 버리고 기존 번호 가져오기)
     def get_or_create_tag(self, tag_name: str) -> Tag:
         """tags 테이블에서 존재하면 가져오고, 없으면 새로 만들고 flush 까지."""
         if not tag_name:
@@ -376,8 +372,8 @@ class Crawler:
         return tag
 
 
+    # event_tags 매핑 생성 함수
     def create_event_tag_links(self, event: Event, tag_names: list[str]) -> None:
-        """event_tags 매핑을 만들어주는 함수."""
         if not tag_names:
             return
 
@@ -399,18 +395,13 @@ class Crawler:
 
             link = EventTag(event_id=event.id, tag_id=tag.id)
             self.db.session.add(link)
-    # ------------------------------------------------------------------------
-    # 3) 정제 + DB 저장
-    # ------------------------------------------------------------------------
 
+
+    # 행사 데이터 dict 정제 + Event 모델로 변환 + DB 저장 함수
     def normalize_and_save_event(self, raw: Dict[str, Any], provider: str) -> Optional[Event]:
-        """
-        raw dict -> Event 모델로 변환 후 DB 저장.
-        """
         title = raw.get('title') or '제목 미정 행사'
 
-        # start_date / end_date 는 SQLAlchemy Date 타입이므로
-        # 문자열이 아닌 Python date 객체로 변환해줘야 한다.
+        # start_date / end_date 는 SQLAlchemy Date 타입이므로 문자열이 아닌 Python date 객체로 변환 필수
         raw_start = raw.get('start_date')
         raw_end = raw.get('end_date')
 
@@ -471,7 +462,7 @@ class Crawler:
         # event.id를 사용하기 위해 commit 대신 flush 먼저
         self.db.session.flush()
 
-        # ✅ 이미지 다운로드 및 로컬 파일 저장 (event_id 기반 파일명)
+        # 이미지 다운로드 및 로컬 파일 저장 (event_id 기반 파일명)
         remote_image_ids = raw.get('image_urls') or []
         if remote_image_ids:
             main_image_id = remote_image_ids[0]  # 대표 이미지는 첫 번째 것만 사용
@@ -483,7 +474,7 @@ class Crawler:
                     existing_urls.append(image_url)
                 event.image_urls = existing_urls
 
-        # ✅ 여기서 태그 매핑 처리
+        # 태그 매핑 처리
         tag_names = raw.get('tags') or []
         self.create_event_tag_links(event, tag_names)
 
